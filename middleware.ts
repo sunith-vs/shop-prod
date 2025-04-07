@@ -29,7 +29,7 @@ export async function middleware(request: NextRequest) {
     if (path.startsWith('/dashboard')) {
       const { data: accessLevel, error: accessError } = await supabase
         .from('access_levels')
-        .select('id')
+        .select()
         .eq('user_id', userSession.user.id)
         .single();
 
