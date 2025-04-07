@@ -20,6 +20,25 @@ export async function middleware(request: NextRequest) {
     const supabase = createClient();
     const { data: { session: userSession } } = await supabase.auth.getSession();
 
+    if (!userSession?.user) {
+      // Redirect to login if no session
+      return NextResponse.redirect(new URL('/login', request.url));
+    }
+
+    // Check access levels for dashboard routes
+    if (path.startsWith('/dashboard')) {
+      const { data: accessLevel, error: accessError } = await supabase
+        .from('access_levels')
+        .select('id')
+        .eq('user_id', userSession.user.id)
+        .single();
+
+      if (!accessLevel || accessError) {
+        // No access level found - redirect to unauthorized page or home
+        return NextResponse.redirect(new URL('/', request.url));
+      }
+    }
+
     if (userSession?.user?.id) {
       // Check if user has completed their profile
       const { data: profile, error } = await supabase
@@ -35,6 +54,8 @@ export async function middleware(request: NextRequest) {
     }
   } catch (error) {
     console.error('[MIDDLEWARE_PROFILE_CHECK]', error);
+    // On error, redirect to login for security
+    return NextResponse.redirect(new URL('/login', request.url));
   }
 
   return session;
