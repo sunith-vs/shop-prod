@@ -71,7 +71,7 @@ export default async function CourseDashboard() {
               </div>
               <ScrollArea className="flex-1 p-4">
                 <Button asChild className="w-full" size="sm">
-                  <Link href="/admin/courses/new" className="flex items-center gap-2">
+                  <Link href="/dashboard/new" className="flex items-center gap-2">
                     <PlusCircle size={16} />
                     Add New Course
                   </Link>
@@ -89,7 +89,7 @@ export default async function CourseDashboard() {
         </div>
         <ScrollArea className="flex-1 p-4">
           <Button asChild className="w-full" size="sm">
-            <Link href="/admin/courses/new" className="flex items-center gap-2">
+            <Link href="/dashboard/new" className="flex items-center gap-2">
               <PlusCircle size={16} />
               Add New Course
             </Link>
@@ -138,7 +138,7 @@ export default async function CourseDashboard() {
                 No courses have been created yet.
               </p>
               <Button asChild>
-                <Link href="/admin/courses/new">Create Your First Course</Link>
+                <Link href="/dashboard/new">Create Your First Course</Link>
               </Button>
             </Card>
           ) : (

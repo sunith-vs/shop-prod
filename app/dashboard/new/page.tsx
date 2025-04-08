@@ -1,5 +1,6 @@
-import { createClient } from '@/lib/supabase/server';
-import { redirect } from 'next/navigation';
+'use client';
+
+import { createCourse } from './actions';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -11,66 +12,72 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { revalidatePath } from 'next/cache';
+import { useState } from 'react';
+import { useToast } from "@/components/ui/use-toast";
 
 export const dynamic = 'force-dynamic';
 
-async function createCourse(formData: FormData) {
-  'use server'
-  
-  const supabase = createClient();
-  const { data: { user }, error: userError } = await supabase.auth.getUser();
-  if (!user || userError) {
-    redirect('/login');
-  }
-
-  const title = formData.get('title') as string;
-  const description = formData.get('description') as string;
-  const subHeading = formData.get('subHeading') as string;
-  const bannerUrl = formData.get('bannerUrl') as string;
-  const thumbnailUrl = formData.get('thumbnailUrl') as string;
-  const status = formData.get('status') as string;
-  const brochureUrl = formData.get('brochureUrl') as string;
-  const tagUrl = formData.get('tagUrl') as string;
-  
-  // Create a URL-friendly slug from the title
-  const slug = title
+function generateSlug(title: string) {
+  return title
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/(^-|-$)/g, '');
-
-  const { error } = await supabase
-    .from('courses')
-    .insert([
-      {
-        title,
-        description,
-        sub_heading: subHeading,
-        banner_url: bannerUrl,
-        thumbnail: thumbnailUrl,
-        status,
-        brochure_url: brochureUrl,
-        tag_url: tagUrl,
-        slug,
-      }
-    ]);
-
-  if (error) {
-    console.error('Error creating course:', error);
-    throw new Error('Failed to create course');
-  }
-
-  revalidatePath('/admin/courses');
-  redirect('/admin/courses');
 }
 
-export default async function NewCourse() {
-  const supabase = createClient();
-  
-  const { data: { session } } = await supabase.auth.getSession();
-  if (!session) {
-    redirect('/login');
-  }
+export default function NewCourse() {
+  const [highlights, setHighlights] = useState<string[]>(['']);
+  const [title, setTitle] = useState('');
+  const [slug, setSlug] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { toast } = useToast();
+
+  const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newTitle = e.target.value;
+    setTitle(newTitle);
+    setSlug(generateSlug(newTitle));
+  };
+
+  const handleHighlightChange = (index: number, value: string) => {
+    const newHighlights = [...highlights];
+    newHighlights[index] = value;
+    setHighlights(newHighlights);
+  };
+
+  const addHighlight = () => {
+    setHighlights([...highlights, '']);
+  };
+
+  const removeHighlight = (index: number) => {
+    const newHighlights = highlights.filter((_, i) => i !== index);
+    if (newHighlights.length === 0) {
+      setHighlights(['']);
+    } else {
+      setHighlights(newHighlights);
+    }
+  };
+
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    try {
+      setIsSubmitting(true);
+      const formData = new FormData(event.currentTarget);
+      await createCourse(formData);
+      toast({
+        title: "Success",
+        description: "Course created successfully!",
+        variant: "default",
+      });
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to create course';
+      toast({
+        title: "Error",
+        description: errorMessage,
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   return (
     <div className="container max-w-3xl py-6 space-y-6">
@@ -86,7 +93,7 @@ export default async function NewCourse() {
           <CardTitle>Course Details</CardTitle>
         </CardHeader>
         <CardContent>
-          <form action={createCourse} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
               <label htmlFor="title" className="text-sm font-medium">
                 Title
@@ -96,6 +103,22 @@ export default async function NewCourse() {
                 name="title"
                 placeholder="Enter course title"
                 required
+                value={title}
+                onChange={handleTitleChange}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <label htmlFor="slug" className="text-sm font-medium">
+                Slug
+              </label>
+              <Input
+                id="slug"
+                name="slug"
+                placeholder="Enter URL slug"
+                required
+                value={slug}
+                onChange={(e) => setSlug(e.target.value)}
               />
             </div>
 
@@ -120,6 +143,37 @@ export default async function NewCourse() {
                 placeholder="Enter course description"
                 rows={5}
               />
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm font-medium">
+                Highlights
+              </label>
+              {highlights.map((highlight, index) => (
+                <div key={index} className="flex gap-2">
+                  <Input
+                    name="highlights[]"
+                    placeholder="Enter highlight"
+                    value={highlight}
+                    onChange={(e) => handleHighlightChange(index, e.target.value)}
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => removeHighlight(index)}
+                  >
+                    Remove
+                  </Button>
+                </div>
+              ))}
+              <Button
+                type="button"
+                variant="outline"
+                onClick={addHighlight}
+                className="w-full"
+              >
+                Add Highlight
+              </Button>
             </div>
 
             <div className="space-y-2">
@@ -187,8 +241,8 @@ export default async function NewCourse() {
             </div>
 
             <div className="flex justify-end pt-4">
-              <Button type="submit">
-                Create Course
+              <Button type="submit" disabled={isSubmitting}>
+                {isSubmitting ? "Creating..." : "Create Course"}
               </Button>
             </div>
           </form>
