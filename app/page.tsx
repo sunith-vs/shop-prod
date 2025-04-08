@@ -1,3 +1,5 @@
+import Home from "./home/page";
+
 export default function HomePage() {
-  return <h1 className="text-lg font-medium">Welcome home!</h1>;
+  return <Home/>;
 }
