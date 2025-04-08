@@ -1,5 +1,5 @@
 import { createClient } from '@/lib/supabase/server';
-import { Card, CardHeader, CardContent } from '@/components/ui/card';
+import {Card, CardHeader, CardContent, CardTitle} from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import Link from 'next/link';
@@ -144,9 +144,8 @@ export default async function CourseDashboard() {
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
               {courses.map((course) => (
-                <Link key={course.id} href={`/admin/courses/${course.id}`}>
-                  <Card className="w-full h-full hover:bg-accent/5 transition-colors">
-                    <CardHeader className="p-4 md:p-6">
+                <Card key={course.id}>
+              <CardHeader className="p-4 md:p-6">
                       {course.thumbnail && (
                         <div className="relative w-full h-40 mb-4">
                           <Image
@@ -167,18 +166,23 @@ export default async function CourseDashboard() {
                         </Badge>
                       </div>
                     </CardHeader>
-                    <CardContent className="p-4 md:p-6 pt-0 md:pt-0">
-                      <p className="text-sm text-muted-foreground line-clamp-2">
-                        {course.description || 'No description provided'}
-                      </p>
-                      {course.sub_heading && (
-                        <p className="text-sm mt-2 text-muted-foreground">
-                          {course.sub_heading}
-                        </p>
-                      )}
-                    </CardContent>
-                  </Card>
-                </Link>
+              <CardContent>
+                <p className="text-sm text-gray-500 mb-4">{course.sub_heading}</p>
+                <p className="text-sm text-gray-500 mb-4">Status: {course.status}</p>
+                <div className="flex gap-2">
+                  <Link href={`/${course.slug}`} className="flex-1">
+                    <Button variant="outline" className="w-full">
+                      View
+                    </Button>
+                  </Link>
+                  <Link href={`/dashboard/${course.slug}/edit`} className="flex-1">
+                    <Button className="w-full">
+                      Edit
+                    </Button>
+                  </Link>
+                </div>
+              </CardContent>
+            </Card>
               ))}
             </div>
           )}

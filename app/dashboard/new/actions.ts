@@ -47,6 +47,6 @@ export async function createCourse(formData: FormData) {
     throw new Error('Failed to create course');
   }
 
-  revalidatePath('/admin/courses');
-  redirect('/admin/courses');
+  revalidatePath('/dashboard');
+  redirect(`/dashboard/${slug}/edit`);
 }
