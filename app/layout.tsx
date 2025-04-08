@@ -19,7 +19,7 @@ export default function RootLayout({
     <html lang="en">
       <body className={inter.className}>
         <MainNav />
-        <main className="flex-1 p-10">{children}</main>
+        <main className="flex-1 px-10">{children}</main>
         <Toaster />
       </body>
     </html>
