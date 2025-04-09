@@ -3,7 +3,7 @@ import { UserAccountNav } from "@/components/user-account-nav";
 
 export function MainNav() {
   return (
-    <nav className="flex h-16 items-center justify-between border px-4 sticky top-0 bg-white">
+    <nav className="flex h-16 items-center justify-between border px-4 sticky top-0 bg-white z-10">
       <div className="flex space-x-4">
         <NavItem href="/">Home</NavItem>
         <NavItem href="/our-courses">Our Courses</NavItem>
