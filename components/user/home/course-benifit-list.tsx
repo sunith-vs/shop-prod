@@ -11,17 +11,17 @@ interface BenefitCardProps {
 }
 
 const BenefitCard = ({ icon, title, subtitle, description, color, bulletPoints = [] }: BenefitCardProps) => (
-    <div className={`min-w-[200px] max-w-[320px] px-[20px] py-[14px] rounded-xl ${color} shadow-sm hover:shadow-md transition-shadow duration-300 h-full`}>
+    <div className={`min-w-[200px] lg:max-w-[320px] px-[20px] py-[14px] rounded-xl ${color} shadow-sm hover:shadow-md transition-shadow duration-300 h-full`}>
         <div className="text-3xl mb-2">{icon}</div>
-        <h3 className="text-[#1d2939] text-[28px] font-semibold font-['Mona_Sans'] leading-snug">{title}</h3>
-        {subtitle && <p className="text-[#1d2939] text-sm font-medium font-['Mona_Sans'] leading-snug">{subtitle}</p>}
-        {description && <p className="text-sm text-gray-700">{description}</p>}
+        <h3 className="text-[#1d2939] text-[28px] font-semibold font-display leading-snug">{title}</h3>
+        {subtitle && <p className="text-[#1d2939] text-sm font-medium font-display leading-snug">{subtitle}</p>}
+        {description && <p className="text-sm text-gray-700 font-display">{description}</p>}
         {bulletPoints.length > 0 && (
             <ul className="mt-2">
                 {bulletPoints.map((point, index) => (
                     <li key={index} className="flex items-start">
                         <span className="mr-2">•</span>
-                        <span>{point}</span>
+                        <span className="text-[#1d2939] text-sm font-medium font-display leading-snug">{point}</span>
                     </li>
                 ))}
             </ul>
@@ -109,7 +109,7 @@ const CourseBenefitsList = () => {
 
     return (
         <div>
-            <div className="text-[#1d2939] text-[52px] font-bold font-['Inter'] text-center mt-[60px] mb-[40px]">Course Benefits</div>
+            <div className="text-[#1d2939] text-[52px] font-bold  text-center mt-[60px] mb-[40px]">Course Benefits</div>
 
             {/* Top row benefits - inline with flexbox and wrap */}
             <div className="flex flex-wrap gap-[24px] justify-center">

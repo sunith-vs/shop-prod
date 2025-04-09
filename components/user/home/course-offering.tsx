@@ -39,7 +39,7 @@ interface CourseCategory {
 const CourseOption = ({ id, type, name, price, originalPrice, discount, isSelected, onClick, highlighted = false }: CourseOptionProps) => (
   <div
     className={`border ${isSelected ? 'border-orange-500' : 'border-gray-200'} 
-    rounded-xl p-4 mb-[10px] ${highlighted ? 'bg-yellow-50' : ''} relative h-[82px]`}
+    rounded-xl p-4 mb-[10px] bg-[#FFF8E4] relative h-[82px]`}
   >
     <div className="flex items-center justify-between">
       <div className="flex items-center">
@@ -156,13 +156,13 @@ const CourseOffering = () => {
           </h1>
 
           {/* Description */}
-          <p className="text-[#667085] text-base font-normal font-['Inter'] leading-normal mb-[14px]">
+          <p className="text-[#667085] text-base font-normal  leading-normal mb-[14px]">
             Eduport provides over 1000 hours of clear, simple classes and 78 tests to help you track your progress, all guided by experienced local teachers from IITs and NITs, while the system adjusts to your pace with easy-to-use tools and personal mentorship.
           </p>
 
 
           {/* Feature List */}
-          <div className="justify-start text-[#1d2939] text-base font-medium font-['Inter'] tracking-wider">
+          <div className="justify-start text-[#1d2939] text-base font-medium  tracking-wider">
             {features.map((feature: string, index: number) => (
               <FeatureItem key={index} text={feature} />
             ))}
@@ -171,7 +171,7 @@ const CourseOffering = () => {
           {/* Course Categories */}
           {courseCategories.map((category, categoryIndex) => (
             <div className="mb-4" key={categoryIndex}>
-              <h2 className="text-xl font-bold mb-3">{category.title}</h2>
+              <h2 className="text-xl font-bold mb-3 mt-[14px]">{category.title}</h2>
 
               {/* Course Options */}
               {category.courses.map((course: CourseData) => (
@@ -192,11 +192,11 @@ const CourseOffering = () => {
           ))}
 
           {/* CTA Buttons */}
-          <button className="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-4 rounded-xl mb-[14px] transition duration-200">
+          <button className="w-full bg-[#FB6514] text-white font-bold py-4 rounded-xl mb-[14px] transition duration-200">
             BUY NOW
           </button>
 
-          <button className="w-full text-orange-500 font-bold py-4 flex items-center justify-center bg-[#fff6f1] rounded-xl">
+          <button className="w-full text-[#FB6514] font-bold py-4 flex items-center justify-center bg-[#fff6f1] rounded-xl">
             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
             </svg>
