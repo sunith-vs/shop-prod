@@ -1,26 +1,24 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
 import "./globals.css";
-import { MainNav } from "@/components/main-nav";
 import { Toaster } from "@/components/ui/toaster";
-
-const inter = Inter({ subsets: ["latin"] });
+import { inter, monaSans } from "@/lib/fonts";
+import { MainNav } from "@/components/main-nav";
 
 export const metadata: Metadata = {
-  title: "Supabase Auth + Next.js Demo",
+  title: "Course Management",
+  description: "Manage your courses efficiently",
 };
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
-    <html lang="en">
+    <html lang="en" className={`${inter.variable} ${monaSans.variable}`}>
       <body className={inter.className}>
-        <MainNav />
-        <main className="flex-1 px-10">{children}</main>
-        <Toaster />
+      <MainNav />
+      <main className="flex-1 px-10">{children}</main>
       </body>
     </html>
   );

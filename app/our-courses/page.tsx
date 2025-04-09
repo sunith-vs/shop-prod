@@ -131,12 +131,19 @@ export default function OurCoursesPage() {
         {/* Course Grid - Responsive columns */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 mt-6 sm:mt-10">
           {courses.map((course) => (
+
             <div
               key={course.id}
-              className={`${hoveredCardId === course.id ? 'bg-[rgba(255,97,42,0.18)]' : 'bg-white'} rounded-[20px] p-3 border ${hoveredCardId === course.id ? 'border-[#00000000]' : 'border-[#EAECF0]'} border-1 relative`}
+              className={`bg-white rounded-[20px] p-3 border border ${hoveredCardId === course.id ? 'border-[#00000000]' : 'border-[#EAECF0]'} ${hoveredCardId === course.id ? ' border-0' : ' border-1'} relative overflow-hidden"`}
               onMouseEnter={() => setHoveredCardId(course.id)}
               onMouseLeave={() => setHoveredCardId(null)}
             >
+              {/* Dimming overlay layer - only visible when card is hovered */}
+              <div
+                className={`absolute inset-0 bg-[rgba(255,97,42,0.18)] rounded-[20px] transition-opacity duration-300 z-10 ${hoveredCardId === course.id ? 'opacity-100' : 'opacity-0'
+                  }`}
+              />
+
               <div className="bg-[#00000000] rounded-[20px] overflow-hidden relative" style={{ paddingTop: '60.57%' }}>
                 <img
                   src={course.imageUrl}
@@ -147,31 +154,33 @@ export default function OurCoursesPage() {
               </div>
 
               {/* View Now button - only visible for the specific hovered card */}
-              <div className={`absolute inset-0 flex items-center justify-center transition-opacity duration-300 ${hoveredCardId === course.id ? 'opacity-100' : 'opacity-0'}`}>
-                <button className="flex items-center gap-2 bg-[#EC4909] text-white px-4 py-3 rounded-[10px] transition-colors z-10">
+              <div className={`absolute inset-0 flex items-center justify-center transition-opacity duration-300 ${hoveredCardId === course.id ? 'opacity-100' : 'opacity-0'} z-20`}>
+                <button className="flex items-center gap-2 bg-[#EC4909] text-white px-4 py-3 rounded-[10px] transition-colors">
                   View Now
-                  <div className="w-6 h-6  relative bg-white rounded-[39px] flex justify-center items-center gap-[3px] overflow-hidden">
+                  <div className="w-6 h-6 relative bg-white rounded-[39px] flex justify-center items-center gap-[3px] overflow-hidden">
                     <ArrowRight size={12} color="#FB6514" />
                   </div>
                 </button>
               </div>
 
-              <h3 className="text-lg sm:text-xl font-semibold text-[#1D2939] mt-3 sm:mt-4 line-clamp-2">{course.title}</h3>
-              <p className="font-regular text-[#667085] mt-1 sm:mt-1.5 text-sm sm:text-base line-clamp-3">{course.description}</p>
-              <div className="flex flex-wrap mt-3 sm:mt-4 items-center">
-                <div className="mr-2 w-4 h-4 sm:w-5 sm:h-5 flex items-center justify-center">
-                  <Icons.book className="w-full h-full text-orange-500" />
+              <h3 className="text-lg sm:text-xl font-semibold text-[#1D2939] mt-3 sm:mt-4 line-clamp-2 ">{course.title}</h3>
+              <div className='flex flex-col justify-between h-[120px]'>
+                <p className="font-regular text-[#667085] mt-1 sm:mt-1.5 text-sm sm:text-base line-clamp-3 overflow-hidden text-ellipsis">{course.description}</p>
+                <div className="flex flex-wrap items-center">
+                  <div className="mr-2 w-4 h-4 sm:w-5 sm:h-5 flex items-center justify-center">
+                    <Icons.book className="w-full h-full text-orange-500" />
+                  </div>
+                  {course.board.map((board, index) => (
+                    <React.Fragment key={board}>
+                      <span className="rounded-full text-xs sm:text-sm font-medium text-[#667085]">
+                        {board}
+                      </span>
+                      {index !== course.board.length - 1 && (
+                        <span className="rounded-full text-xs sm:text-sm font-regular text-[#D0D5DD] px-1.5">|</span>
+                      )}
+                    </React.Fragment>
+                  ))}
                 </div>
-                {course.board.map((board, index) => (
-                  <React.Fragment key={board}>
-                    <span className="rounded-full text-xs sm:text-sm font-medium text-[#667085]">
-                      {board}
-                    </span>
-                    {index !== course.board.length - 1 && (
-                      <span className="rounded-full text-xs sm:text-sm font-regular text-[#D0D5DD] px-1.5">|</span>
-                    )}
-                  </React.Fragment>
-                ))}
               </div>
             </div>
           ))}
