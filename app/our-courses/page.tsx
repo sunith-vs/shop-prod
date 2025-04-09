@@ -4,11 +4,10 @@ import React, { useEffect } from 'react'
 import { useState } from 'react';
 import Head from 'next/head';
 import { Icons } from '@/components/icons';
-import { FiEye } from 'react-icons/fi';
 import { ArrowRight } from 'lucide-react';
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export default function OurCoursesPage() {
-  const [activeTab, setActiveTab] = useState('Popular');
   const tabs = ['Popular', 'NEET', 'JEE', 'KEAM', 'CUET', '11 - 12', '7 - 10'];
   const [contentHeight, setContentHeight] = useState('100vh');
   const [hoveredCardId, setHoveredCardId] = useState<number | null>(null);
@@ -94,24 +93,23 @@ export default function OurCoursesPage() {
           <p className="text-[#667085] text-base sm:text-lg">Learn free with Live Classes and Pre Recorded Videos</p>
         </div>
 
-        {/* Tabs - Horizontal scrolling row - added z-index to prevent overlapping */}
-        <div className="mb-5 flex justify-center">
-          <div className="overflow-x-auto flex pb-2 no-scrollbar w-full">
-            <div className="flex gap-1 sm:gap-2.5 px-1 sm:px-2.5 py-2 mx-auto">
-              {tabs.map((tab) => (
-                <button
-                  key={tab}
-                  onClick={() => setActiveTab(tab)}
-                  className={`px-4 sm:px-6 md:px-8 py-1.5 rounded-full whitespace-nowrap flex-shrink-0 text-sm sm:text-base transition-colors ${activeTab === tab
-                    ? 'bg-[#FB6514] text-white border border-[#FB6514] border-2'
-                    : 'bg-[#FFFBFA] text-[#FB6514] hover:bg-[#FFE4D2] border border-[#FFE4D2] border-2'
-                    }`}
-                >
-                  {tab}
-                </button>
-              ))}
+        {/* Tabs using Shadcn UI - Fixed for mobile view */}
+        <div className="mb-5">
+          <Tabs defaultValue="Popular" className="w-full">
+            <div className="w-full overflow-x-auto pb-2 no-scrollbar">
+              <TabsList className="h-auto p-1 bg-[#00000000] flex gap-2.5 w-max min-w-full sm:min-w-0 sm:w-fit sm:mx-auto">
+                {tabs.map((tab) => (
+                  <TabsTrigger
+                    key={tab}
+                    value={tab}
+                    className="px-3 sm:px-6 md:px-8 py-1.5 rounded-full whitespace-nowrap flex-shrink-0 text-xs sm:text-sm data-[state=active]:bg-[#FB6514] data-[state=active]:text-white data-[state=active]:border-[#FB6514] data-[state=inactive]:bg-[#FFFBFA] data-[state=inactive]:text-[#FB6514] data-[state=inactive]:hover:bg-[#FFE4D2] border-2 border-[#FFE4D2]"
+                  >
+                    {tab}
+                  </TabsTrigger>
+                ))}
+              </TabsList>
             </div>
-          </div>
+          </Tabs>
         </div>
 
         {/* Add custom scrollbar style */}
