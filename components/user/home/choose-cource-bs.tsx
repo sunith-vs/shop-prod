@@ -40,13 +40,13 @@ const CourseBottomSheet: React.FC<CourseBottomSheetProps> = ({ isOpen, onClose }
             {/* Bottom sheet */}
             <div className="absolute bottom-0 left-0 right-0 bg-white rounded-t-xl shadow-lg transition-transform duration-300 ease-in-out transform">
                 <div className="max-w-4xl mx-auto px-4 py-6 lg:w-[720px]">
-                    <h2 className="text-[#1d2939] text-2xl font-bold mb-[14px]">Choose Course</h2>
+                    <h2 className="text-[#1d2939] text-lg md:text-2xl font-bold mb-[14px]">Choose Course</h2>
 
                     {/* Course selection area */}
                     <div className="space-y-4">
                         {courses.map((course) => (
                             <div key={course.id}>
-                                <h3 className="text-[#1d2939] text-lg font-bold mb-[14px]">{course.title}</h3>
+                                <h3 className="text-[#1d2939] text-sm md:text-lg font-bold mb-[14px]">{course.title}</h3>
                                 <div className={`border rounded-lg p-4 flex items-center justify-between transition-all ${selectedCourse === course.id ? 'border-orange-500' : 'border-gray-300'}`}>
                                     <div className="flex items-center space-x-3">
                                         <div
@@ -63,15 +63,15 @@ const CourseBottomSheet: React.FC<CourseBottomSheetProps> = ({ isOpen, onClose }
                                             )}
                                         </div>
                                         <div>
-                                            <p className="text-[#1d2939] font-bold">Offline</p>
-                                            <p className="text-gray-600 text-sm">{course.type}</p>
+                                            <p className="text-[#1d2939] text-sm md:text-xl font-bold">Offline</p>
+                                            <p className="text-gray-600 text-sm md:text-xl">{course.type}</p>
                                         </div>
                                     </div>
                                     <div className="text-right">
-                                        <p className="text-[#1d2939] font-bold">{course.price} <span className="text-gray-600 font-normal">for {course.duration}</span></p>
+                                        <p className="text-[#1d2939] text-sm md:text-xl font-bold">{course.price} <span className="text-gray-600 font-normal">for {course.duration}</span></p>
                                         <p>
-                                            <span className="line-through text-gray-500 text-sm">{course.originalPrice}</span>
-                                            <span className="text-green-600 text-sm ml-1">{course.discount}</span>
+                                            <span className="line-through text-[#1d2939] text-xs md:text-lg font-normal">{course.originalPrice}</span>
+                                            <span className="text-[#1d2939] text-[#0e9a49] text-xs md:text-lg font-bold">{course.discount}</span>
                                         </p>
                                     </div>
                                 </div>
@@ -83,12 +83,12 @@ const CourseBottomSheet: React.FC<CourseBottomSheetProps> = ({ isOpen, onClose }
                     <div className="mt-8 grid grid-cols-2 gap-4">
                         <button
                             onClick={onClose}
-                            className="py-3 px-6 border border-orange-500 text-[#fb6514] text-xl font-bold rounded-lg hover:bg-orange-50 transition-colors"
+                            className="py-3 px-6 border border-orange-500 text-[#fb6514] text-sm md:text-xl font-bold rounded-lg hover:bg-orange-50 transition-colors"
                         >
                             Cancel
                         </button>
                         <button
-                            className="py-3 px-6 bg-orange-500 text-white text-xl font-bold rounded-lg hover:bg-orange-600 transition-colors"
+                            className="py-3 px-6 bg-orange-500 text-white text-sm md:text-xl font-bold rounded-lg hover:bg-orange-600 transition-colors"
                         >
                             BUY NOW
                         </button>

@@ -44,9 +44,9 @@ function CarouselList() {
     };
 
     return (
-        <div className="w-full max-w-4xl">
+        <div className="w-full max-w-4xl mb-[12px] md:mb-0">
             <RouteListNav />
-            <div className="text-[#667085] text-[52px] font-bold  my-[20px]">NEET CRASH </div>
+            <div className="text-[#667085] text-[26px] md:text-[52px] font-bold  my-[20px]">NEET CRASH </div>
             <div className="relative w-full">
                 <div className="relative h-[280px] overflow-hidden rounded-lg md:h-[450px] bg-black">
                     {/* Carousel slides */}
@@ -100,7 +100,7 @@ function CarouselList() {
                         <button
                             key={index}
                             type="button"
-                            className={`${activeSlide == index ? 'w-[29px]' : 'w-3'} h-3 rounded-full ${activeSlide === index ? 'bg-[#FF6B35]' : 'bg-gray-300'
+                            className={`${activeSlide == index ? 'w-[12px] md:w-[29px]' : 'w-2 md:w-3'} h-2 md:h-3 rounded-full ${activeSlide === index ? 'bg-[#FF6B35]' : 'bg-gray-300'
                                 }`}
                             aria-current={activeSlide === index}
                             aria-label={`Slide ${index + 1}`}

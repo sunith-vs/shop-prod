@@ -13,9 +13,9 @@ interface BenefitCardProps {
 const BenefitCard = ({ icon, title, subtitle, description, color, bulletPoints = [] }: BenefitCardProps) => (
     <div className={`min-w-[200px] lg:max-w-[320px] px-[20px] py-[14px] rounded-xl ${color} shadow-sm hover:shadow-md transition-shadow duration-300 h-full`}>
         <div className="text-3xl mb-2">{icon}</div>
-        <h3 className="text-[#1d2939] text-[28px] font-semibold font-display leading-snug">{title}</h3>
+        <h3 className="text-[#1d2939] text-2xl md:text-[28px] font-semibold font-display leading-snug">{title}</h3>
         {subtitle && <p className="text-[#1d2939] text-sm font-medium font-display leading-snug">{subtitle}</p>}
-        {description && <p className="text-sm text-gray-700 font-display">{description}</p>}
+        {description && <p className="text-sm text-gray-700 font-display text-wrap">{description}</p>}
         {bulletPoints.length > 0 && (
             <ul className="mt-2">
                 {bulletPoints.map((point, index) => (
@@ -109,10 +109,10 @@ const CourseBenefitsList = () => {
 
     return (
         <div>
-            <div className="text-[#1d2939] text-[52px] font-bold  text-center mt-[60px] mb-[40px]">Course Benefits</div>
+            <div className="text-[#1d2939] text-4xl md:text-[52px] font-bold  text-center mt-[60px] mb-[40px]">Course Benefits</div>
 
             {/* Top row benefits - inline with flexbox and wrap */}
-            <div className="flex flex-wrap gap-[24px] justify-center">
+            <div className="grid lg:flex flex-wrap md:grid-cols-2 gap-[24px]  justify-center">
                 {benefits.map((benefit: BenefitItem, index: number) => (
                     <div key={index} className="flex-none">
                         <BenefitCard {...benefit} />

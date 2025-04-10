@@ -50,16 +50,16 @@ const CourseOption = ({ id, type, name, price, originalPrice, discount, isSelect
           {isSelected && <div className="w-4 h-4 bg-[#fb6514] rounded-full"></div>}
         </div>
         <div>
-          <h3 className="font-medium text-gray-800">{type}</h3>
-          <p className="text-gray-700">{name}</p>
+          <h3 className="text-[#1d2939] text-sm font-bold">{type}</h3>
+          <p className="text-[#1d2939] text-sm font-bold">{name}</p>
         </div>
       </div>
 
       <div className="text-right">
-        <p className="font-bold text-xl">₹{price.toLocaleString()} <span className="text-gray-600 font-normal text-sm">for 2 years</span></p>
+        <p className="text-[#1d2939] text-sm md:text-base font-bold">₹{price.toLocaleString()} <span className="text-gray-600 font-normal text-sm">for 2 years</span></p>
         <div className="flex items-center justify-end">
-          {originalPrice && <p className="text-gray-600 line-through text-sm">₹{originalPrice.toLocaleString()}</p>}
-          {discount && <p className="text-green-600 font-medium ml-1">({discount}% OFF)</p>}
+          {originalPrice && <p className="text-[#1d2939] text-xs md:text-sm font-normal line-through">₹{originalPrice.toLocaleString()}</p>}
+          {discount && <p className="text-[#0e9a49] text-xs md:text-sm font-bold">({discount}% OFF)</p>}
         </div>
       </div>
     </div>
@@ -138,7 +138,7 @@ const CourseOffering = () => {
   ];
 
   return (
-    <div className=" lg:pl-[40px] md:mt-[18px] lg:w-[900px]">
+    <div className=" lg:pl-[40px]  lg:w-[900px]">
       <div className="border border-gray-200 rounded-3xl overflow-hidden shadow-sm">
         {/* Header with Special Offer */}
         <div className="relative">
@@ -151,18 +151,18 @@ const CourseOffering = () => {
 
         <div className="p-6 pt-16">
           {/* Title */}
-          <h1 className="text-3xl font-bold mb-4">
-            <span className="text-[#fb6514]">Join</span> classes now!
+          <h1 className="text-[#101828] text-2xl font-semibold leading-relaxed mb-4">
+            <span className="text-[#ff7b34]">Join</span> classes now!
           </h1>
 
           {/* Description */}
-          <p className="text-[#667085] text-base font-normal  leading-normal mb-[14px]">
+          <p className="text-[#667085] text-sm md:text-base font-normal  leading-normal mb-[14px]">
             Eduport provides over 1000 hours of clear, simple classes and 78 tests to help you track your progress, all guided by experienced local teachers from IITs and NITs, while the system adjusts to your pace with easy-to-use tools and personal mentorship.
           </p>
 
 
           {/* Feature List */}
-          <div className="justify-start text-[#1d2939] text-base font-medium  tracking-wider">
+          <div className="justify-start text-[#1d2939] text-sm md:text-base font-medium tracking-wider">
             {features.map((feature: string, index: number) => (
               <FeatureItem key={index} text={feature} />
             ))}
@@ -171,7 +171,7 @@ const CourseOffering = () => {
           {/* Course Categories */}
           {courseCategories.map((category, categoryIndex) => (
             <div className="mb-4" key={categoryIndex}>
-              <h2 className="text-xl font-bold mb-3 mt-[14px]">{category.title}</h2>
+              <h2 className="text-[#1d2939] text-sm font-bold mb-3 mt-[14px]">{category.title}</h2>
 
               {/* Course Options */}
               {category.courses.map((course: CourseData) => (

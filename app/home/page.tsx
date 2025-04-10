@@ -9,7 +9,7 @@ import React from 'react'
 
 const Home = () => {
   return (
-    <div className='max-w-[1280px] mx-auto sm:px-[24px]'>
+    <div className='max-w-[1280px] mx-auto px-[14px]'>
       <OurCoursesOfferBanner />
 
       <div className="lg:flex mt-[60px]">

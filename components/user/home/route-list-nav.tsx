@@ -3,7 +3,7 @@ import React from 'react'
 
 const RouteListNav = () => {
   return (
-    <div>
+    <div className='text-sm font-normal'>
       <ul className="flex list-none space-x-2">
         <li>
           <Link href="/" className="hover:text-orange-500">Home</Link>
