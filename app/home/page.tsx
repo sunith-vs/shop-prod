@@ -9,19 +9,24 @@ import React from 'react'
 
 const Home = () => {
   return (
-    <div className='max-w-[1280px] mx-auto px-[14px]'>
+    <div className='max-w-[1580px] mx-auto pb-[150px]'>
       <OurCoursesOfferBanner />
 
-      <div className="lg:flex mt-[60px]">
-        <CarouselList />
-        <CourseOffering />
+      <div className='max-w-[1380px] mx-auto px-[16px] md:px-[24px]'>
+
+        <div className="lg:flex mt-[60px]">
+          <CarouselList />
+          <CourseOffering />
+        </div>
+        <CourseBenefitsList />
+        <BorderText />
+        <StudentProfileCards />
+
       </div>
-      <CourseBenefitsList />
-      <BorderText />
-      <StudentProfileCards />
       <HomeFooter />
 
     </div>
+
   )
 }
 

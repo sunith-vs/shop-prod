@@ -44,7 +44,7 @@ function CarouselList() {
     };
 
     return (
-        <div className="w-full max-w-4xl mb-[12px] md:mb-0">
+        <div className="w-full max-w-4xl mb-[12px] lg:mb-0">
             <RouteListNav />
             <div className="text-[#667085] text-[26px] md:text-[52px] font-bold  my-[20px]">NEET CRASH </div>
             <div className="relative w-full">

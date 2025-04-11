@@ -32,7 +32,7 @@ const HomeFooter = () => {
 
     return (
         <>
-            <div className="w-full bg-[#FFFAF5] border-t border-gray-200 py-[36px] px-4">
+            <div className="fixed bottom-0 left-0 w-full bg-[#FFFAF5] border-t border-gray-200 pb-[36px] pt-[20px] px-4 z-50">
                 <div className="text-center justify-center text-[#454b56] text-base font-medium]">
                     <span>🎓</span>
                     <span>1,423 Learners already enrolled</span>

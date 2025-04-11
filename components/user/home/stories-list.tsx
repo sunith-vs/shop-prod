@@ -36,7 +36,7 @@ const StudentProfileCards = () => {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-[60px]">
             {students.map((student) => (
-                <div key={student.id} className="bg-white rounded-lg overflow-hidden border">
+                <div key={student.id} className="bg-white rounded-2xl overflow-hidden border">
                     {/* Student Info Header */}
 
                     <div className="flex items-center p-[14px]">

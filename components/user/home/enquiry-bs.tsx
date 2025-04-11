@@ -62,13 +62,13 @@ const EnquiryBottomSheet: React.FC<EnquiryBottomSheetProps> = ({
             </button>
           </div>
 
-          <h2 className=" text-[#1d2939] text-2xl font-bold">Enquire Now</h2>
-          <p className="text-[#667085] text-sm font-medium leading-none my-[14px]">Fill out the form below to secure your slot and stand a chance to win exclusive offers.</p>
+          <h2 className=" text-[#1d2939] text-lg md:text-2xl font-bold">Enquire Now</h2>
+          <p className="text-[#667085] text-xs md:text-sm font-medium leading-none my-[14px]">Fill out the form below to secure your slot and stand a chance to win exclusive offers.</p>
 
           <form onSubmit={handleSubmit}>
             {/* Name Input */}
             <div className="mb-4">
-              <label htmlFor="name" className="text-[#fb6514] text-sm font-medium">Name</label>
+              <label htmlFor="name" className="text-[#fb6514] text-xs md:text-sm font-medium">Name</label>
               <div className="mt-[4px]">
                 <input
                   type="text"
@@ -85,7 +85,7 @@ const EnquiryBottomSheet: React.FC<EnquiryBottomSheetProps> = ({
 
             {/* District Dropdown */}
             <div className="mb-4">
-              <label htmlFor="district" className="text-[#475467] text-sm font-medium">District</label>
+              <label htmlFor="district" className="text-[#475467] text-xs md:text-sm font-medium">District</label>
               <div className="relative shadow-sm rounded-lg mt-[4px]">
                 <select
                   id="district"
@@ -135,8 +135,8 @@ const EnquiryBottomSheet: React.FC<EnquiryBottomSheetProps> = ({
                     )}
                   </div>
                   <div className="ml-2">
-                    <p className="text-gray-700 font-medium">NEET</p>
-                    <p className="text-gray-600 text-sm">Crash Offline</p>
+                    <p className="text-[#475467] text-base font-bold">NEET</p>
+                    <p className="text-[#475467] text-base font-bold">Crash Offline</p>
                   </div>
                 </div>
 
@@ -153,8 +153,8 @@ const EnquiryBottomSheet: React.FC<EnquiryBottomSheetProps> = ({
                     )}
                   </div>
                   <div className="ml-2">
-                    <p className="text-gray-700 font-medium">NEET</p>
-                    <p className="text-gray-600 text-sm">CRASH Online</p>
+                    <p className="text-[#475467] text-base font-bold">NEET</p>
+                    <p className="text-[#475467] text-base font-bold">CRASH Online</p>
                   </div>
                 </div>
               </div>
@@ -162,7 +162,7 @@ const EnquiryBottomSheet: React.FC<EnquiryBottomSheetProps> = ({
 
             {/* Phone Number Input */}
             <div className="mb-8">
-              <label htmlFor="phone" className="block text-gray-700 font-medium mb-2">Phone Number</label>
+              <label htmlFor="phone" className="block text-[#475467] text-xs md:text-sm font-medium mb-2">Phone Number</label>
               <div className="flex w-full shadow-sm rounded-lg overflow-hidden">
                 <div className="relative">
                   <div className="flex items-center border border-gray-300 border-r-0 rounded-l-lg px-3 py-3 bg-white">
@@ -217,13 +217,13 @@ const EnquiryBottomSheet: React.FC<EnquiryBottomSheetProps> = ({
               <button
                 type="button"
                 onClick={onClose}
-                className="py-3 border border-[#FB6514] text-[#fb6514] text-xl font-bold rounded-lg hover:bg-orange-50 transition-colors"
+                className="py-3 border border-[#FB6514] text-[#fb6514] text-base md:text-xl font-bold rounded-lg hover:bg-orange-50 transition-colors"
               >
                 Cancel
               </button>
               <button
                 type="submit"
-                className="py-3 bg-[#FB6514] text-white text-xl font-bold rounded-lg hover:bg-orange-600 transition-colors shadow-sm"
+                className="py-3 bg-[#FB6514] text-white text-base md:text-xl font-bold rounded-lg hover:bg-orange-600 transition-colors shadow-sm"
               >
                 Submit
               </button>
