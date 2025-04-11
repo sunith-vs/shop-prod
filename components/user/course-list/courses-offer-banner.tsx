@@ -4,7 +4,7 @@ import React from 'react'
 import Image from 'next/image'
 import { useEffect, useState } from 'react'
 
-const OurCoursesOfferBanner = () => {
+const CoursesOfferBanner = () => {
   const [isMediumOrSmall, setIsMediumOrSmall] = useState(false)
 
   useEffect(() => {
@@ -42,4 +42,4 @@ const OurCoursesOfferBanner = () => {
   )
 }
 
-export default OurCoursesOfferBanner
+export default CoursesOfferBanner

@@ -1,5 +1,5 @@
-import Home from "./home/page";
+import Home from "./course-list/page";
 
 export default function HomePage() {
-  return <Home/>;
+  return <Home />;
 }
