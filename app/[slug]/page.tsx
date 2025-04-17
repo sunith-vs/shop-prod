@@ -7,8 +7,6 @@ import StudentProfileCards from '@/components/user/course-list/stories-list'
 import React from 'react'
 import CourseListFooter from '@/components/user/course-list/cource-list-footer'
 import { createClient } from '@/lib/supabase/server';
-import Image from 'next/image';
-import { Badge } from '@/components/ui/badge';
 
 // Define types based on the data structure
 type Course = {
@@ -64,8 +62,21 @@ const CourseList = async ({ params }: { params: { slug: string } }) => {
     throw new Error('Failed to fetch batches');
   }
 
+  // Fetch course benefits for this course
+  const { data: courseBenefits, error: benefitsError } = await supabase
+    .from('course_benefits')
+    .select('*')
+    .eq('course_id', course.id)
+    .order('order');
+
+  if (benefitsError) {
+    console.error('Error fetching course benefits:', benefitsError);
+    throw new Error('Failed to fetch course benefits');
+  }
+
   console.log("course", course);
   console.log("batches", batches);
+  console.log("courseBenefits", courseBenefits);
 
   return (
     <div className='max-w-[1580px] mx-auto pb-[150px]'>
