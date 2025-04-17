@@ -1,5 +1,9 @@
-import Home from "./course-list/page";
+import Home from "./[slug]/page";
 
 export default function HomePage() {
-  return <Home />;
+  return (
+    <main>
+      <h1>Welcome to the home page</h1>
+    </main>
+  )
 }

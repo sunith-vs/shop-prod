@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import Image from 'next/image';
+import PurchaseModal from '../purchase/purchase-modal';
 
 // Define TypeScript interfaces
 interface CourseOptionProps {
@@ -31,15 +32,29 @@ interface CourseData {
 }
 
 interface CourseCategory {
-  title: string;
   courses: CourseData[];
+}
+
+interface Batch {
+  id: string;
+  name: string;
+  type: string;
+  amount: number;
+  subject_batch_id: string;
+  course_id: string;
+  created_at: string;
+  offline?: boolean;
+}
+
+interface CourseOfferingProps {
+  batches?: Batch[];
 }
 
 // Course option component for better reusability
 const CourseOption = ({ id, type, name, price, originalPrice, discount, isSelected, onClick, highlighted = false }: CourseOptionProps) => (
   <div
     className={`border ${isSelected ? 'border-orange-500' : 'border-gray-200'} 
-    rounded-xl p-4 mb-[10px] bg-[#FFF8E4] relative h-[82px]`}
+    rounded-xl p-4 mb-[10px] bg-[#FFF8E4] relative `}
   >
     <div className="flex items-center justify-between">
       <div className="flex items-center">
@@ -50,15 +65,15 @@ const CourseOption = ({ id, type, name, price, originalPrice, discount, isSelect
           {isSelected && <div className="w-4 h-4 bg-[#fb6514] rounded-full"></div>}
         </div>
         <div>
-          <h3 className="text-[#1d2939] text-sm font-bold">{type}</h3>
-          <p className="text-[#1d2939] text-sm font-bold">{name}</p>
+          <p className="text-[#1d2939] text-base font-bold">{name}</p>
+          <h3 className="text-[#1d2939] text-sm font-normal">{type}</h3>
         </div>
       </div>
 
       <div className="text-right">
-        <p className="text-[#1d2939] text-sm md:text-base font-bold">₹{price.toLocaleString()} <span className="text-gray-600 font-normal text-sm">for 2 years</span></p>
+        <p className="text-[#1d2939] text-sm md:text-base font-bold">₹{price.toLocaleString()} <span className="text-[#1d2939] font-normal text-sm md:text-base">for 2 years</span></p>
         <div className="flex items-center justify-end">
-          {originalPrice && <p className="text-[#1d2939] text-xs md:text-sm font-normal line-through">₹{originalPrice.toLocaleString()}</p>}
+          {originalPrice && <p className="text-[#1d2939] text-xs md:text-sm font-normal line-through mr-1">₹{originalPrice.toLocaleString()}</p>}
           {discount && <p className="text-[#0e9a49] text-xs md:text-sm font-bold">({discount}% OFF)</p>}
         </div>
       </div>
@@ -75,58 +90,31 @@ const FeatureItem = ({ text }: FeatureItemProps) => (
 );
 
 // Main component
-const CourseOffering = () => {
-  const [selectedCourse, setSelectedCourse] = useState('offline-neet');
+const CourseOffering = ({ batches }: CourseOfferingProps) => {
+  // Use the first batch ID as the default selected course
+  const defaultSelectedCourse = batches && batches.length > 0 ? batches[0].id : 'offline-neet';
+  const [selectedCourse, setSelectedCourse] = useState(defaultSelectedCourse);
+  const [isPurchaseModalOpen, setIsPurchaseModalOpen] = useState(false);
 
-  // Course data - makes it easier to add/modify courses
+  // Use provided batches or sample data if none provided
+  const batchesToUse = batches && batches.length > 0 ? batches : [];
+
+  // Convert batches to course categories format
   const courseCategories: CourseCategory[] = [
     {
-      title: "NEET Crash",
-      courses: [
-        {
-          id: 'offline-neet',
-          type: 'Offline',
-          name: 'NEET CRASH',
-          price: 15000,
-          originalPrice: 15000,
-          discount: 10,
-          highlighted: false
-        },
-        {
-          id: 'online-neet',
-          type: 'Online',
-          name: 'NEET CRASH',
-          price: 15000,
-          originalPrice: 15000,
-          discount: 10,
-          highlighted: true
-        }
-      ]
-    },
-    {
-      title: "JEE Crash",
-      courses: [
-        {
-          id: 'online-jee-1',
-          type: 'Online',
-          name: 'NEET CRASH', // This seems to be an error in the original, keeping it as is
-          price: 15000,
-          originalPrice: 15000,
-          discount: 10,
-          highlighted: true
-        },
-        {
-          id: 'online-jee-2',
-          type: 'Online',
-          name: 'NEET CRASH', // This seems to be an error in the original, keeping it as is
-          price: 15000,
-          originalPrice: 15000,
-          discount: 10,
-          highlighted: true
-        }
-      ]
+      courses: batchesToUse.map(batch => ({
+        id: batch.id,
+        type: batch.type === 'offline' ? 'Offline' : 'Online',
+        name: batch.name,
+        price: batch.amount,
+        originalPrice: Math.round(batch.amount * 1.1), // Adding 10% to original price to show discount
+        discount: 10,
+        highlighted: batch.type !== 'offline'
+      }))
     }
   ];
+
+  console.log('Using batches:', batchesToUse);
 
   // Features list
   const features = [
@@ -170,9 +158,7 @@ const CourseOffering = () => {
 
           {/* Course Categories */}
           {courseCategories.map((category, categoryIndex) => (
-            <div className="mb-4" key={categoryIndex}>
-              <h2 className="text-[#1d2939] text-sm font-bold mb-3 mt-[14px]">{category.title}</h2>
-
+            <div className="mb-4 mt-[14px]" key={categoryIndex}>
               {/* Course Options */}
               {category.courses.map((course: CourseData) => (
                 <CourseOption
@@ -192,7 +178,10 @@ const CourseOffering = () => {
           ))}
 
           {/* CTA Buttons */}
-          <button className="w-full bg-[#FB6514] text-white font-bold py-4 rounded-xl mb-[14px] transition duration-200">
+          <button 
+            className="w-full bg-[#FB6514] text-white font-bold py-4 rounded-xl mb-[14px] transition duration-200 hover:bg-orange-600"
+            onClick={() => setIsPurchaseModalOpen(true)}
+          >
             BUY NOW
           </button>
 
@@ -205,6 +194,16 @@ const CourseOffering = () => {
         </div>
       </div>
 
+      {/* Purchase Modal */}
+      {isPurchaseModalOpen && (
+        <PurchaseModal
+          isOpen={isPurchaseModalOpen}
+          onClose={() => setIsPurchaseModalOpen(false)}
+          courseId={selectedCourse}
+          courseAmount={courseCategories[0].courses.find(course => course.id === selectedCourse)?.price || 0}
+          courseName={courseCategories[0].courses.find(course => course.id === selectedCourse)?.name || ''}
+        />
+      )}
     </div>
   );
 };

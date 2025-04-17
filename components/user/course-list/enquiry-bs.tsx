@@ -42,12 +42,23 @@ const EnquiryBottomSheet: React.FC<EnquiryBottomSheetProps> = ({
   };
 
   return (
-    <div className={`fixed inset-0 z-50 ${isOpen ? 'block' : 'hidden'}`}>
+    <div className={`fixed inset-0 z-50 ${isOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'} transition-opacity duration-300 ease-in-out`}>
       {/* Overlay background */}
-      <div className="absolute inset-0 bg-black bg-opacity-30" onClick={onClose}></div>
+      <div 
+        className="absolute inset-0 bg-black bg-opacity-30 transition-opacity duration-300 ease-in-out" 
+        onClick={onClose}
+        style={{ opacity: isOpen ? '1' : '0' }}
+      ></div>
 
       {/* Bottom sheet */}
-      <div className="absolute bottom-0 left-0 right-0 bg-white rounded-t-xl shadow-lg transition-transform duration-300 ease-in-out transform pb-6">
+      <div 
+        className="absolute bottom-0 left-0 right-0 bg-white rounded-t-3xl shadow-lg transition-all duration-300 ease-in-out transform pb-6 w-full"
+        style={{ 
+          transform: isOpen ? 'translateY(0)' : 'translateY(100%)',
+          opacity: isOpen ? '1' : '0',
+          boxShadow: '0 -4px 20px rgba(0, 0, 0, 0.15)'
+        }}
+      >
         <div className="max-w-4xl mx-auto px-4 py-6 lg:w-[720px]">
           {/* Close button */}
           <div className="absolute top-4 right-4">

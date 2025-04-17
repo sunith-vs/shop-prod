@@ -5,6 +5,17 @@ import CourseBottomSheet from './choose-cource-bs'
 import EnquiryBottomSheet from './enquiry-bs'
 
 // Define the interface for the form data to match what EnquiryBottomSheet expects
+interface Batch {
+  id: string;
+  name: string;
+  type: string;
+  amount: number;
+  subject_batch_id: string;
+  course_id: string;
+  created_at: string;
+  offline?: boolean;
+}
+
 interface EnquiryFormData {
   name: string;
   district: string;
@@ -12,7 +23,11 @@ interface EnquiryFormData {
   phoneNumber: string;
 }
 
-const CourseListFooter = () => {
+interface CourseListFooterProps {
+  batches?: Batch[];
+}
+
+const CourseListFooter = ({ batches = [] }: CourseListFooterProps) => {
     const [isBottomSheetOpen, setIsBottomSheetOpen] = useState(false);
     const [isEnquiryOpen, setIsEnquiryOpen] = useState(false);
 
@@ -63,6 +78,7 @@ const CourseListFooter = () => {
             <CourseBottomSheet
                 isOpen={isBottomSheetOpen}
                 onClose={closeBottomSheet}
+                batches={batches}
             />
         </>
     )
