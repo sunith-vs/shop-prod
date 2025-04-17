@@ -18,7 +18,7 @@ type Course = {
   slug: string;
   sub_heading: string;
   description: string;
-  highlights: string | null;
+  highlights: string[];
   brochure_url: string | null;
   tag_url: string | null;
   status: string;
@@ -73,7 +73,7 @@ const CourseList = async ({ params }: { params: { slug: string } }) => {
       <div className='max-w-[1380px] mx-auto px-[16px] md:px-[24px]'>
         <div className="lg:flex mt-[60px]">
           <CarouselList />
-          <CourseOffering batches={batches} />
+          <CourseOffering batches={batches} course={course} />
         </div>
         <CourseBenefitsList />
         <BorderText />

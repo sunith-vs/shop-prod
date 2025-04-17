@@ -46,8 +46,26 @@ interface Batch {
   offline?: boolean;
 }
 
+interface Course {
+  id: string;
+  banner_url: string;
+  title: string;
+  slug: string;
+  sub_heading: string;
+  description: string;
+  highlights: string[];
+  brochure_url: string;
+  tag_url: string;
+  status: string;
+  created_at: string;
+  updated_at: string;
+  thumbnail: string;
+  eduport_course_id: number;
+}
+
 interface CourseOfferingProps {
   batches?: Batch[];
+  course?: Course;
 }
 
 // Course option component for better reusability
@@ -90,7 +108,7 @@ const FeatureItem = ({ text }: FeatureItemProps) => (
 );
 
 // Main component
-const CourseOffering = ({ batches }: CourseOfferingProps) => {
+const CourseOffering = ({ batches, course }: CourseOfferingProps) => {
   // Use the first batch ID as the default selected course
   const defaultSelectedCourse = batches && batches.length > 0 ? batches[0].id : 'offline-neet';
   const [selectedCourse, setSelectedCourse] = useState(defaultSelectedCourse);
@@ -116,14 +134,8 @@ const CourseOffering = ({ batches }: CourseOfferingProps) => {
 
   console.log('Using batches:', batchesToUse);
 
-  // Features list
-  const features = [
-    "Expert Classes by IIT/AIIMS/NIT Alumn",
-    "78 progress tests",
-    "Personal mentorship",
-    "Personal mentorship",
-    "Focused 60-Day Crash Plan"
-  ];
+  // Use course highlights if available, otherwise use default features
+  const highlights = course?.highlights || [];
 
   return (
     <div className=" lg:pl-[40px]  lg:w-[900px]">
@@ -145,13 +157,13 @@ const CourseOffering = ({ batches }: CourseOfferingProps) => {
 
           {/* Description */}
           <p className="text-[#667085] text-sm md:text-base font-normal  leading-normal mb-[14px]">
-            Eduport provides over 1000 hours of clear, simple classes and 78 tests to help you track your progress, all guided by experienced local teachers from IITs and NITs, while the system adjusts to your pace with easy-to-use tools and personal mentorship.
+            {course?.description || 'Description not available'}
           </p>
 
 
           {/* Feature List */}
           <div className="justify-start text-[#1d2939] text-sm md:text-base font-medium tracking-wider">
-            {features.map((feature: string, index: number) => (
+            {highlights.map((feature: string, index: number) => (
               <FeatureItem key={index} text={feature} />
             ))}
           </div>
@@ -178,7 +190,7 @@ const CourseOffering = ({ batches }: CourseOfferingProps) => {
           ))}
 
           {/* CTA Buttons */}
-          <button 
+          <button
             className="w-full bg-[#FB6514] text-white font-bold py-4 rounded-xl mb-[14px] transition duration-200 hover:bg-orange-600"
             onClick={() => setIsPurchaseModalOpen(true)}
           >
