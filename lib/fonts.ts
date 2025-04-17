@@ -9,20 +9,14 @@ export const inter = Inter({
 export const monaSans = localFont({
   src: [
     {
-      path: "../public/fonts/Mona-Sans-Regular.woff2",
-      weight: "400",
+      path: "../public/fonts/MonaSans-VariableFont_wdth,wght.ttf",
       style: "normal",
     },
     {
-      path: "../public/fonts/Mona-Sans-Medium.woff2",
-      weight: "500",
-      style: "normal",
-    },
-    {
-      path: "../public/fonts/Mona-Sans-Bold.woff2",
-      weight: "700",
-      style: "normal",
+      path: "../public/fonts/MonaSans-Italic-VariableFont_wdth,wght.ttf",
+      style: "italic",
     },
   ],
   variable: "--font-mona-sans",
+  display: "swap",
 });
