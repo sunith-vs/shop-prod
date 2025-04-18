@@ -3,24 +3,98 @@
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import RouteListNav from './route-list-nav';
+import { createClient } from '@/lib/supabase/client';
 
-function CarouselList() {
-    const carouselImages = [
-        'https://images.unsplash.com/photo-1516214104703-d870798883c5?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60',
-        'https://images.unsplash.com/photo-1496181133206-80ce9b88a853?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60',
-        'https://images.unsplash.com/photo-1605379399642-870262d3d051?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60',
-        'https://images.unsplash.com/photo-1563986768609-322da13575f3?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60',
-        'https://images.unsplash.com/photo-1531297484001-80022131f5a1?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60',
-    ];
+// Define the carousel item type
+interface CarouselItem {
+    id: string;
+    url: string;
+    index: number;
+    course_id: string;
+    created_at: string;
+}
 
+function CarouselList({ courseId, courseTitle }: { courseId: string, courseTitle: string }) {
+    const supabase = createClient();
+    const [carouselItems, setCarouselItems] = useState<CarouselItem[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+    
     const [activeSlide, setActiveSlide] = useState(0);
-    const totalSlides = carouselImages.length;
+    const totalSlides = carouselItems.length;
 
+    // Fetch carousel items from the database
+    useEffect(() => {
+        const fetchCarouselItems = async () => {
+            try {
+                setLoading(true);
+                const { data, error } = await supabase
+                    .from('carousel')
+                    .select('*')
+                    .eq('course_id', courseId)
+                    .order('index', { ascending: true });
+                
+                if (error) {
+                    throw error;
+                }
+                
+                if (data && data.length > 0) {
+                    setCarouselItems(data);
+                } else {
+                    // Fallback to default images if no carousel items found
+                    const defaultImages = [
+                        'https://images.unsplash.com/photo-1516214104703-d870798883c5?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60',
+                        'https://images.unsplash.com/photo-1496181133206-80ce9b88a853?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60',
+                        'https://images.unsplash.com/photo-1605379399642-870262d3d051?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60',
+                        'https://images.unsplash.com/photo-1563986768609-322da13575f3?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60',
+                        'https://images.unsplash.com/photo-1531297484001-80022131f5a1?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60',
+                    ];
+                    
+                    // Create mock carousel items with default images
+                    const mockItems: CarouselItem[] = defaultImages.map((url, index) => ({
+                        id: `default-${index}`,
+                        url,
+                        index,
+                        course_id: courseId,
+                        created_at: new Date().toISOString()
+                    }));
+                    
+                    setCarouselItems(mockItems);
+                }
+            } catch (err) {
+                console.error('Error fetching carousel items:', err);
+                setError(err instanceof Error ? err.message : 'Failed to fetch carousel items');
+                
+                // Set default images on error
+                const defaultImages = [
+                    'https://images.unsplash.com/photo-1516214104703-d870798883c5?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60',
+                    'https://images.unsplash.com/photo-1496181133206-80ce9b88a853?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60'
+                ];
+                
+                const mockItems: CarouselItem[] = defaultImages.map((url, index) => ({
+                    id: `default-${index}`,
+                    url,
+                    index,
+                    course_id: courseId,
+                    created_at: new Date().toISOString()
+                }));
+                
+                setCarouselItems(mockItems);
+            } finally {
+                setLoading(false);
+            }
+        };
+        
+        fetchCarouselItems();
+    }, [courseId, supabase]);
+    
     // Auto-slide functionality
     useEffect(() => {
+        if (totalSlides === 0) return;
+        
         const interval = setInterval(() => {
             setActiveSlide((prevSlide) => (prevSlide + 1) % totalSlides);
-        }, 5000); // Change slide every 3 seconds
+        }, 5000); // Change slide every 5 seconds
 
         return () => clearInterval(interval);
     }, [totalSlides]);
@@ -45,12 +119,20 @@ function CarouselList() {
 
     return (
         <div className="w-full max-w-4xl mb-[12px] lg:mb-0">
-            <RouteListNav />
-            <div className="text-[#667085] text-[26px] md:text-[52px] font-bold  my-[20px]">NEET CRASH </div>
+            <RouteListNav courseTitle={courseTitle} />
+            <div className="text-[#667085] text-[26px] md:text-[52px] font-bold my-[20px]">{courseTitle}</div>
             <div className="relative w-full">
                 <div className="relative h-[280px] overflow-hidden rounded-lg md:h-[450px] bg-black">
                     {/* Carousel slides */}
-                    {carouselImages.map((src, index) => (
+                    {loading ? (
+                        <div className="absolute inset-0 flex items-center justify-center">
+                            <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                        </div>
+                    ) : error ? (
+                        <div className="absolute inset-0 flex items-center justify-center text-red-500">
+                            Failed to load carousel images
+                        </div>
+                    ) : carouselItems.map((item, index) => (
                         <div
                             key={index}
                             className={`absolute w-full h-full transition-opacity duration-700 ease-in-out ${activeSlide === index ? 'opacity-100' : 'opacity-0'
@@ -58,10 +140,10 @@ function CarouselList() {
                         >
                             {/* Modified this section to make images fill the entire container */}
                             <div className="absolute inset-0">
-                                {isExternalUrl(src) ? (
+                                {isExternalUrl(item.url) ? (
                                     // For external network images
                                     <Image
-                                        src={src}
+                                        src={item.url}
                                         alt={`Carousel image ${index + 1}`}
                                         fill
                                         sizes="(max-width: 768px) 100vw, 900px"
@@ -72,7 +154,7 @@ function CarouselList() {
                                 ) : (
                                     // For local images
                                     <Image
-                                        src={src}
+                                        src={item.url}
                                         alt={`Carousel image ${index + 1}`}
                                         fill
                                         sizes="(max-width: 768px) 100vw, 900px"

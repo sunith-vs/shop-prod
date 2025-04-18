@@ -60,6 +60,7 @@ interface Course {
   created_at: string;
   updated_at: string;
   thumbnail: string;
+  banner_mobile: string;
   eduport_course_id: number;
 }
 
@@ -142,14 +143,16 @@ const CourseOffering = ({ batches, course }: CourseOfferingProps) => {
       <div className="border border-gray-200 rounded-3xl overflow-hidden shadow-sm">
         {/* Header with Special Offer */}
         <div className="relative">
-          <div className="absolute top-4 left-4">
-            <div className="bg-blue-500 text-white px-4 py-2 rounded-full font-bold">
-              Special Offer
-            </div>
-          </div>
+          <Image
+            src={course?.tag_url || ''}
+            alt="Special Offer"
+            width={135}
+            height={40}
+            className="object-contain"
+          />
         </div>
 
-        <div className="p-6 pt-16">
+        <div className="px-6 pb-6 pt-[12px]">
           {/* Title */}
           <h1 className="text-[#101828] text-2xl font-semibold leading-relaxed mb-4">
             <span className="text-[#ff7b34]">Join</span> classes now!

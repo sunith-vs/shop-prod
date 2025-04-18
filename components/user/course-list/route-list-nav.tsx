@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import React from 'react'
 
-const RouteListNav = () => {
+const RouteListNav = ({ courseTitle }: { courseTitle: string }) => {
   return (
     <div className='text-sm font-normal'>
       <ul className="flex list-none space-x-2">
@@ -14,7 +14,7 @@ const RouteListNav = () => {
         </li>
         <span className="text-gray-500 mx-2">{'>'}</span>
         <li>
-          <span className="font-semibold text-[#ff7b34]">NEET CRASH</span>
+          <span className="font-semibold text-[#ff7b34]">{courseTitle}</span>
         </li>
       </ul>
     </div>

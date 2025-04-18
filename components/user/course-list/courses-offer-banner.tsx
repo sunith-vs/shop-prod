@@ -4,7 +4,7 @@ import React from 'react'
 import Image from 'next/image'
 import { useEffect, useState } from 'react'
 
-const CoursesOfferBanner = ({ bannerUrl }: { bannerUrl: string }) => {
+const CoursesOfferBanner = ({ bannerUrl, bannerMobile }: { bannerUrl: string, bannerMobile: string }) => {
   const [isMediumOrSmall, setIsMediumOrSmall] = useState(false)
 
   useEffect(() => {
@@ -26,7 +26,7 @@ const CoursesOfferBanner = ({ bannerUrl }: { bannerUrl: string }) => {
   return (
     <div style={{ position: 'relative', width: '100%' }}>
       <Image 
-        src={isMediumOrSmall ? "/svgs/our-courses-offer-banner-md.svg" : bannerUrl}
+        src={isMediumOrSmall ? bannerMobile : bannerUrl}
         alt="Our Courses Offer Banner"
         width={0}
         height={0}
