@@ -52,16 +52,17 @@ const CourseList = async ({ params }: { params: { slug: string } }) => {
     throw new Error('Failed to fetch course');
   }
 
-  // Fetch batches for this course
-  const { data: batches, error: batchesError } = await supabase
-    .from('batches')
-    .select('*')
-    .eq('course_id', course.id);
+  // Fetch course and batch details using the new function
+  const { data: courseDetails, error: detailsError } = await supabase
+    .rpc('get_course_and_batch_details', { eduport_id: course.eduport_course_id });
 
-  if (batchesError) {
-    console.error('Error fetching batches:', batchesError);
-    throw new Error('Failed to fetch batches');
+  if (detailsError) {
+    console.error('Error fetching course details:', detailsError);
+    throw new Error('Failed to fetch course details');
   }
+
+  // Extract batches from the response
+  const batches = courseDetails?.batches || [];
 
   // Fetch course benefits for this course
   const { data: courseBenefits, error: benefitsError } = await supabase
@@ -70,12 +71,14 @@ const CourseList = async ({ params }: { params: { slug: string } }) => {
     .eq('course_id', course.id)
     .order('order');
 
+
   if (benefitsError) {
     console.error('Error fetching course benefits:', benefitsError);
     throw new Error('Failed to fetch course benefits');
   }
 
   console.log("course", course);
+  console.log("courseDetails", courseDetails);
   console.log("batches", batches);
   console.log("courseBenefits", courseBenefits);
 

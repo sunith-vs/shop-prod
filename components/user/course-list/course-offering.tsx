@@ -10,11 +10,10 @@ interface CourseOptionProps {
   type: string;
   name: string;
   price: number;
-  originalPrice?: number;
-  discount?: number;
   isSelected: boolean;
   onClick: (id: string) => void;
   highlighted?: boolean;
+  batches?: Batch[];
 }
 
 interface FeatureItemProps {
@@ -44,6 +43,19 @@ interface Batch {
   course_id: string;
   created_at: string;
   offline?: boolean;
+  eduport_batch_id?: number;
+  offer_claims?: {
+    id: string;
+    created_at: string;
+    offer: {
+      id: string;
+      title: string;
+      percentage: number;
+      expiry: string;
+      is_active: boolean;
+      created_at: string;
+    };
+  }[];
 }
 
 interface Course {
@@ -70,35 +82,40 @@ interface CourseOfferingProps {
 }
 
 // Course option component for better reusability
-const CourseOption = ({ id, type, name, price, originalPrice, discount, isSelected, onClick, highlighted = false }: CourseOptionProps) => (
-  <div
-    className={`border ${isSelected ? 'border-orange-500' : 'border-gray-200'} 
+const CourseOption = ({ id, type, name, price, isSelected, onClick, batches }: CourseOptionProps) => {
+  const batch = batches?.find(batch => batch.id === id);
+  const offer = batch?.offer_claims?.find(claim => claim.offer.is_active && new Date(claim.offer.expiry) > new Date())?.offer;
+  const discountPercentage = offer ? offer.percentage : 0;
+  const discountedPrice = offer ? Math.round(price * (1 - discountPercentage / 100)) : price;
+  return (
+    <div
+      className={`border ${isSelected ? 'border-orange-500' : 'border-gray-200'} 
     rounded-xl p-4 mb-[10px] bg-[#FFF8E4] relative `}
-  >
-    <div className="flex items-center justify-between">
-      <div className="flex items-center">
-        <div
-          className={`w-[21.67px] h-[21.67px] relative rounded-[10.83px] border-[1.50px] ${isSelected ? 'border-[#fb6514]' : 'border-[#1d2939]'} rounded-full border border-gray-400 mr-3 flex items-center justify-center cursor-pointer`}
-          onClick={() => onClick(id)}
-        >
-          {isSelected && <div className="w-4 h-4 bg-[#fb6514] rounded-full"></div>}
+    >
+      <div className="flex items-center justify-between">
+        <div className="flex items-center">
+          <div
+            className={`w-[21.67px] h-[21.67px] relative rounded-[10.83px] border-[1.50px] ${isSelected ? 'border-[#fb6514]' : 'border-[#1d2939]'} rounded-full border border-gray-400 mr-3 flex items-center justify-center cursor-pointer`}
+            onClick={() => onClick(id)}
+          >
+            {isSelected && <div className="w-4 h-4 bg-[#fb6514] rounded-full"></div>}
+          </div>
+          <div>
+            <p className="text-[#1d2939] text-base font-bold">{name}</p>
+            <h3 className="text-[#1d2939] text-sm font-normal">{type}</h3>
+          </div>
         </div>
-        <div>
-          <p className="text-[#1d2939] text-base font-bold">{name}</p>
-          <h3 className="text-[#1d2939] text-sm font-normal">{type}</h3>
-        </div>
-      </div>
-
-      <div className="text-right">
-        <p className="text-[#1d2939] text-sm md:text-base font-bold">₹{price.toLocaleString()} <span className="text-[#1d2939] font-normal text-sm md:text-base">for 2 years</span></p>
-        <div className="flex items-center justify-end">
-          {originalPrice && <p className="text-[#1d2939] text-xs md:text-sm font-normal line-through mr-1">₹{originalPrice.toLocaleString()}</p>}
-          {discount && <p className="text-[#0e9a49] text-xs md:text-sm font-bold">({discount}% OFF)</p>}
+        <div className="text-right">
+          <p className="text-[#1d2939] text-sm md:text-base font-bold">₹{discountedPrice.toLocaleString()} <span className="text-[#1d2939] font-normal text-sm md:text-base">for 2 years</span></p>
+          <div className="flex items-center justify-end">
+            <p className="text-[#1d2939] text-xs md:text-sm font-normal line-through mr-1">₹{price.toLocaleString()}</p>
+            <p className="text-[#0e9a49] text-xs md:text-sm font-bold">({discountPercentage}% OFF)</p>
+          </div>
         </div>
       </div>
     </div>
-  </div>
-);
+  );
+};
 
 // Feature item component for consistency
 const FeatureItem = ({ text }: FeatureItemProps) => (
@@ -121,15 +138,34 @@ const CourseOffering = ({ batches, course }: CourseOfferingProps) => {
   // Convert batches to course categories format
   const courseCategories: CourseCategory[] = [
     {
-      courses: batchesToUse.map(batch => ({
-        id: batch.id,
-        type: batch.type === 'offline' ? 'Offline' : 'Online',
-        name: batch.name,
-        price: batch.amount,
-        originalPrice: Math.round(batch.amount * 1.1), // Adding 10% to original price to show discount
-        discount: 10,
-        highlighted: batch.type !== 'offline'
-      }))
+      courses: batchesToUse.map(batch => {
+        // Get the active offer with highest discount percentage if available
+        const activeOffers = batch.offer_claims?.filter(
+          (claim: any) => claim.offer?.is_active && new Date(claim.offer?.expiry) > new Date()
+        ) || [];
+
+        // Sort by percentage in descending order and take the first (highest discount)
+        const bestOffer = activeOffers.length > 0
+          ? [...activeOffers].sort((a: any, b: any) => b.offer.percentage - a.offer.percentage)[0].offer
+          : null;
+
+        // Calculate discounted price if offer exists
+        const discountPercentage = bestOffer?.percentage || 0;
+        const originalPrice = batch.amount;
+        const discountedPrice = discountPercentage > 0
+          ? Math.round(originalPrice * (1 - discountPercentage / 100))
+          : originalPrice;
+
+        return {
+          id: batch.id,
+          type: batch.type === 'offline' ? 'Offline' : 'Online',
+          name: batch.name,
+          price: discountedPrice,
+          originalPrice: discountPercentage > 0 ? originalPrice : undefined,
+          discount: discountPercentage > 0 ? discountPercentage : undefined,
+          highlighted: batch.type !== 'offline'
+        };
+      })
     }
   ];
 
@@ -181,12 +217,11 @@ const CourseOffering = ({ batches, course }: CourseOfferingProps) => {
                   id={course.id}
                   type={course.type}
                   name={course.name}
-                  price={course.price}
-                  originalPrice={course.originalPrice}
-                  discount={course.discount}
+                  price={course.originalPrice || 0}
                   isSelected={selectedCourse === course.id}
                   onClick={setSelectedCourse}
                   highlighted={course.highlighted}
+                  batches={batchesToUse}
                 />
               ))}
             </div>
