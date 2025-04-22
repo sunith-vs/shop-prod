@@ -86,7 +86,8 @@ export function MediaSection({ courseId, initialData, onUpdate }: MediaSectionPr
       : null;
       
     if (upload && !upload.loading) {
-      upload.setFiles([]);
+      // upload.setFiles([]);
+
       setActiveUpload(null);
     }
   };
