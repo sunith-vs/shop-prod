@@ -15,6 +15,7 @@ import { notFound } from 'next/navigation';
 import { SideTabs } from './components/side-tabs';
 import { FileText, Image, Layout, Gift, Calendar } from 'lucide-react';
 import { CarouselSection } from './components/carousel-section';
+import { HighlightsSection } from './components/highlights-section';
 
 type CourseType = 'JEE' | 'NEET' | 'CUET' | '11-12' | '5-10';
 
@@ -53,11 +54,11 @@ const COURSE_TYPES: CourseType[] = ['JEE', 'NEET', 'CUET', '11-12', '5-10'];
 
 export default function EditCourse({ params }: { params: { slug: string } }) {
   const [course, setCourse] = useState<Course | null>(null);
-  const [highlights, setHighlights] = useState<string[]>(['']);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('general');
   const [editedSlug, setEditedSlug] = useState('');
+  const [isPopular, setIsPopular] = useState(course?.popular || false);
   const { toast } = useToast();
   const router = useRouter();
 
@@ -79,7 +80,7 @@ export default function EditCourse({ params }: { params: { slug: string } }) {
 
         setCourse(data);
         setEditedSlug(data.slug);
-        setHighlights(data.highlights || ['']);
+        setIsPopular(data.popular);
       } catch (error) {
         toast({
           title: "Error",
@@ -124,30 +125,11 @@ export default function EditCourse({ params }: { params: { slug: string } }) {
     } catch (error) {
       toast({
         title: "Error",
-        description: "Failed to update course status",
+        description: error instanceof Error ? error.message : "Failed to update course status",
         variant: "destructive",
       });
     } finally {
       setIsSubmitting(false);
-    }
-  };
-
-  const handleHighlightChange = (index: number, value: string) => {
-    const newHighlights = [...highlights];
-    newHighlights[index] = value;
-    setHighlights(newHighlights);
-  };
-
-  const addHighlight = () => {
-    setHighlights([...highlights, '']);
-  };
-
-  const removeHighlight = (index: number) => {
-    const newHighlights = highlights.filter((_, i) => i !== index);
-    if (newHighlights.length === 0) {
-      setHighlights(['']);
-    } else {
-      setHighlights(newHighlights);
     }
   };
 
@@ -160,16 +142,15 @@ export default function EditCourse({ params }: { params: { slug: string } }) {
 
       const newSlug = formData.get('slug') as string;
       const updates = {
-        title: formData.get('title'),
-        description: formData.get('description'),
-        sub_heading: formData.get('subHeading'),
-        banner_url: formData.get('bannerUrl'),
-        thumbnail: formData.get('thumbnailUrl'),
-        brochure_url: formData.get('brochureUrl'),
+        title: formData.get('title') as string,
+        description: formData.get('description') as string,
+        sub_heading: formData.get('subHeading') as string,
+        banner_url: formData.get('bannerUrl') as string,
+        thumbnail: formData.get('thumbnailUrl') as string,
+        brochure_url: formData.get('brochureUrl') as string,
         slug: newSlug,
-        highlights: highlights.filter(Boolean),
-        course_type: formData.get('courseType'),
-        popular: formData.get('popular') === 'true',
+        course_type: formData.get('courseType') as CourseType,
+        popular: isPopular,
         updated_at: new Date().toISOString(),
       };
 
@@ -179,6 +160,9 @@ export default function EditCourse({ params }: { params: { slug: string } }) {
         .eq('slug', params.slug);
 
       if (error) throw error;
+
+      // Update local state
+      setCourse(prev => prev ? { ...prev, ...updates } : null);
 
       toast({
         title: "Success",
@@ -197,41 +181,6 @@ export default function EditCourse({ params }: { params: { slug: string } }) {
       toast({
         title: "Error",
         description: errorMessage,
-        variant: "destructive",
-      });
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  const handleCarouselSave = async (items: any[]) => {
-    try {
-      setIsSubmitting(true);
-      const supabase = createClient();
-
-      const { error } = await supabase
-        .from('courses')
-        .update({
-          carousel_items: items,
-          updated_at: new Date().toISOString(),
-        })
-        .eq('slug', params.slug);
-
-      if (error) throw error;
-
-      setCourse(prev => ({
-        ...prev!,
-        carousel_items: items
-      }));
-
-      toast({
-        title: "Success",
-        description: "Carousel items updated successfully!",
-      });
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to update carousel items",
         variant: "destructive",
       });
     } finally {
@@ -299,10 +248,15 @@ export default function EditCourse({ params }: { params: { slug: string } }) {
                 <div className="flex items-center space-x-2">
                   <Switch
                     id="popular"
-                    name="popular"
-                    defaultChecked={course.popular}
+                    checked={isPopular}
+                    onCheckedChange={setIsPopular}
                   />
                   <Label htmlFor="popular">Mark as Popular Course</Label>
+                  <input 
+                    type="hidden" 
+                    name="popular" 
+                    value={isPopular.toString()} 
+                  />
                 </div>
 
                 <div className="space-y-2">
@@ -343,14 +297,13 @@ export default function EditCourse({ params }: { params: { slug: string } }) {
               <CardTitle>Images & Files</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
+              <form className="space-y-4">
                 <div className="space-y-2">
                   <label htmlFor="bannerUrl" className="text-sm font-medium">Banner URL</label>
                   <Input
                     id="bannerUrl"
                     name="bannerUrl"
-                    type="url"
-                    placeholder="Enter banner image URL"
+                    placeholder="Enter banner URL"
                     defaultValue={course.banner_url}
                   />
                 </div>
@@ -360,8 +313,7 @@ export default function EditCourse({ params }: { params: { slug: string } }) {
                   <Input
                     id="thumbnailUrl"
                     name="thumbnailUrl"
-                    type="url"
-                    placeholder="Enter thumbnail image URL"
+                    placeholder="Enter thumbnail URL"
                     defaultValue={course.thumbnail}
                   />
                 </div>
@@ -371,50 +323,11 @@ export default function EditCourse({ params }: { params: { slug: string } }) {
                   <Input
                     id="brochureUrl"
                     name="brochureUrl"
-                    type="url"
                     placeholder="Enter brochure URL"
                     defaultValue={course.brochure_url}
                   />
                 </div>
-              </div>
-            </CardContent>
-          </Card>
-        );
-
-      case 'benefits':
-        return (
-          <Card>
-            <CardHeader>
-              <CardTitle>Course Benefits</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {highlights.map((highlight, index) => (
-                  <div key={index} className="flex gap-2">
-                    <Input
-                      name="highlights[]"
-                      placeholder="Enter highlight"
-                      value={highlight}
-                      onChange={(e) => handleHighlightChange(index, e.target.value)}
-                    />
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={() => removeHighlight(index)}
-                    >
-                      Remove
-                    </Button>
-                  </div>
-                ))}
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={addHighlight}
-                  className="w-full"
-                >
-                  Add Highlight
-                </Button>
-              </div>
+              </form>
             </CardContent>
           </Card>
         );
@@ -429,7 +342,36 @@ export default function EditCourse({ params }: { params: { slug: string } }) {
               <CarouselSection
                 courseId={course.id}
                 initialItems={course.carousel_items || []}
-                onSave={handleCarouselSave}
+                onSave={(items) => {
+                  if (!course) return;
+                  setCourse({
+                    ...course,
+                    carousel_items: items
+                  });
+                }}
+              />
+            </CardContent>
+          </Card>
+        );
+
+      case 'benefits':
+        return (
+          <Card>
+            <CardHeader>
+              <CardTitle>Course Benefits</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <HighlightsSection
+                courseId={course.id}
+                slug={params.slug}
+                initialHighlights={course.highlights || []}
+                onUpdate={(highlights) => {
+                  if (!course) return;
+                  setCourse({
+                    ...course,
+                    highlights
+                  });
+                }}
               />
             </CardContent>
           </Card>
