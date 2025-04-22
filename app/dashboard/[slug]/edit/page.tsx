@@ -16,6 +16,7 @@ import { SideTabs } from './components/side-tabs';
 import { FileText, Image, Layout, Gift, Calendar, Plus, X } from 'lucide-react';
 import { CarouselSection } from './components/carousel-section';
 import { HighlightsSection } from './components/highlights-section';
+import { MediaSection } from './components/media-section';
 
 type CourseType = 'JEE' | 'NEET' | 'CUET' | '11-12' | '5-10';
 
@@ -193,6 +194,47 @@ export default function EditCourse({ params }: { params: { slug: string } }) {
     }
   };
 
+  const handleMediaUpdate = async (updates: Partial<{
+    banner_url: string;
+    thumbnail: string;
+    brochure_url: string;
+  }>) => {
+    if (!course) return;
+    
+    try {
+      setIsSubmitting(true);
+      const supabase = createClient();
+
+      const { error } = await supabase
+        .from('courses')
+        .update({
+          ...updates,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('slug', params.slug);
+
+      if (error) throw error;
+
+      setCourse(prev => ({
+        ...prev!,
+        ...updates
+      }));
+
+      toast({
+        title: "Success",
+        description: "Media updated successfully!",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to update media",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   if (isLoading) return null;
   if (!course) return notFound();
 
@@ -351,37 +393,17 @@ export default function EditCourse({ params }: { params: { slug: string } }) {
               <CardTitle>Images & Files</CardTitle>
             </CardHeader>
             <CardContent>
-              <form className="space-y-4">
-                <div className="space-y-2">
-                  <label htmlFor="bannerUrl" className="text-sm font-medium">Banner URL</label>
-                  <Input
-                    id="bannerUrl"
-                    name="bannerUrl"
-                    placeholder="Enter banner URL"
-                    defaultValue={course.banner_url}
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <label htmlFor="thumbnailUrl" className="text-sm font-medium">Thumbnail URL</label>
-                  <Input
-                    id="thumbnailUrl"
-                    name="thumbnailUrl"
-                    placeholder="Enter thumbnail URL"
-                    defaultValue={course.thumbnail}
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <label htmlFor="brochureUrl" className="text-sm font-medium">Brochure URL</label>
-                  <Input
-                    id="brochureUrl"
-                    name="brochureUrl"
-                    placeholder="Enter brochure URL"
-                    defaultValue={course.brochure_url}
-                  />
-                </div>
-              </form>
+              {activeTab === 'media' && course && (
+                <MediaSection
+                  courseId={course.id}
+                  initialData={{
+                    banner_url: course.banner_url,
+                    thumbnail: course.thumbnail,
+                    brochure_url: course.brochure_url
+                  }}
+                  onUpdate={handleMediaUpdate}
+                />
+              )}
             </CardContent>
           </Card>
         );
