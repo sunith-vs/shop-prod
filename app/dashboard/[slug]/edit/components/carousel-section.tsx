@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -8,6 +8,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { useSupabaseUpload } from '@/hooks/use-supabase-upload';
 import { Plus, X, ArrowUp, ArrowDown, Youtube, Save } from 'lucide-react';
 import { FileUploadModal } from './file-upload-modal';
+import { createClient } from '@/lib/supabase/client';
 
 interface CarouselItem {
   id: string;
@@ -40,17 +41,89 @@ export function CarouselSection({ courseId, initialItems = [], onSave }: Carouse
     maxFiles: 1,
   });
 
+  useEffect(() => {
+    if (imageUpload.isSuccess && imageUpload.successes.length > 0) {
+      const fileName = imageUpload.successes[0];
+      console.log('File uploaded successfully:', fileName);
+      
+      // Construct the public URL
+      const url = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/courses/carousel/${courseId}/${fileName}`;
+      console.log('Constructed public URL:', url);
+      
+      // Generate a new item
+      const newItem = {
+        id: crypto.randomUUID(),
+        url: url,
+        index: items.length,
+        type: 'image' as const
+      };
+      console.log('Created new carousel item:', newItem);
+
+      // Save to database
+      const saveToDatabase = async () => {
+        try {
+          console.log('Saving to carousel database...');
+          const supabase = createClient();
+          const { data, error } = await supabase
+            .from('carousel')
+            .insert({
+              id: newItem.id,
+              url: newItem.url,
+              index: newItem.index,
+              course_id: courseId,
+              created_at: new Date().toISOString()
+            })
+            .select()
+            .single();
+
+          console.log('Database response:', { data, error });
+
+          if (error) {
+            console.error('Error saving to carousel:', error);
+            return;
+          }
+
+          // Update local state only after successful database save
+          console.log('Updating UI state...');
+          const updatedItems = [...items, newItem];
+          setItems(updatedItems);
+          onSave(updatedItems);
+          console.log('UI state updated with new items:', updatedItems);
+
+          // Clean up
+          console.log('Cleaning up...');
+          setIsUploadModalOpen(false);
+          imageUpload.setFiles([]);
+        } catch (error) {
+          console.error('Error saving to database:', error);
+        }
+      };
+
+      saveToDatabase();
+    }
+  }, [imageUpload.isSuccess, imageUpload.successes]);
+
+  useEffect(() => {
+    // Log any upload errors
+    if (imageUpload.errors.length > 0) {
+      console.error('Upload errors:', imageUpload.errors);
+    }
+  }, [imageUpload.errors]);
+
   const handleAddItem = (type: 'image' | 'youtube') => {
     setNewItemType(type);
     setNewUrl('');
     if (type === 'image') {
+      // Reset upload state before opening modal
+      imageUpload.setFiles([]);
+      imageUpload.setErrors([]);
       setIsUploadModalOpen(true);
     } else {
       setIsModalOpen(true);
     }
   };
 
-  const handleSaveNewItem = () => {
+  const handleSaveNewItem = async () => {
     if (!newUrl) return;
 
     if (newItemType === 'youtube' && !getYoutubeVideoId(newUrl)) {
@@ -69,20 +142,44 @@ export function CarouselSection({ courseId, initialItems = [], onSave }: Carouse
     setHasUnsavedChanges(true);
     setIsModalOpen(false);
     setNewUrl('');
-  };
 
-  const handleRemoveItem = (id: string) => {
-    const updatedItems = items
-      .filter(item => item.id !== id)
-      .map((item, index) => ({ ...item, index }));
-    setItems(updatedItems);
-    setHasUnsavedChanges(true);
-    if (editingItem?.id === id) {
-      setEditingItem(null);
+    // Save to database immediately for YouTube videos
+    if (newItemType === 'youtube') {
+      const supabase = createClient();
+      await supabase
+        .from('carousel')
+        .insert({
+          id: newItem.id,
+          url: newItem.url,
+          index: newItem.index,
+          course_id: courseId
+        });
+      onSave(updatedItems);
+      setHasUnsavedChanges(false);
     }
   };
 
-  const handleMoveItem = (id: string, direction: 'up' | 'down') => {
+  const handleRemoveItem = async (id: string) => {
+    const updatedItems = items
+      .filter(item => item.id !== id)
+      .map((item, index) => ({ ...item, index }));
+    
+    setItems(updatedItems);
+    if (editingItem?.id === id) {
+      setEditingItem(null);
+    }
+
+    // Remove from database immediately
+    const supabase = createClient();
+    await supabase
+      .from('carousel')
+      .delete()
+      .eq('id', id);
+    
+    onSave(updatedItems);
+  };
+
+  const handleMoveItem = async (id: string, direction: 'up' | 'down') => {
     const index = items.findIndex(item => item.id === id);
     if (direction === 'up' && index > 0) {
       const newItems = [...items];
@@ -99,7 +196,7 @@ export function CarouselSection({ courseId, initialItems = [], onSave }: Carouse
     }
   };
 
-  const handleUpdateItem = (id: string, updates: Partial<CarouselItem>) => {
+  const handleUpdateItem = async (id: string, updates: Partial<CarouselItem>) => {
     const updatedItems = items.map(item => 
       item.id === id ? { ...item, ...updates } : item
     );
@@ -113,7 +210,28 @@ export function CarouselSection({ courseId, initialItems = [], onSave }: Carouse
     return match ? match[1] : null;
   };
 
-  const handleSaveChanges = () => {
+  const handleSaveChanges = async () => {
+    const supabase = createClient();
+    
+    // Update all items in the database
+    await supabase
+      .from('carousel')
+      .delete()
+      .eq('course_id', courseId);
+
+    if (items.length > 0) {
+      await supabase
+        .from('carousel')
+        .insert(
+          items.map(item => ({
+            id: item.id,
+            url: item.url,
+            index: item.index,
+            course_id: courseId
+          }))
+        );
+    }
+
     onSave(items);
     setHasUnsavedChanges(false);
   };
@@ -326,26 +444,25 @@ export function CarouselSection({ courseId, initialItems = [], onSave }: Carouse
         onClose={() => {
           setIsUploadModalOpen(false);
           imageUpload.setFiles([]);
+          imageUpload.setErrors([]);
         }}
         title="Upload Image"
         type="image"
         upload={{
           ...imageUpload,
           onUpload: async () => {
-            await imageUpload.onUpload();
-            if (imageUpload.isSuccess && imageUpload.successes.length > 0) {
-              const url = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/courses/carousel/${courseId}/${imageUpload.successes[0]}`;
-              const newItem: CarouselItem = {
-                id: crypto.randomUUID(),
-                url,
-                index: items.length,
-                type: 'image'
-              };
-              const updatedItems = [...items, newItem];
-              setItems(updatedItems);
-              setHasUnsavedChanges(true);
-              setIsUploadModalOpen(false);
-              imageUpload.setFiles([]);
+            try {
+              console.log('Starting image upload process...');
+              console.log('Current files:', imageUpload.files);
+              
+              if (!imageUpload.files || imageUpload.files.length === 0) {
+                console.error('No files selected for upload');
+                return;
+              }
+
+              await imageUpload.onUpload();
+            } catch (error) {
+              console.error('Error in upload process:', error);
             }
           }
         }}
