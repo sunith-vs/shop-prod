@@ -13,6 +13,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { useRouter } from 'next/navigation';
 import { notFound } from 'next/navigation';
 import { SideTabs } from './components/side-tabs';
+import { BatchesSection } from './components/batches-section';
 import { FileText, Image, Layout, Gift, Calendar, Plus, X } from 'lucide-react';
 import { CarouselSection } from './components/carousel-section';
 import { HighlightsSection } from './components/highlights-section';
@@ -442,7 +443,6 @@ export default function EditCourse({ params }: { params: { slug: string } }) {
                   // Update the course state
                   setCourse({
                     ...course,
-                    carousel_items: items
                   });
 
                   // Save to database
@@ -503,9 +503,7 @@ export default function EditCourse({ params }: { params: { slug: string } }) {
               <CardTitle>Batches</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-center text-muted-foreground py-8">
-                Batch management coming soon
-              </div>
+              <BatchesSection courseId={course.id} />
             </CardContent>
           </Card>
         );
@@ -531,7 +529,7 @@ export default function EditCourse({ params }: { params: { slug: string } }) {
             <Button variant="outline" onClick={() => router.push('/dashboard')}>
               Cancel
             </Button>
-            <Button onClick={() => router.push(`/dashboard/${params.slug}`)}>
+            <Button onClick={() => router.push(`/${params.slug}`)}>
               View Course
             </Button>
           </div>
