@@ -16,6 +16,8 @@ interface CarouselItem {
   url: string;
   index: number;
   type: 'image' | 'youtube';
+  title?: string;
+  thumbnail?: string;
 }
 
 interface CarouselSectionProps {
@@ -41,6 +43,27 @@ export function CarouselSection({ courseId, initialItems = [], onSave }: Carouse
     allowedMimeTypes: ['image/*'],
     maxFiles: 1,
   });
+
+  const getYoutubeVideoId = (url: string) => {
+    const regex = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/;
+    const match = url.match(regex);
+    return match ? match[1] : null;
+  };
+
+  const getYoutubeVideoMetadata = async (videoId: string) => {
+    try {
+      // Using oEmbed API to get video metadata (no API key required)
+      const response = await fetch(`https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${videoId}&format=json`);
+      const data = await response.json();
+      return {
+        title: data.title,
+        thumbnail: `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`
+      };
+    } catch (error) {
+      console.error('Error fetching video metadata:', error);
+      return null;
+    }
+  };
 
   useEffect(() => {
     if (imageUpload.isSuccess && imageUpload.successes.length > 0) {
@@ -127,15 +150,25 @@ export function CarouselSection({ courseId, initialItems = [], onSave }: Carouse
   const handleSaveNewItem = async () => {
     if (!newUrl) return;
 
-    if (newItemType === 'youtube' && !getYoutubeVideoId(newUrl)) {
+    const videoId = getYoutubeVideoId(newUrl);
+    if (newItemType === 'youtube' && !videoId) {
       return; // Invalid YouTube URL
+    }
+
+    let metadata = null;
+    if (newItemType === 'youtube' && videoId) {
+      metadata = await getYoutubeVideoMetadata(videoId);
     }
 
     const newItem: CarouselItem = {
       id: crypto.randomUUID(),
       url: newUrl,
       index: items.length,
-      type: newItemType
+      type: newItemType,
+      ...(metadata && {
+        title: metadata.title,
+        thumbnail: metadata.thumbnail
+      })
     };
 
     const updatedItems = [...items, newItem];
@@ -153,7 +186,9 @@ export function CarouselSection({ courseId, initialItems = [], onSave }: Carouse
           id: newItem.id,
           url: newItem.url,
           index: newItem.index,
-          course_id: courseId
+          course_id: courseId,
+          title: newItem.title,
+          thumbnail: newItem.thumbnail
         });
       onSave(updatedItems);
       setHasUnsavedChanges(false);
@@ -205,12 +240,6 @@ export function CarouselSection({ courseId, initialItems = [], onSave }: Carouse
     setHasUnsavedChanges(true);
   };
 
-  const getYoutubeVideoId = (url: string) => {
-    const regex = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/;
-    const match = url.match(regex);
-    return match ? match[1] : null;
-  };
-
   const handleSaveChanges = async () => {
     const supabase = createClient();
     
@@ -228,7 +257,9 @@ export function CarouselSection({ courseId, initialItems = [], onSave }: Carouse
             id: item.id,
             url: item.url,
             index: item.index,
-            course_id: courseId
+            course_id: courseId,
+            title: item.title,
+            thumbnail: item.thumbnail
           }))
         );
     }
@@ -278,11 +309,24 @@ export function CarouselSection({ courseId, initialItems = [], onSave }: Carouse
                   </div>
                 ) : (
                   <div className="flex items-center gap-4">
-                    <div className="flex h-24 w-24 items-center justify-center rounded bg-muted">
-                      <Youtube className="h-8 w-8 text-muted-foreground" />
+                    <div className="relative h-24 w-24 overflow-hidden rounded">
+                      <Image
+                        src={item.thumbnail || `https://img.youtube.com/vi/${getYoutubeVideoId(item.url)}/hqdefault.jpg`}
+                        alt={item.title || `Video ${index + 1}`}
+                        fill
+                        className="object-cover"
+                      />
+                      <div className="absolute inset-0 flex items-center justify-center bg-black/30">
+                        <Youtube className="h-8 w-8 text-white" />
+                      </div>
                     </div>
-                    <div className="text-sm text-muted-foreground">
-                      {item.url}
+                    <div className="flex flex-col gap-1">
+                      <div className="text-sm font-medium">
+                        {item.title || `Video ${index + 1}`}
+                      </div>
+                      <div className="text-xs text-muted-foreground truncate max-w-[200px]">
+                        {item.url}
+                      </div>
                     </div>
                   </div>
                 )}
