@@ -79,11 +79,11 @@ export function MediaSection({ courseId, initialData, onUpdate }: MediaSectionPr
   }, [brochureUpload.isSuccess, brochureUpload.successes]);
 
   const handleCloseModal = () => {
-    // Only close if there's no active upload
+    // Close modal if there's no ongoing upload
     if (
-      (activeUpload === 'banner' && !bannerUpload.files.length) ||
-      (activeUpload === 'thumbnail' && !thumbnailUpload.files.length) ||
-      (activeUpload === 'brochure' && !brochureUpload.files.length)
+      (activeUpload === 'banner' && !bannerUpload.loading) ||
+      (activeUpload === 'thumbnail' && !thumbnailUpload.loading) ||
+      (activeUpload === 'brochure' && !brochureUpload.loading)
     ) {
       setActiveUpload(null);
     }
@@ -104,6 +104,7 @@ export function MediaSection({ courseId, initialData, onUpdate }: MediaSectionPr
                     src={bannerUrl}
                     alt="Banner"
                     fill
+                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                     className="object-cover"
                   />
                   <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
@@ -143,6 +144,7 @@ export function MediaSection({ courseId, initialData, onUpdate }: MediaSectionPr
                     src={thumbnailUrl}
                     alt="Thumbnail"
                     fill
+                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                     className="object-cover"
                   />
                   <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">

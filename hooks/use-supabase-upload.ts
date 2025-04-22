@@ -1,12 +1,14 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { type FileError, type FileRejection, useDropzone } from 'react-dropzone'
 import {createClient} from "@/lib/supabase/client";
+import { getTimestampedFileName } from '@/lib/utils/file';
 
 const supabase = createClient()
 
 interface FileWithPreview extends File {
   preview?: string
   errors: readonly FileError[]
+  originalName?: string
 }
 
 type UseSupabaseUploadOptions = {
@@ -83,19 +85,25 @@ const useSupabaseUpload = (options: UseSupabaseUploadOptions) => {
       const validFiles = acceptedFiles
         .filter((file) => !files.find((x) => x.name === file.name))
         .map((file) => {
-          ;(file as FileWithPreview).preview = URL.createObjectURL(file)
-          ;(file as FileWithPreview).errors = []
-          return file as FileWithPreview
+          const timestampedName = getTimestampedFileName(file.name);
+          const newFile = new File([file], timestampedName, { type: file.type });
+          return Object.assign(newFile, {
+            preview: URL.createObjectURL(file),
+            errors: [],
+            originalName: file.name
+          }) as FileWithPreview;
         })
 
       const invalidFiles = fileRejections.map(({ file, errors }) => {
-        ;(file as FileWithPreview).preview = URL.createObjectURL(file)
-        ;(file as FileWithPreview).errors = errors
-        return file as FileWithPreview
+        const newFile = new File([file], file.name, { type: file.type });
+        return Object.assign(newFile, {
+          preview: URL.createObjectURL(file),
+          errors,
+          originalName: file.name
+        }) as FileWithPreview;
       })
 
       const newFiles = [...files, ...validFiles, ...invalidFiles]
-
       setFiles(newFiles)
     },
     [files, setFiles]
@@ -113,8 +121,6 @@ const useSupabaseUpload = (options: UseSupabaseUploadOptions) => {
   const onUpload = useCallback(async () => {
     setLoading(true)
 
-    // [Joshen] This is to support handling partial successes
-    // If any files didn't upload for any reason, hitting "Upload" again will only upload the files that had errors
     const filesWithErrors = errors.map((x) => x.name)
     const filesToUpload =
       filesWithErrors.length > 0
@@ -141,7 +147,6 @@ const useSupabaseUpload = (options: UseSupabaseUploadOptions) => {
     )
 
     const responseErrors = responses.filter((x) => x.message !== undefined)
-    // if there were errors previously, this function tried to upload the files again so we should clear/overwrite the existing errors.
     setErrors(responseErrors)
 
     const responseSuccesses = responses.filter((x) => x.message === undefined)
@@ -158,7 +163,6 @@ const useSupabaseUpload = (options: UseSupabaseUploadOptions) => {
       setErrors([])
     }
 
-    // If the number of files doesn't exceed the maxFiles parameter, remove the error 'Too many files' from each file
     if (files.length <= maxFiles) {
       let changed = false
       const newFiles = files.map((file) => {

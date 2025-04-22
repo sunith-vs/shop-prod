@@ -5,6 +5,11 @@ import { Dropzone, DropzoneEmptyState, DropzoneContent } from '@/components/drop
 import { UseSupabaseUploadReturn } from '@/hooks/use-supabase-upload';
 import { Button } from "@/components/ui/button";
 
+interface FileWithPreview extends File {
+  preview?: string;
+  originalName?: string;
+}
+
 interface FileUploadModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -20,8 +25,14 @@ export function FileUploadModal({
   type,
   upload
 }: FileUploadModalProps) {
+  const handleClose = () => {
+    if (!upload.loading) {
+      onClose();
+    }
+  };
+
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
+    <Dialog open={isOpen} onOpenChange={handleClose}>
       <DialogContent className="sm:max-w-[600px]">
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
@@ -31,7 +42,12 @@ export function FileUploadModal({
             {upload.files.length === 0 ? (
               <DropzoneEmptyState className="h-32" />
             ) : (
-              <DropzoneContent className="h-32" />
+              <div className="h-32 flex flex-col items-center justify-center">
+                <DropzoneContent className="mb-2" />
+                <p className="text-sm text-muted-foreground">
+                  {(upload.files[0] as FileWithPreview).originalName || upload.files[0].name}
+                </p>
+              </div>
             )}
           </Dropzone>
           {upload.files.length > 0 && !upload.isSuccess && (
