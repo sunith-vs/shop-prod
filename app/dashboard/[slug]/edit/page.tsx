@@ -13,7 +13,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { useRouter } from 'next/navigation';
 import { notFound } from 'next/navigation';
 import { SideTabs } from './components/side-tabs';
-import { FileText, Image, Layout, Gift, Calendar } from 'lucide-react';
+import { FileText, Image, Layout, Gift, Calendar, Plus, X } from 'lucide-react';
 import { CarouselSection } from './components/carousel-section';
 import { HighlightsSection } from './components/highlights-section';
 
@@ -32,6 +32,7 @@ interface Course {
   status: 'draft' | 'active' | 'inactive';
   popular: boolean;
   course_type: CourseType;
+  eduport_course_id?: string;
   carousel_items?: Array<{
     id: string;
     title: string;
@@ -59,6 +60,7 @@ export default function EditCourse({ params }: { params: { slug: string } }) {
   const [activeTab, setActiveTab] = useState('general');
   const [editedSlug, setEditedSlug] = useState('');
   const [isPopular, setIsPopular] = useState(course?.popular || false);
+  const [highlights, setHighlights] = useState<string[]>(course?.highlights || []);
   const { toast } = useToast();
   const router = useRouter();
 
@@ -81,6 +83,7 @@ export default function EditCourse({ params }: { params: { slug: string } }) {
         setCourse(data);
         setEditedSlug(data.slug);
         setIsPopular(data.popular);
+        setHighlights(data.highlights || []);
       } catch (error) {
         toast({
           title: "Error",
@@ -151,6 +154,8 @@ export default function EditCourse({ params }: { params: { slug: string } }) {
         slug: newSlug,
         course_type: formData.get('courseType') as CourseType,
         popular: isPopular,
+        eduport_course_id: formData.get('eduportCourseId') as string,
+        highlights: highlights.filter(Boolean),
         updated_at: new Date().toISOString(),
       };
 
@@ -260,6 +265,16 @@ export default function EditCourse({ params }: { params: { slug: string } }) {
                 </div>
 
                 <div className="space-y-2">
+                  <label htmlFor="eduportCourseId" className="text-sm font-medium">Eduport Course ID</label>
+                  <Input
+                    id="eduportCourseId"
+                    name="eduportCourseId"
+                    placeholder="Enter Eduport course ID"
+                    defaultValue={course.eduport_course_id}
+                  />
+                </div>
+
+                <div className="space-y-2">
                   <label htmlFor="subHeading" className="text-sm font-medium">Sub Heading</label>
                   <Input
                     id="subHeading"
@@ -267,6 +282,45 @@ export default function EditCourse({ params }: { params: { slug: string } }) {
                     placeholder="Enter course sub heading"
                     defaultValue={course.sub_heading}
                   />
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Course Highlights</label>
+                  <div className="space-y-3">
+                    {highlights.map((highlight, index) => (
+                      <div key={index} className="flex gap-2">
+                        <Input
+                          value={highlight}
+                          onChange={(e) => {
+                            const newHighlights = [...highlights];
+                            newHighlights[index] = e.target.value;
+                            setHighlights(newHighlights);
+                          }}
+                          placeholder={`Highlight ${index + 1}`}
+                          className="flex-1"
+                        />
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => {
+                            setHighlights(highlights.filter((_, i) => i !== index));
+                          }}
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    ))}
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => setHighlights([...highlights, ''])}
+                      className="w-full"
+                    >
+                      <Plus className="h-4 w-4 mr-2" />
+                      Add Highlight
+                    </Button>
+                  </div>
                 </div>
 
                 <div className="space-y-2">
