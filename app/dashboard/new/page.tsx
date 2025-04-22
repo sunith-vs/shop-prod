@@ -12,7 +12,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { useState } from 'react';
+import { Dropzone, DropzoneContent, DropzoneEmptyState } from '@/components/dropzone';
+import { useSupabaseUpload } from '@/hooks/use-supabase-upload';
+import { useState, useEffect } from 'react';
 import { useToast } from "@/components/ui/use-toast";
 
 export const dynamic = 'force-dynamic';
@@ -29,7 +31,52 @@ export default function NewCourse() {
   const [title, setTitle] = useState('');
   const [slug, setSlug] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [bannerUrl, setBannerUrl] = useState('');
+  const [thumbnailUrl, setThumbnailUrl] = useState('');
+  const [brochureUrl, setBrochureUrl] = useState('');
   const { toast } = useToast();
+
+  const bannerUpload = useSupabaseUpload({
+    bucketName: 'courses',
+    path: 'banner',
+    allowedMimeTypes: ['image/*'],
+    maxFiles: 1,
+  });
+
+  const thumbnailUpload = useSupabaseUpload({
+    bucketName: 'courses',
+    path: 'thumbnail',
+    allowedMimeTypes: ['image/*'],
+    maxFiles: 1,
+  });
+
+  const brochureUpload = useSupabaseUpload({
+    bucketName: 'courses',
+    path: 'brochure',
+    allowedMimeTypes: ['application/pdf'],
+    maxFiles: 1,
+  });
+
+  useEffect(() => {
+    if (bannerUpload.isSuccess && bannerUpload.successes.length > 0) {
+      const url = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/courses/banner/${bannerUpload.successes[0]}`;
+      setBannerUrl(url);
+    }
+  }, [bannerUpload.isSuccess, bannerUpload.successes]);
+
+  useEffect(() => {
+    if (thumbnailUpload.isSuccess && thumbnailUpload.successes.length > 0) {
+      const url = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/courses/thumbnail/${thumbnailUpload.successes[0]}`;
+      setThumbnailUrl(url);
+    }
+  }, [thumbnailUpload.isSuccess, thumbnailUpload.successes]);
+
+  useEffect(() => {
+    if (brochureUpload.isSuccess && brochureUpload.successes.length > 0) {
+      const url = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/courses/brochure/${brochureUpload.successes[0]}`;
+      setBrochureUrl(url);
+    }
+  }, [brochureUpload.isSuccess, brochureUpload.successes]);
 
   const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newTitle = e.target.value;
@@ -177,39 +224,54 @@ export default function NewCourse() {
             </div>
 
             <div className="space-y-2">
-              <label htmlFor="bannerUrl" className="text-sm font-medium">
-                Banner URL
-              </label>
-              <Input
-                id="bannerUrl"
-                name="bannerUrl"
-                type="url"
-                placeholder="Enter banner image URL"
-              />
+              <label className="text-sm font-medium">Banner Image</label>
+              <Dropzone {...bannerUpload}>
+                {bannerUpload.files.length === 0 ? (
+                  <DropzoneEmptyState className="h-32" />
+                ) : (
+                  <DropzoneContent className="h-32" />
+                )}
+              </Dropzone>
+              <input type="hidden" name="bannerUrl" value={bannerUrl} />
+              {bannerUpload.files.length > 0 && !bannerUpload.isSuccess && (
+                <Button type="button" onClick={bannerUpload.onUpload} disabled={bannerUpload.loading}>
+                  {bannerUpload.loading ? 'Uploading...' : 'Upload Banner'}
+                </Button>
+              )}
             </div>
 
             <div className="space-y-2">
-              <label htmlFor="thumbnailUrl" className="text-sm font-medium">
-                Thumbnail URL
-              </label>
-              <Input
-                id="thumbnailUrl"
-                name="thumbnailUrl"
-                type="url"
-                placeholder="Enter thumbnail image URL"
-              />
+              <label className="text-sm font-medium">Thumbnail Image</label>
+              <Dropzone {...thumbnailUpload}>
+                {thumbnailUpload.files.length === 0 ? (
+                  <DropzoneEmptyState className="h-32" />
+                ) : (
+                  <DropzoneContent className="h-32" />
+                )}
+              </Dropzone>
+              <input type="hidden" name="thumbnailUrl" value={thumbnailUrl} />
+              {thumbnailUpload.files.length > 0 && !thumbnailUpload.isSuccess && (
+                <Button type="button" onClick={thumbnailUpload.onUpload} disabled={thumbnailUpload.loading}>
+                  {thumbnailUpload.loading ? 'Uploading...' : 'Upload Thumbnail'}
+                </Button>
+              )}
             </div>
 
             <div className="space-y-2">
-              <label htmlFor="brochureUrl" className="text-sm font-medium">
-                Brochure URL
-              </label>
-              <Input
-                id="brochureUrl"
-                name="brochureUrl"
-                type="url"
-                placeholder="Enter brochure URL"
-              />
+              <label className="text-sm font-medium">Brochure (PDF)</label>
+              <Dropzone {...brochureUpload}>
+                {brochureUpload.files.length === 0 ? (
+                  <DropzoneEmptyState className="h-32" />
+                ) : (
+                  <DropzoneContent className="h-32" />
+                )}
+              </Dropzone>
+              <input type="hidden" name="brochureUrl" value={brochureUrl} />
+              {brochureUpload.files.length > 0 && !brochureUpload.isSuccess && (
+                <Button type="button" onClick={brochureUpload.onUpload} disabled={brochureUpload.loading}>
+                  {brochureUpload.loading ? 'Uploading...' : 'Upload Brochure'}
+                </Button>
+              )}
             </div>
 
             <div className="space-y-2">
