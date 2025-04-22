@@ -79,11 +79,11 @@ export function MediaSection({ courseId, initialData, onUpdate }: MediaSectionPr
   }, [brochureUpload.isSuccess, brochureUpload.successes]);
 
   const handleCloseModal = () => {
-    // Close modal if there's no ongoing upload
+    // Only close if there's no active upload
     if (
-      (activeUpload === 'banner' && !bannerUpload.loading) ||
-      (activeUpload === 'thumbnail' && !thumbnailUpload.loading) ||
-      (activeUpload === 'brochure' && !brochureUpload.loading)
+      (activeUpload === 'banner' && !bannerUpload.files.length) ||
+      (activeUpload === 'thumbnail' && !thumbnailUpload.files.length) ||
+      (activeUpload === 'brochure' && !brochureUpload.files.length)
     ) {
       setActiveUpload(null);
     }
