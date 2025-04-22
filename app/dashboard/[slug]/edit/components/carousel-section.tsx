@@ -15,9 +15,6 @@ interface CarouselItem {
   id: string;
   url: string;
   index: number;
-  type: 'image' | 'youtube';
-  title?: string;
-  thumbnail?: string;
 }
 
 interface CarouselSectionProps {
@@ -193,10 +190,8 @@ export function CarouselSection({ courseId, initialItems = [], onSave }: Carouse
       id: crypto.randomUUID(),
       url: newUrl,
       index: items.length,
-      type: newItemType,
       ...(metadata && {
         title: metadata.title,
-        thumbnail: metadata.thumbnail
       })
     };
 
@@ -209,8 +204,6 @@ export function CarouselSection({ courseId, initialItems = [], onSave }: Carouse
         url: newItem.url,
         index: newItem.index,
         course_id: courseId,
-        title: newItem.title, // Save metadata
-        thumbnail: newItem.thumbnail // Save metadata
       });
 
     if (error) {
@@ -245,7 +238,7 @@ export function CarouselSection({ courseId, initialItems = [], onSave }: Carouse
     }
 
     // Remove from Supabase storage if it's an image
-    if (itemToRemove.type === 'image') {
+    if (!itemToRemove.url.includes("youtube.com")) {
         try {
             const urlParts = itemToRemove.url.split('/');
             const fileName = urlParts[urlParts.length - 1];
@@ -299,8 +292,6 @@ export function CarouselSection({ courseId, initialItems = [], onSave }: Carouse
         // Include other fields needed for potential insert/update if necessary
         url: item.url,
         course_id: courseId,
-        title: item.title,
-        thumbnail: item.thumbnail
     }));
 
     const { error } = await supabase
@@ -349,7 +340,7 @@ export function CarouselSection({ courseId, initialItems = [], onSave }: Carouse
           {items.map((item, index) => (
             <Card key={item.id} className={`relative overflow-hidden ${editingItem?.id === item.id ? 'ring-2 ring-primary' : ''}`}>
               <CardContent className="flex items-center gap-4 p-4">
-                {item.type === 'image' ? (
+                {! item.url.includes("youtube.com") ? (
                   <div className="relative h-24 w-24 overflow-hidden rounded">
                     <Image
                       src={item.url}
@@ -363,8 +354,8 @@ export function CarouselSection({ courseId, initialItems = [], onSave }: Carouse
                   <div className="flex items-center gap-4">
                     <div className="relative h-24 w-24 overflow-hidden rounded">
                       <Image
-                        src={item.thumbnail || `https://img.youtube.com/vi/${getYoutubeVideoId(item.url)}/hqdefault.jpg`}
-                        alt={item.title || `Video ${index + 1}`}
+                        src={`https://img.youtube.com/vi/${getYoutubeVideoId(item.url)}/hqdefault.jpg`}
+                        alt={`Video ${index + 1}`}
                         fill
                         className="object-cover"
                         onError={(e) => { e.currentTarget.src = '/placeholder-video.png'; /* Fallback placeholder */ }}
@@ -375,7 +366,7 @@ export function CarouselSection({ courseId, initialItems = [], onSave }: Carouse
                     </div>
                     <div className="flex flex-col gap-1">
                       <div className="text-sm font-medium">
-                        {item.title || `Video ${index + 1}`}
+                        {`Video ${index + 1}`}
                       </div>
                       <div className="text-xs text-muted-foreground truncate max-w-[200px]">
                         {item.url}
