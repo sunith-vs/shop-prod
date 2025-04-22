@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { Toaster } from "@/components/ui/toaster";
 import { inter, monaSans } from "@/lib/fonts";
+import { cn } from "@/lib/utils";
+import { RazorpayProvider } from "@/components/user/purchase/razorpay-provider";
 
 export const metadata: Metadata = {
   title: "Course Management",
@@ -16,8 +18,10 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${inter.variable} ${monaSans.variable}`}>
       <body className={inter.className}>
-        {children}
-        <Toaster />
+        <RazorpayProvider>
+          {children}
+          <Toaster />
+        </RazorpayProvider>
       </body>
     </html>
   );

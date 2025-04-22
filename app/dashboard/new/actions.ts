@@ -16,9 +16,7 @@ export async function createCourse(formData: FormData) {
   const subHeading = formData.get('subHeading') as string;
   const bannerUrl = formData.get('bannerUrl') as string;
   const thumbnailUrl = formData.get('thumbnailUrl') as string;
-  const status = formData.get('status') as string;
   const brochureUrl = formData.get('brochureUrl') as string;
-  const tagUrl = formData.get('tagUrl') as string;
   const slug = formData.get('slug') as string;
   const highlights = formData.getAll('highlights[]').filter(Boolean) as string[];
 
@@ -31,9 +29,7 @@ export async function createCourse(formData: FormData) {
         sub_heading: subHeading,
         banner_url: bannerUrl,
         thumbnail: thumbnailUrl,
-        status,
         brochure_url: brochureUrl,
-        tag_url: tagUrl,
         slug,
         highlights,
       }
