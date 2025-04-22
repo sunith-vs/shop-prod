@@ -183,35 +183,40 @@ export function MediaSection({ courseId, initialData, onUpdate }: MediaSectionPr
             <CardTitle>Course Brochure</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="relative w-full p-6 bg-muted rounded-lg">
-              {brochureUrl ? (
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-4">
-                    <FileText className="h-8 w-8 text-primary" />
-                    <div>
-                      <p className="font-medium">Course Brochure</p>
-                      <p className="text-sm text-muted-foreground">PDF Document</p>
-                    </div>
-                  </div>
+            <div className="space-y-4">
+              <div className="flex items-center gap-4">
+                <div className="h-12 w-12 bg-muted rounded-lg flex items-center justify-center">
+                  <FileText className="h-6 w-6 text-muted-foreground" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium truncate">
+                    {brochureUrl ? 'Course Brochure' : 'No brochure uploaded'}
+                  </p>
+                  {brochureUrl && (
+                    <p className="text-sm text-muted-foreground truncate">
+                      PDF Document
+                    </p>
+                  )}
+                </div>
+                <div className="flex gap-2">
+                  {brochureUrl && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => window.open(brochureUrl, '_blank')}
+                    >
+                      View
+                    </Button>
+                  )}
                   <Button
-                    variant="secondary"
+                    variant="outline"
                     size="sm"
                     onClick={() => setActiveUpload('brochure')}
                   >
-                    <Edit className="h-4 w-4 mr-2" />
-                    Change
+                    {brochureUrl ? 'Change' : 'Upload'}
                   </Button>
                 </div>
-              ) : (
-                <div className="flex items-center justify-center">
-                  <Button
-                    variant="secondary"
-                    onClick={() => setActiveUpload('brochure')}
-                  >
-                    Upload Brochure
-                  </Button>
-                </div>
-              )}
+              </div>
             </div>
           </CardContent>
         </Card>
