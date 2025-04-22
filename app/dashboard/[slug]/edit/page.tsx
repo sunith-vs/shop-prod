@@ -36,9 +36,9 @@ interface Course {
   eduport_course_id?: string;
   carousel_items?: Array<{
     id: string;
-    title: string;
-    description: string;
-    imageUrl: string;
+    url: string;
+    index: number;
+    type: 'image' | 'youtube';
   }>;
   created_at: string;
   updated_at: string;
@@ -70,21 +70,42 @@ export default function EditCourse({ params }: { params: { slug: string } }) {
       try {
         setIsLoading(true);
         const supabase = createClient();
-        const { data, error } = await supabase
+        
+        // Fetch course data
+        const { data: courseData, error: courseError } = await supabase
           .from('courses')
           .select('*')
           .eq('slug', params.slug)
           .single();
 
-        if (error || !data) {
+        if (courseError || !courseData) {
           notFound();
           return;
         }
 
-        setCourse(data);
-        setEditedSlug(data.slug);
-        setIsPopular(data.popular);
-        setHighlights(data.highlights || []);
+        // Fetch carousel items
+        const { data: carouselData } = await supabase
+          .from('carousel')
+          .select('*')
+          .eq('course_id', courseData.id)
+          .order('index');
+
+        // Combine course data with carousel items
+        const courseWithCarousel = {
+          ...courseData,
+          carousel_items: carouselData?.map(item => ({
+            id: item.id,
+            url: item.url,
+            index: item.index,
+            // Determine if URL is YouTube or image
+            type: item.url.includes('youtube.com') || item.url.includes('youtu.be') ? 'youtube' : 'image'
+          })) || []
+        };
+
+        setCourse(courseWithCarousel);
+        setEditedSlug(courseData.slug);
+        setIsPopular(courseData.popular);
+        setHighlights(courseData.highlights || []);
       } catch (error) {
         toast({
           title: "Error",
@@ -415,12 +436,37 @@ export default function EditCourse({ params }: { params: { slug: string } }) {
               <CarouselSection
                 courseId={course.id}
                 initialItems={course.carousel_items || []}
-                onSave={(items) => {
+                onSave={async (items) => {
                   if (!course) return;
+                  
+                  // Update the course state
                   setCourse({
                     ...course,
                     carousel_items: items
                   });
+
+                  // Save to database
+                  const supabase = createClient();
+                  
+                  // Delete existing items
+                  await supabase
+                    .from('carousel')
+                    .delete()
+                    .eq('course_id', course.id);
+                  
+                  // Insert new items
+                  if (items.length > 0) {
+                    await supabase
+                      .from('carousel')
+                      .insert(
+                        items.map(item => ({
+                          id: item.id,
+                          url: item.url,
+                          index: item.index,
+                          course_id: course.id
+                        }))
+                      );
+                  }
                 }}
               />
             </CardContent>
