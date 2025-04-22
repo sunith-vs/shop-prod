@@ -9,6 +9,7 @@ import { useSupabaseUpload } from '@/hooks/use-supabase-upload';
 import { Plus, X, ArrowUp, ArrowDown, Youtube, Save } from 'lucide-react';
 import { FileUploadModal } from './file-upload-modal';
 import { createClient } from '@/lib/supabase/client';
+import Image from 'next/image';
 
 interface CarouselItem {
   id: string;
@@ -237,161 +238,93 @@ export function CarouselSection({ courseId, initialItems = [], onSave }: Carouse
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h3 className="text-lg font-medium">Carousel Items</h3>
+    <Card>
+      <CardHeader className="flex flex-row items-center justify-between">
+        <CardTitle>Carousel Items</CardTitle>
         <div className="flex gap-2">
-          <Button onClick={() => handleAddItem('image')} size="sm">
-            <Plus className="h-4 w-4 mr-2" />
+          <Button
+            variant="outline"
+            size="sm"
+            className="flex items-center gap-2"
+            onClick={() => handleAddItem('image')}
+          >
+            <Plus className="h-4 w-4" />
             Add Image
           </Button>
-          <Button onClick={() => handleAddItem('youtube')} size="sm" variant="outline">
-            <Youtube className="h-4 w-4 mr-2" />
+          <Button
+            variant="outline"
+            size="sm"
+            className="flex items-center gap-2"
+            onClick={() => handleAddItem('youtube')}
+          >
+            <Youtube className="h-4 w-4" />
             Add YouTube
           </Button>
         </div>
-      </div>
-
-      {/* Images Section */}
-      <div>
-        <h4 className="text-sm font-medium mb-3">Images</h4>
-        <div className="space-y-2">
-          {items
-            .filter(item => item.type === 'image')
-            .map((item, index, filteredItems) => (
-              <Card 
-                key={item.id}
-                className={`cursor-pointer ${editingItem?.id === item.id ? 'ring-2 ring-primary' : ''}`}
-                onClick={() => setEditingItem(item)}
-              >
-                <CardContent className="p-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="h-12 w-12 bg-muted rounded-md overflow-hidden">
-                        <img 
-                          src={item.url} 
-                          alt="Carousel item"
-                          className="h-full w-full object-cover"
-                        />
-                      </div>
-                      <div className="text-sm">Image {index + 1}</div>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      {index > 0 && (
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleMoveItem(item.id, 'up');
-                          }}
-                        >
-                          <ArrowUp className="h-4 w-4" />
-                        </Button>
-                      )}
-                      {index < filteredItems.length - 1 && (
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleMoveItem(item.id, 'down');
-                          }}
-                        >
-                          <ArrowDown className="h-4 w-4" />
-                        </Button>
-                      )}
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleRemoveItem(item.id);
-                        }}
-                      >
-                        <X className="h-4 w-4" />
-                      </Button>
-                    </div>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-4">
+          {items.map((item, index) => (
+            <Card key={item.id} className={`relative overflow-hidden ${editingItem?.id === item.id ? 'ring-2 ring-primary' : ''}`}>
+              <CardContent className="flex items-center gap-4 p-4">
+                {item.type === 'image' ? (
+                  <div className="relative h-24 w-24 overflow-hidden rounded">
+                    <Image
+                      src={item.url}
+                      alt={`Image ${index + 1}`}
+                      fill
+                      className="object-cover"
+                    />
                   </div>
-                </CardContent>
-              </Card>
-            ))}
-        </div>
-      </div>
-
-      {/* Videos Section */}
-      <div>
-        <h4 className="text-sm font-medium mb-3">YouTube Videos</h4>
-        <div className="space-y-2">
-          {items
-            .filter(item => item.type === 'youtube')
-            .map((item, index, filteredItems) => (
-              <Card 
-                key={item.id}
-                className={`cursor-pointer ${editingItem?.id === item.id ? 'ring-2 ring-primary' : ''}`}
-                onClick={() => setEditingItem(item)}
-              >
-                <CardContent className="p-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="h-12 w-12 bg-secondary rounded-md overflow-hidden flex items-center justify-center">
-                        <Youtube className="h-6 w-6 text-muted-foreground" />
-                      </div>
-                      <div className="text-sm">Video {index + 1}</div>
+                ) : (
+                  <div className="flex items-center gap-4">
+                    <div className="flex h-24 w-24 items-center justify-center rounded bg-muted">
+                      <Youtube className="h-8 w-8 text-muted-foreground" />
                     </div>
-                    <div className="flex items-center gap-1">
-                      {index > 0 && (
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleMoveItem(item.id, 'up');
-                          }}
-                        >
-                          <ArrowUp className="h-4 w-4" />
-                        </Button>
-                      )}
-                      {index < filteredItems.length - 1 && (
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleMoveItem(item.id, 'down');
-                          }}
-                        >
-                          <ArrowDown className="h-4 w-4" />
-                        </Button>
-                      )}
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleRemoveItem(item.id);
-                        }}
-                      >
-                        <X className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </div>
-                  {item.url && (
-                    <div className="mt-2 text-sm text-muted-foreground truncate">
+                    <div className="text-sm text-muted-foreground">
                       {item.url}
                     </div>
+                  </div>
+                )}
+                <div className="ml-auto flex items-center gap-2">
+                  {index > 0 && (
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => handleMoveItem(item.id, 'up')}
+                    >
+                      <ArrowUp className="h-4 w-4" />
+                    </Button>
                   )}
-                </CardContent>
-              </Card>
-            ))}
+                  {index < items.length - 1 && (
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => handleMoveItem(item.id, 'down')}
+                    >
+                      <ArrowDown className="h-4 w-4" />
+                    </Button>
+                  )}
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => handleRemoveItem(item.id)}
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
         </div>
-      </div>
-
-      {/* Save Changes Button */}
+      </CardContent>
       {hasUnsavedChanges && (
-        <div className="flex justify-end">
-          <Button onClick={handleSaveChanges}>
-            <Save className="h-4 w-4 mr-2" />
+        <div className="fixed bottom-4 right-4">
+          <Button
+            onClick={handleSaveChanges}
+            className="flex items-center gap-2"
+          >
+            <Save className="h-4 w-4" />
             Save Changes
           </Button>
         </div>
@@ -448,61 +381,8 @@ export function CarouselSection({ courseId, initialItems = [], onSave }: Carouse
         }}
         title="Upload Image"
         type="image"
-        upload={{
-          ...imageUpload,
-          onUpload: async () => {
-            try {
-              console.log('Starting image upload process...');
-              console.log('Current files:', imageUpload.files);
-              
-              if (!imageUpload.files || imageUpload.files.length === 0) {
-                console.error('No files selected for upload');
-                return;
-              }
-
-              await imageUpload.onUpload();
-            } catch (error) {
-              console.error('Error in upload process:', error);
-            }
-          }
-        }}
+        upload={imageUpload}
       />
-
-      {/* Edit panel for YouTube videos */}
-      {editingItem && editingItem.type === 'youtube' && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Edit YouTube Video</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <label className="text-sm font-medium">YouTube URL</label>
-              <Input
-                value={editingItem.url}
-                onChange={(e) => {
-                  const videoId = getYoutubeVideoId(e.target.value);
-                  if (videoId) {
-                    handleUpdateItem(editingItem.id, { url: e.target.value });
-                  }
-                }}
-                placeholder="Enter YouTube video URL"
-              />
-              {editingItem.url && getYoutubeVideoId(editingItem.url) && (
-                <div className="aspect-video mt-4">
-                  <iframe
-                    width="100%"
-                    height="100%"
-                    src={`https://www.youtube.com/embed/${getYoutubeVideoId(editingItem.url)}`}
-                    frameBorder="0"
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                    allowFullScreen
-                  />
-                </div>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-      )}
-    </div>
+    </Card>
   );
 }
