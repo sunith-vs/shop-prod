@@ -274,37 +274,9 @@ export default function NewCourse() {
               )}
             </div>
 
-            <div className="space-y-2">
-              <label htmlFor="tagUrl" className="text-sm font-medium">
-                Tag URL
-              </label>
-              <Input
-                id="tagUrl"
-                name="tagUrl"
-                type="url"
-                placeholder="Enter tag URL"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <label htmlFor="status" className="text-sm font-medium">
-                Status
-              </label>
-              <Select name="status" defaultValue="draft">
-                <SelectTrigger>
-                  <SelectValue placeholder="Select status" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="draft">Draft</SelectItem>
-                  <SelectItem value="active">Active</SelectItem>
-                  <SelectItem value="inactive">Inactive</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="flex justify-end pt-4">
-              <Button type="submit" disabled={isSubmitting}>
-                {isSubmitting ? "Creating..." : "Create Course"}
+            <div className="space-y-4 mt-4">
+              <Button type="submit" disabled={isSubmitting} className="w-full">
+                {isSubmitting ? 'Creating Course...' : 'Create Course'}
               </Button>
             </div>
           </form>
