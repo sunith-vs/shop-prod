@@ -80,11 +80,13 @@ export function MediaSection({ courseId, initialData, onUpdate }: MediaSectionPr
 
   const handleCloseModal = () => {
     // Only close if there's no active upload
-    if (
-      (activeUpload === 'banner' && !bannerUpload.files.length) ||
-      (activeUpload === 'thumbnail' && !thumbnailUpload.files.length) ||
-      (activeUpload === 'brochure' && !brochureUpload.files.length)
-    ) {
+    const upload = activeUpload === 'banner' ? bannerUpload 
+      : activeUpload === 'thumbnail' ? thumbnailUpload 
+      : activeUpload === 'brochure' ? brochureUpload 
+      : null;
+      
+    if (upload && !upload.loading) {
+      upload.setFiles([]);
       setActiveUpload(null);
     }
   };
@@ -97,16 +99,18 @@ export function MediaSection({ courseId, initialData, onUpdate }: MediaSectionPr
             <CardTitle>Banner Image</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="relative w-full aspect-video bg-muted rounded-lg overflow-hidden group">
+            <div className="relative w-full bg-muted rounded-lg overflow-hidden">
               {bannerUrl ? (
                 <>
-                  <Image
-                    src={bannerUrl}
-                    alt="Banner"
-                    fill
-                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                    className="object-cover"
-                  />
+                  <div className="aspect-[1728/245]">
+                    <Image
+                      src={bannerUrl}
+                      alt="Banner"
+                      fill
+                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                      className="object-contain"
+                    />
+                  </div>
                   <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                     <Button
                       variant="secondary"
@@ -119,7 +123,7 @@ export function MediaSection({ courseId, initialData, onUpdate }: MediaSectionPr
                   </div>
                 </>
               ) : (
-                <div className="h-full flex items-center justify-center">
+                <div className="aspect-[1728/245] flex items-center justify-center">
                   <Button
                     variant="secondary"
                     onClick={() => setActiveUpload('banner')}
@@ -137,16 +141,18 @@ export function MediaSection({ courseId, initialData, onUpdate }: MediaSectionPr
             <CardTitle>Thumbnail Image</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="relative w-48 h-48 bg-muted rounded-lg overflow-hidden group">
+            <div className="relative w-48 bg-muted rounded-lg overflow-hidden">
               {thumbnailUrl ? (
                 <>
-                  <Image
-                    src={thumbnailUrl}
-                    alt="Thumbnail"
-                    fill
-                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                    className="object-cover"
-                  />
+                  <div className="aspect-[374/232]">
+                    <Image
+                      src={thumbnailUrl}
+                      alt="Thumbnail"
+                      fill
+                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                      className="object-contain"
+                    />
+                  </div>
                   <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                     <Button
                       variant="secondary"
@@ -159,7 +165,7 @@ export function MediaSection({ courseId, initialData, onUpdate }: MediaSectionPr
                   </div>
                 </>
               ) : (
-                <div className="h-full flex items-center justify-center">
+                <div className="aspect-[374/232] flex items-center justify-center">
                   <Button
                     variant="secondary"
                     onClick={() => setActiveUpload('thumbnail')}

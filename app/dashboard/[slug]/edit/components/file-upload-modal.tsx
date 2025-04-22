@@ -25,8 +25,16 @@ export function FileUploadModal({
   type,
   upload
 }: FileUploadModalProps) {
+  const handleClose = () => {
+    // Reset the upload state before closing
+    if (!upload.loading) {
+      upload.setFiles([]);
+      onClose();
+    }
+  };
+
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
+    <Dialog open={isOpen} onOpenChange={handleClose}>
       <DialogContent className="sm:max-w-[600px]">
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
