@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { type FileError, type FileRejection, useDropzone } from 'react-dropzone'
+import { type FileError, type FileRejection, useDropzone, DropzoneInputProps, DropzoneRootProps } from 'react-dropzone'
 import {createClient} from "@/lib/supabase/client";
 import { getTimestampedFileName } from '@/lib/utils/file';
 
@@ -52,19 +52,21 @@ interface UseSupabaseUploadOptions {
   upsert?: boolean
 }
 
+// Define a more specific return type
 interface UseSupabaseUploadReturnSpecific extends Omit<ReturnType<typeof useDropzone>, 'getInputProps' | 'getRootProps'> {
   files: FileWithPreview[];
   successes: string[];
   isSuccess: boolean;
   loading: boolean;
   errors: { name: string; message: string }[];
-  onUpload: (filesToProcess: FileWithPreview[]) => Promise<void>;
+  onUpload: (filesToProcess: FileWithPreview[]) => Promise<void>; // Modified signature
   reset: () => void;
   maxFileSize?: number;
   maxFiles?: number;
   allowedMimeTypes?: string[];
   getInputProps: <T extends DropzoneInputProps>(props?: T | undefined) => T;
   getRootProps: <T extends DropzoneRootProps>(props?: T | undefined) => T;
+  // Exclude setFiles and setErrors if we don't want them exposed
 }
 
 const useSupabaseUpload = (options: UseSupabaseUploadOptions): UseSupabaseUploadReturnSpecific => {
@@ -82,7 +84,14 @@ const useSupabaseUpload = (options: UseSupabaseUploadOptions): UseSupabaseUpload
   const [loading, setLoading] = useState<boolean>(false)
   const [errors, setErrors] = useState<{ name: string; message: string }[]>([])
   const [successes, setSuccesses] = useState<string[]>([])
-  
+
+  // Re-introduce ref to track latest files state
+  const filesRef = useRef(files);
+  useEffect(() => {
+    filesRef.current = files;
+  }, [files]);
+
+  // Function to revoke preview URLs
   const revokePreviews = useCallback((filesToRevoke: FileWithPreview[]) => {
     filesToRevoke.forEach(file => {
       if (file.preview) {
@@ -91,35 +100,39 @@ const useSupabaseUpload = (options: UseSupabaseUploadOptions): UseSupabaseUpload
     });
   }, []);
 
+  // Reset function - Make stable by using ref and removing `files` dependency
   const reset = useCallback(() => {
     console.log("[useSupabaseUpload] Resetting state...");
-    revokePreviews(files); 
-    setFiles([]);
+    // Use ref to access current files without adding dependency
+    revokePreviews(filesRef.current);
+    setFiles([]); // This will trigger the ref update effect
     setErrors([]);
     setSuccesses([]);
     setLoading(false);
-  }, [files, revokePreviews]); 
+  }, [revokePreviews]); // Dependency array is now stable
+
 
   const isSuccess = useMemo(() => {
-    if (errors.length === 0 && successes.length === 0) {
-      return false
-    }
-    const filesWithoutErrors = files.filter(f => f.errors.length === 0);
-    if (filesWithoutErrors.length === 0 && errors.length > 0) return false; 
+    // Check if all non-errored files are successful
+    const filesWithoutErrors = filesRef.current.filter(f => f.errors.length === 0); // Use ref
+    if (filesWithoutErrors.length === 0 && errors.length === 0 && successes.length === 0) return false; // Initial state
+    if (filesWithoutErrors.length === 0 && errors.length > 0) return false; // Only errors
     if (filesWithoutErrors.length > 0 && successes.length === filesWithoutErrors.length && errors.length === 0) {
         return true;
     }
     return false
-  }, [errors, successes, files])
+  }, [errors, successes, files]) // Keep files dep here for reactivity
 
   const onDrop = useCallback(
     (acceptedFiles: File[], fileRejections: FileRejection[]) => {
       console.log("[useSupabaseUpload] onDrop triggered.");
       console.log("[useSupabaseUpload] Accepted Files:", acceptedFiles.map(f => f.name));
       console.log("[useSupabaseUpload] Rejected Files:", fileRejections.map(fr => fr.file.name));
-      console.log("[useSupabaseUpload] Current files state before drop:", files.map(f => f.name));
+      // Log previous state using ref
+      console.log("[useSupabaseUpload] Current files state before drop:", filesRef.current.map(f => f.name));
 
-      revokePreviews(files);
+      // Revoke previous previews using ref
+      revokePreviews(filesRef.current);
 
       const mapToFileWithPreview = (file: File, errors: readonly FileError[] = []) => {
         const timestampedName = getTimestampedFileName(file.name);
@@ -136,34 +149,34 @@ const useSupabaseUpload = (options: UseSupabaseUploadOptions): UseSupabaseUpload
 
       if (maxFiles === 1) {
         console.log("[useSupabaseUpload] Handling maxFiles = 1. Clearing files first.");
-        setFiles([]); 
-
+        setFiles([]); // Clear state first
+        
         const validFile = acceptedFiles[0] ? mapToFileWithPreview(acceptedFiles[0]) : null;
         const invalidFile = fileRejections[0] ? mapToFileWithPreview(fileRejections[0].file, fileRejections[0].errors) : null;
         newFiles = [validFile || invalidFile].filter(Boolean) as FileWithPreview[];
 
       } else {
-         const currentOriginalNames = new Set(files.map(f => f.originalName)); 
+        // Append logic using ref for current state
+         const currentOriginalNames = new Set(filesRef.current.map(f => f.originalName));
          const validFilesToAdd = acceptedFiles
            .filter(file => !currentOriginalNames.has(file.name))
            .map(file => mapToFileWithPreview(file));
-
          const invalidFilesToAdd = fileRejections
            .filter(({ file }) => !currentOriginalNames.has(file.name))
            .map(({ file, errors }) => mapToFileWithPreview(file, errors));
-
-         newFiles = [...files, ...validFilesToAdd, ...invalidFilesToAdd]; 
+         // Combine with current state from ref
+         newFiles = [...filesRef.current, ...validFilesToAdd, ...invalidFilesToAdd];
          if (newFiles.length > maxFiles) {
             newFiles = newFiles.slice(-maxFiles);
          }
       }
 
       console.log("[useSupabaseUpload] Setting new files state:", newFiles.map(f => ({ name: f.name, original: f.originalName })));
-      setFiles(newFiles);
+      setFiles(newFiles); // This triggers the ref update effect
       setErrors([]);
       setSuccesses([]);
     },
-    [files, maxFiles, revokePreviews] 
+    [maxFiles, revokePreviews] // Use ref inside, so `files` state not needed as dependency
   );
 
   const dropzoneProps = useDropzone({
@@ -175,13 +188,14 @@ const useSupabaseUpload = (options: UseSupabaseUploadOptions): UseSupabaseUpload
     multiple: maxFiles !== 1,
   });
 
+  // Modified onUpload to accept files as argument
   const onUpload = useCallback(async (filesToProcess: FileWithPreview[]) => {
     console.log("[useSupabaseUpload] onUpload triggered.");
     console.log("[useSupabaseUpload] Files received by onUpload:", filesToProcess.map(f => ({ name: f.name, original: f.originalName })));
 
     if (!filesToProcess || filesToProcess.length === 0) {
       console.log("[useSupabaseUpload] No files passed to onUpload.");
-      setLoading(false); 
+      setLoading(false); // Ensure loading is reset if called with no files
       return;
     }
 
@@ -224,49 +238,60 @@ const useSupabaseUpload = (options: UseSupabaseUploadOptions): UseSupabaseUpload
     console.log("[useSupabaseUpload] Upload finished. Errors:", responseErrors);
     console.log("[useSupabaseUpload] Upload finished. Successes:", responseSuccesses.map(x => x.name));
 
+    // Still set the hook's internal state for consistency
     setErrors(responseErrors);
     setSuccesses(responseSuccesses.map((x) => x.name)); 
 
     setLoading(false);
-  }, [path, bucketName, upsert, cacheControl]); 
+  }, [path, bucketName, upsert, cacheControl]); // Removed internal state dependencies
 
 
   useEffect(() => {
-    if (files.length === 0) {
-      setErrors([])
+    // Handle 'too-many-files' error dynamically using current state `files`
+    const currentFiles = files; // Use state directly for this UI logic
+    if (currentFiles.length === 0) {
+      if (errors.length > 0) setErrors([]); // Clear errors if files are cleared
     }
-    else if (files.length > maxFiles) {
-      const newFiles = files.map((file) => {
-        const hasTooManyError = file.errors.some((e) => e.code === 'too-many-files');
-        if (!hasTooManyError) {
-           return {...file, errors: [...file.errors, {code: 'too-many-files', message: `Maximum number of files is ${maxFiles}`}]};
-        }
-        return file
-      })
-      setFiles(newFiles)
-    }
-    else if (files.length <= maxFiles) {
-      let changed = false
-      const newFiles = files.map((file) => {
-        if (file.errors.some((e) => e.code === 'too-many-files')) {
-          file.errors = file.errors.filter((e) => e.code !== 'too-many-files')
-          changed = true
-        }
-        return file
-      })
-      if (changed) {
-        setFiles(newFiles)
+    else if (currentFiles.length > maxFiles) {
+      const needsErrorUpdate = currentFiles.some(file => !file.errors.some(e => e.code === 'too-many-files'));
+      if (needsErrorUpdate) {
+        const newFiles = currentFiles.map((file) => {
+          const hasTooManyError = file.errors.some((e) => e.code === 'too-many-files');
+          if (!hasTooManyError) {
+              return {...file, errors: [...file.errors, {code: 'too-many-files', message: `Maximum number of files is ${maxFiles}`}]};
+          }
+          return file
+        })
+        setFiles(newFiles) // Update state with errors
       }
     }
-  }, [files, maxFiles]) 
+    else if (currentFiles.length <= maxFiles) {
+      const needsErrorRemoval = currentFiles.some(file => file.errors.some(e => e.code === 'too-many-files'));
+      if (needsErrorRemoval) {
+        let changed = false
+        const newFiles = currentFiles.map((file) => {
+          if (file.errors.some((e) => e.code === 'too-many-files')) {
+            file.errors = file.errors.filter((e) => e.code !== 'too-many-files')
+            changed = true
+          }
+          return file
+        })
+        if (changed) {
+          setFiles(newFiles) // Update state with errors removed
+        }
+      }
+    }
+  }, [files, maxFiles, errors.length]) // Depend on files and maxFiles for this effect
 
-
+  // Clean up previews on unmount using ref
   useEffect(() => {
+    // Return cleanup function
     return () => {
        console.log("[useSupabaseUpload] Unmounting, revoking previews...");
-      revokePreviews(files);
+       // Use ref for cleanup to avoid dependency on `files` state
+       revokePreviews(filesRef.current);
     };
-  }, [files, revokePreviews]); 
+  }, [revokePreviews]); // Stable dependency
 
 
   return {
@@ -275,13 +300,13 @@ const useSupabaseUpload = (options: UseSupabaseUploadOptions): UseSupabaseUpload
     isSuccess,
     loading,
     errors,
-    onUpload, 
-    reset,
+    onUpload, // Now expects files argument
+    reset, // Reset function is now stable
     maxFileSize: maxFileSize,
     maxFiles: maxFiles,
     allowedMimeTypes,
-    ...dropzoneProps, 
+    ...dropzoneProps, // Includes getInputProps and getRootProps
   }
 }
 
-export { useSupabaseUpload, type UseSupabaseUploadOptions, type UseSupabaseUploadReturnSpecific as UseSupabaseUploadReturn } 
+export { useSupabaseUpload, type UseSupabaseUploadOptions, type UseSupabaseUploadReturnSpecific as UseSupabaseUploadReturn } // Export modified type name

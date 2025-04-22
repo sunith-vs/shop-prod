@@ -26,9 +26,9 @@ export function FileUploadModal({
   upload
 }: FileUploadModalProps) {
   const handleClose = () => {
-    // Reset the upload state before closing
+    // Reset the upload state before closing using the provided reset function
     if (!upload.loading) {
-      upload.setFiles([]);
+      upload.reset(); // Use reset instead of setFiles
       onClose();
     }
   };
@@ -55,7 +55,7 @@ export function FileUploadModal({
           {upload.files.length > 0 && !upload.isSuccess && (
             <Button 
               type="button" 
-              onClick={upload.onUpload} 
+              onClick={() => upload.onUpload(upload.files)} // Pass files to onUpload
               disabled={upload.loading}
               className="w-full"
             >
