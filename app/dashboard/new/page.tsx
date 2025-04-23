@@ -233,11 +233,11 @@ export default function NewCourse() {
                 )}
               </Dropzone>
               <input type="hidden" name="bannerUrl" value={bannerUrl} />
-              {bannerUpload.files.length > 0 && !bannerUpload.isSuccess && (
+               {/* {bannerUpload.files.length > 0 && !bannerUpload.isSuccess && (
                 <Button type="button" onClick={bannerUpload.onUpload} disabled={bannerUpload.loading}>
                   {bannerUpload.loading ? 'Uploading...' : 'Upload Banner'}
                 </Button>
-              )}
+              )} */}
             </div>
 
             <div className="space-y-2">
@@ -250,11 +250,11 @@ export default function NewCourse() {
                 )}
               </Dropzone>
               <input type="hidden" name="thumbnailUrl" value={thumbnailUrl} />
-              {thumbnailUpload.files.length > 0 && !thumbnailUpload.isSuccess && (
+              {/* {thumbnailUpload.files.length > 0 && !thumbnailUpload.isSuccess && (
                 <Button type="button" onClick={thumbnailUpload.onUpload} disabled={thumbnailUpload.loading}>
                   {thumbnailUpload.loading ? 'Uploading...' : 'Upload Thumbnail'}
                 </Button>
-              )}
+              )} */}
             </div>
 
             <div className="space-y-2">
@@ -267,11 +267,11 @@ export default function NewCourse() {
                 )}
               </Dropzone>
               <input type="hidden" name="brochureUrl" value={brochureUrl} />
-              {brochureUpload.files.length > 0 && !brochureUpload.isSuccess && (
+              {/* {brochureUpload.files.length > 0 && !brochureUpload.isSuccess && (
                 <Button type="button" onClick={brochureUpload.onUpload} disabled={brochureUpload.loading}>
                   {brochureUpload.loading ? 'Uploading...' : 'Upload Brochure'}
                 </Button>
-              )}
+              )} */}
             </div>
 
             <div className="space-y-4 mt-4">

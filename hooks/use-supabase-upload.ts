@@ -55,18 +55,18 @@ type UseSupabaseUploadOptions = {
 // Define a more specific return type
 interface UseSupabaseUploadReturnSpecific extends Omit<ReturnType<typeof useDropzone>, 'getInputProps' | 'getRootProps'> {
   files: FileWithPreview[];
+  setFiles: React.Dispatch<React.SetStateAction<FileWithPreview[]>>;
   successes: string[];
   isSuccess: boolean;
   loading: boolean;
   errors: { name: string; message: string }[];
-  onUpload: (filesToProcess: FileWithPreview[]) => Promise<void>; // Modified signature
+  onUpload: (filesToProcess: FileWithPreview[]) => Promise<void>; 
   reset: () => void;
   maxFileSize?: number;
   maxFiles?: number;
   allowedMimeTypes?: string[];
   getInputProps: <T extends DropzoneInputProps>(props?: T | undefined) => T;
   getRootProps: <T extends DropzoneRootProps>(props?: T | undefined) => T;
-  // Exclude setFiles and setErrors if we don't want them exposed
 }
 
 const useSupabaseUpload = (options: UseSupabaseUploadOptions): UseSupabaseUploadReturnSpecific => {
@@ -222,12 +222,13 @@ const useSupabaseUpload = (options: UseSupabaseUploadOptions): UseSupabaseUpload
 
   return {
     files, 
+    setFiles,
     successes,
     isSuccess,
     loading,
     errors,
-    onUpload, // Now expects files argument
-    reset, // Reset function is now stable
+    onUpload, 
+    reset, 
     maxFileSize: maxFileSize,
     maxFiles: maxFiles,
     allowedMimeTypes,
@@ -235,4 +236,4 @@ const useSupabaseUpload = (options: UseSupabaseUploadOptions): UseSupabaseUpload
   }
 }
 
-export { useSupabaseUpload, type UseSupabaseUploadOptions, type UseSupabaseUploadReturnSpecific as UseSupabaseUploadReturn } // Export modified type name
+export { useSupabaseUpload, type UseSupabaseUploadOptions, type UseSupabaseUploadReturnSpecific as UseSupabaseUploadReturn } 

@@ -69,8 +69,8 @@ const DropzoneContent = ({ className }: { className?: string }) => {
     loading,
     successes,
     errors,
-    maxFileSize,
-    maxFiles,
+    maxFileSize = Number.POSITIVE_INFINITY,
+    maxFiles = Number.POSITIVE_INFINITY,
     isSuccess,
   } = useDropzoneContext()
 
@@ -163,7 +163,7 @@ const DropzoneContent = ({ className }: { className?: string }) => {
         <div className="mt-2">
           <Button
             variant="outline"
-            onClick={onUpload}
+            onClick={() => onUpload(files)}
             disabled={files.some((file) => file.errors.length !== 0) || loading}
           >
             {loading ? (
@@ -182,7 +182,7 @@ const DropzoneContent = ({ className }: { className?: string }) => {
 }
 
 const DropzoneEmptyState = ({ className }: { className?: string }) => {
-  const { maxFiles, maxFileSize, inputRef, isSuccess } = useDropzoneContext()
+  const { maxFiles, maxFileSize = Number.POSITIVE_INFINITY, inputRef, isSuccess } = useDropzoneContext()
 
   if (isSuccess) {
     return null
