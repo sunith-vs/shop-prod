@@ -14,7 +14,7 @@ type CourseCardProps = {
 export const CourseCard: React.FC<CourseCardProps> = ({ course, className }) => {
     return (
         <Card
-            className={`course-card bg-white rounded-[20px] p-3 border hover:border-0 relative overflow-hidden group ${className}`}
+            className={`course-card bg-white rounded-[20px] p-3 border hover:border-0 relative overflow-hidden group h-full flex flex-col ${className}`}
         >
             {/* Dimming overlay layer - visible on hover using group-hover */}
             <div
@@ -40,26 +40,25 @@ export const CourseCard: React.FC<CourseCardProps> = ({ course, className }) => 
                 </button>
             </div>
 
-            <CardHeader className="p-0">
-                <h3 className="text-lg sm:text-xl font-semibold text-[#1D2939] mt-3 sm:mt-4 line-clamp-2">{course.title}</h3>
-            </CardHeader>
-
-            <CardContent className="p-0">
-                <div className="flex flex-col justify-between min-h-[120px]">
-                    <p className="font-regular text-[#667085] mt-1 sm:mt-1.5 text-sm sm:text-base line-clamp-3 overflow-hidden text-ellipsis">
+            <CardContent className="p-0 flex flex-col flex-1">
+                <div className="flex-grow">
+                    <h3 className="text-xl font-semibold sm:font-bold text-[#1D2939] mt-4 line-clamp-2">{course.title}</h3>
+                    <p className="text-base font-normal text-[#667085] mt-1.5 line-clamp-3 overflow-hidden text-ellipsis">
                         {course.description}
                     </p>
-                    <div className="flex flex-wrap items-center mt-2">
-                        <div className="mr-2 w-4 h-4 sm:w-5 sm:h-5 flex items-center justify-center">
-                            <Icons.book className="w-full h-full text-orange-500" />
-                        </div>
-                        {course.board && course.board.map((board, index) => (
+                </div>
+                <div className="flex items-center gap-2 mt-auto pt-4">
+                    <div className="w-4 h-4 sm:w-5 sm:h-5 flex items-center justify-center">
+                        <Icons.book className="w-full h-full text-orange-500" />
+                    </div>
+                    <div className="flex items-center flex-wrap gap-x-1.5">
+                        {course.board?.map((board, index) => (
                             <React.Fragment key={board}>
-                                <span className="rounded-full text-xs sm:text-sm font-medium text-[#667085]">
+                                <span className="rounded-full text-base font-semibold text-[#667085]">
                                     {board}
                                 </span>
                                 {index !== course.board.length - 1 && (
-                                    <span className="rounded-full text-xs sm:text-sm font-regular text-[#D0D5DD] px-1.5">|</span>
+                                    <span className="rounded-full text-base text-[#D0D5DD] px-1.5">|</span>
                                 )}
                             </React.Fragment>
                         ))}
@@ -69,4 +68,3 @@ export const CourseCard: React.FC<CourseCardProps> = ({ course, className }) => 
         </Card>
     )
 }
-

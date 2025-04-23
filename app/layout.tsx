@@ -17,7 +17,7 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${inter.variable} ${monaSans.variable}`}>
       <body className={inter.className}>
-        <MainNav />
+        {/* <MainNav /> */}
         <main className="flex-1">{children}</main>
       </body>
     </html>

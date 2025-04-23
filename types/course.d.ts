@@ -3,5 +3,7 @@ export type Course = {
     title: string;
     description: string | null;
     imageUrl: string | '';
-    board : string[];
+    board: string[];
+    tab_title: string;
+    tab_id: number;
 };
