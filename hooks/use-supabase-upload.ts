@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { type FileError, type FileRejection, useDropzone, DropzoneInputProps, DropzoneRootProps } from 'react-dropzone'
+import { useCallback, useEffect, useMemo, useState ,useRef} from 'react'
+import {DropzoneInputProps, DropzoneRootProps, type FileError, type FileRejection, useDropzone} from 'react-dropzone'
 import {createClient} from "@/lib/supabase/client";
 import { getTimestampedFileName } from '@/lib/utils/file';
 
@@ -11,7 +11,7 @@ interface FileWithPreview extends File {
   originalName?: string
 }
 
-interface UseSupabaseUploadOptions {
+type UseSupabaseUploadOptions = {
   /**
    * Name of bucket to upload files to in your Supabase project
    */
@@ -113,71 +113,43 @@ const useSupabaseUpload = (options: UseSupabaseUploadOptions): UseSupabaseUpload
 
 
   const isSuccess = useMemo(() => {
-    // Check if all non-errored files are successful
-    const filesWithoutErrors = filesRef.current.filter(f => f.errors.length === 0); // Use ref
-    if (filesWithoutErrors.length === 0 && errors.length === 0 && successes.length === 0) return false; // Initial state
-    if (filesWithoutErrors.length === 0 && errors.length > 0) return false; // Only errors
-    if (filesWithoutErrors.length > 0 && successes.length === filesWithoutErrors.length && errors.length === 0) {
-        return true;
+    if (errors.length === 0 && successes.length === 0) {
+      return false
+    }
+    if (errors.length === 0 && successes.length === files.length) {
+      return true
     }
     return false
-  }, [errors, successes, files]) // Keep files dep here for reactivity
+  }, [errors.length, successes.length, files.length])
 
   const onDrop = useCallback(
     (acceptedFiles: File[], fileRejections: FileRejection[]) => {
-      console.log("[useSupabaseUpload] onDrop triggered.");
-      console.log("[useSupabaseUpload] Accepted Files:", acceptedFiles.map(f => f.name));
-      console.log("[useSupabaseUpload] Rejected Files:", fileRejections.map(fr => fr.file.name));
-      // Log previous state using ref
-      console.log("[useSupabaseUpload] Current files state before drop:", filesRef.current.map(f => f.name));
+      const validFiles = acceptedFiles
+        .filter((file) => !files.find((x) => x.name === file.name))
+        .map((file) => {
+          const timestampedName = getTimestampedFileName(file.name);
+          const newFile = new File([file], timestampedName, { type: file.type });
+          return Object.assign(newFile, {
+            preview: URL.createObjectURL(file),
+            errors: [],
+            originalName: file.name
+          }) as FileWithPreview;
+        })
 
-      // Revoke previous previews using ref
-      revokePreviews(filesRef.current);
-
-      const mapToFileWithPreview = (file: File, errors: readonly FileError[] = []) => {
-        const timestampedName = getTimestampedFileName(file.name);
-        const newFile = new File([file], timestampedName, { type: file.type });
-        console.log(`[useSupabaseUpload] Mapping file: ${file.name} -> ${timestampedName}`);
+      const invalidFiles = fileRejections.map(({ file, errors }) => {
+        const newFile = new File([file], file.name, { type: file.type });
         return Object.assign(newFile, {
-          preview: URL.createObjectURL(file), 
+          preview: URL.createObjectURL(file),
           errors,
           originalName: file.name
         }) as FileWithPreview;
-      };
+      })
 
-      let newFiles: FileWithPreview[] = [];
-
-      if (maxFiles === 1) {
-        console.log("[useSupabaseUpload] Handling maxFiles = 1. Clearing files first.");
-        setFiles([]); // Clear state first
-        
-        const validFile = acceptedFiles[0] ? mapToFileWithPreview(acceptedFiles[0]) : null;
-        const invalidFile = fileRejections[0] ? mapToFileWithPreview(fileRejections[0].file, fileRejections[0].errors) : null;
-        newFiles = [validFile || invalidFile].filter(Boolean) as FileWithPreview[];
-
-      } else {
-        // Append logic using ref for current state
-         const currentOriginalNames = new Set(filesRef.current.map(f => f.originalName));
-         const validFilesToAdd = acceptedFiles
-           .filter(file => !currentOriginalNames.has(file.name))
-           .map(file => mapToFileWithPreview(file));
-         const invalidFilesToAdd = fileRejections
-           .filter(({ file }) => !currentOriginalNames.has(file.name))
-           .map(({ file, errors }) => mapToFileWithPreview(file, errors));
-         // Combine with current state from ref
-         newFiles = [...filesRef.current, ...validFilesToAdd, ...invalidFilesToAdd];
-         if (newFiles.length > maxFiles) {
-            newFiles = newFiles.slice(-maxFiles);
-         }
-      }
-
-      console.log("[useSupabaseUpload] Setting new files state:", newFiles.map(f => ({ name: f.name, original: f.originalName })));
-      setFiles(newFiles); // This triggers the ref update effect
-      setErrors([]);
-      setSuccesses([]);
+      const newFiles = [...files, ...validFiles, ...invalidFiles]
+      setFiles(newFiles)
     },
-    [maxFiles, revokePreviews] // Use ref inside, so `files` state not needed as dependency
-  );
+    [files, setFiles]
+  )
 
   const dropzoneProps = useDropzone({
     onDrop,
@@ -186,113 +158,67 @@ const useSupabaseUpload = (options: UseSupabaseUploadOptions): UseSupabaseUpload
     maxSize: maxFileSize,
     maxFiles: maxFiles,
     multiple: maxFiles !== 1,
-  });
+  })
 
-  // Modified onUpload to accept files as argument
-  const onUpload = useCallback(async (filesToProcess: FileWithPreview[]) => {
-    console.log("[useSupabaseUpload] onUpload triggered.");
-    console.log("[useSupabaseUpload] Files received by onUpload:", filesToProcess.map(f => ({ name: f.name, original: f.originalName })));
+  const onUpload = useCallback(async () => {
+    setLoading(true)
 
-    if (!filesToProcess || filesToProcess.length === 0) {
-      console.log("[useSupabaseUpload] No files passed to onUpload.");
-      setLoading(false); // Ensure loading is reset if called with no files
-      return;
-    }
-
-    setLoading(true);
-    setErrors([]); 
-    setSuccesses([]);
-
-    const filesToUpload = filesToProcess.filter(file => file.errors.length === 0);
-
-    if (filesToUpload.length === 0) {
-      console.log("[useSupabaseUpload] No valid files (without errors) passed to onUpload.");
-      setLoading(false);
-      return; 
-    }
-
-    console.log("[useSupabaseUpload] Starting Supabase upload for:", filesToUpload.map(f => f.name));
+    const filesWithErrors = errors.map((x) => x.name)
+    const filesToUpload =
+      filesWithErrors.length > 0
+        ? [
+            ...files.filter((f) => filesWithErrors.includes(f.name)),
+            ...files.filter((f) => !successes.includes(f.name)),
+          ]
+        : files
 
     const responses = await Promise.all(
       filesToUpload.map(async (file) => {
-         console.log(`[useSupabaseUpload] Uploading file: ${file.name} (Original: ${file.originalName}) to path: ${path ? `${path}/${file.name}` : file.name}`);
-         const { error } = await supabase.storage
-           .from(bucketName)
-           .upload(!!path ? `${path}/${file.name}` : file.name, file, { 
-             cacheControl: cacheControl.toString(),
-             upsert,
-           });
-         if (error) {
-           console.error(`[useSupabaseUpload] Upload Error for ${file.name}:`, error);
-           return { name: file.name, message: error.message };
-         } else {
-            console.log(`[useSupabaseUpload] Upload Success for ${file.name}`);
-           return { name: file.name, message: undefined };
-         }
-       })
-     );
-
-    const responseErrors = responses.filter((x): x is { name: string; message: string } => x.message !== undefined);
-    const responseSuccesses = responses.filter((x) => x.message === undefined);
-
-    console.log("[useSupabaseUpload] Upload finished. Errors:", responseErrors);
-    console.log("[useSupabaseUpload] Upload finished. Successes:", responseSuccesses.map(x => x.name));
-
-    // Still set the hook's internal state for consistency
-    setErrors(responseErrors);
-    setSuccesses(responseSuccesses.map((x) => x.name)); 
-
-    setLoading(false);
-  }, [path, bucketName, upsert, cacheControl]); // Removed internal state dependencies
-
-
-  useEffect(() => {
-    // Handle 'too-many-files' error dynamically using current state `files`
-    const currentFiles = files; // Use state directly for this UI logic
-    if (currentFiles.length === 0) {
-      if (errors.length > 0) setErrors([]); // Clear errors if files are cleared
-    }
-    else if (currentFiles.length > maxFiles) {
-      const needsErrorUpdate = currentFiles.some(file => !file.errors.some(e => e.code === 'too-many-files'));
-      if (needsErrorUpdate) {
-        const newFiles = currentFiles.map((file) => {
-          const hasTooManyError = file.errors.some((e) => e.code === 'too-many-files');
-          if (!hasTooManyError) {
-              return {...file, errors: [...file.errors, {code: 'too-many-files', message: `Maximum number of files is ${maxFiles}`}]};
-          }
-          return file
-        })
-        setFiles(newFiles) // Update state with errors
-      }
-    }
-    else if (currentFiles.length <= maxFiles) {
-      const needsErrorRemoval = currentFiles.some(file => file.errors.some(e => e.code === 'too-many-files'));
-      if (needsErrorRemoval) {
-        let changed = false
-        const newFiles = currentFiles.map((file) => {
-          if (file.errors.some((e) => e.code === 'too-many-files')) {
-            file.errors = file.errors.filter((e) => e.code !== 'too-many-files')
-            changed = true
-          }
-          return file
-        })
-        if (changed) {
-          setFiles(newFiles) // Update state with errors removed
+        const { error } = await supabase.storage
+          .from(bucketName)
+          .upload(!!path ? `${path}/${file.name}` : file.name, file, {
+            cacheControl: cacheControl.toString(),
+            upsert,
+          })
+        if (error) {
+          return { name: file.name, message: error.message }
+        } else {
+          return { name: file.name, message: undefined }
         }
+      })
+    )
+
+    const responseErrors = responses.filter((x) => x.message !== undefined)
+    setErrors(responseErrors)
+
+    const responseSuccesses = responses.filter((x) => x.message === undefined)
+    const newSuccesses = Array.from(
+      new Set([...successes, ...responseSuccesses.map((x) => x.name)])
+    )
+    setSuccesses(newSuccesses)
+
+    setLoading(false)
+  }, [files, path, bucketName, errors, successes])
+
+  useEffect(() => {
+    if (files.length === 0) {
+      setErrors([])
+    }
+
+    if (files.length <= maxFiles) {
+      let changed = false
+      const newFiles = files.map((file) => {
+        if (file.errors.some((e) => e.code === 'too-many-files')) {
+          file.errors = file.errors.filter((e) => e.code !== 'too-many-files')
+          changed = true
+        }
+        return file
+      })
+      if (changed) {
+        setFiles(newFiles)
       }
     }
-  }, [files, maxFiles, errors.length]) // Depend on files and maxFiles for this effect
-
-  // Clean up previews on unmount using ref
-  useEffect(() => {
-    // Return cleanup function
-    return () => {
-       console.log("[useSupabaseUpload] Unmounting, revoking previews...");
-       // Use ref for cleanup to avoid dependency on `files` state
-       revokePreviews(filesRef.current);
-    };
-  }, [revokePreviews]); // Stable dependency
-
+  }, [files.length, setFiles, maxFiles])
 
   return {
     files, 
@@ -305,7 +231,7 @@ const useSupabaseUpload = (options: UseSupabaseUploadOptions): UseSupabaseUpload
     maxFileSize: maxFileSize,
     maxFiles: maxFiles,
     allowedMimeTypes,
-    ...dropzoneProps, // Includes getInputProps and getRootProps
+    ...dropzoneProps,
   }
 }
 
