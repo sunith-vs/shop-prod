@@ -12,7 +12,7 @@ export async function middleware(request: NextRequest) {
   if (path.startsWith('/api') ||
       path === '/profile/complete' ||
       path.startsWith('/auth') ||
-      path === '/login') {
+      path === '/signin') {
     return session;
   }
 
@@ -22,7 +22,7 @@ export async function middleware(request: NextRequest) {
 
     if (!userSession?.user) {
       // Redirect to login if no session
-      return NextResponse.redirect(new URL('/login', request.url));
+      return NextResponse.redirect(new URL('/signin', request.url));
     }
 
     // Check access levels for dashboard routes
@@ -55,7 +55,7 @@ export async function middleware(request: NextRequest) {
   } catch (error) {
     console.error('[MIDDLEWARE_PROFILE_CHECK]', error);
     // On error, redirect to login for security
-    return NextResponse.redirect(new URL('/login', request.url));
+    return NextResponse.redirect(new URL('/signin', request.url));
   }
 
   return session;
@@ -64,7 +64,7 @@ export async function middleware(request: NextRequest) {
 export const config = {
   matcher: [
     '/protected',
-    '/login',
+    '/signin',
     '/admin/:path*',
     '/dashboard/:path*',
     '/profile/:path*'

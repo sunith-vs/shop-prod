@@ -33,7 +33,7 @@ export default async function CourseDashboard() {
   
   const { data: { user }, error: userError } = await supabase.auth.getUser();
   if (!user || userError) {
-    redirect('/login');
+    redirect('/signin');
   }
 
   const { data: courses, error } = await supabase
@@ -50,7 +50,7 @@ export default async function CourseDashboard() {
     'use server'
     const supabase = createClient();
     await supabase.auth.signOut();
-    redirect('/login');
+    redirect('/signin');
   }
 
   return (

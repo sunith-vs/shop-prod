@@ -34,7 +34,7 @@ export default function ProfileComplete() {
     const checkAuth = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) {
-        router.push('/login');
+        router.push('/signin');
       }
     };
     checkAuth();

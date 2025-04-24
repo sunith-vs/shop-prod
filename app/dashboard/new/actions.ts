@@ -8,7 +8,7 @@ export async function createCourse(formData: FormData) {
   const supabase = createClient();
   const { data: { user }, error: userError } = await supabase.auth.getUser();
   if (!user || userError) {
-    redirect('/login');
+    redirect('/signin');
   }
 
   const title = formData.get('title') as string;
