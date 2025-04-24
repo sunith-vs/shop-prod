@@ -109,7 +109,7 @@ const BenefitCard: React.FC<CourseBenefit & { icons: Record<string, Icon> }> = (
                     <div className="w-[52px] h-[52px] bg-gray-100 rounded-full flex items-center justify-center text-xl">?</div>
                 )}
             </div>
-            <h3 className="text-[#1d2939] text-2xl md:text-[28px] font-semibold font-inter leading-snug">
+            <h3 className="text-[#1d2939] text-2xl md:text-[28px] font-semibold font-mono leading-snug">
                 {title}
             </h3>
 
@@ -120,7 +120,7 @@ const BenefitCard: React.FC<CourseBenefit & { icons: Record<string, Icon> }> = (
                             item.trim() && (
                                 <li key={index} className="flex items-start">
                                     <span className="text-[#1d2939] mr-2 font-bold">•</span>
-                                    <span className="text-[#1d2939] text-sm font-medium font-inter leading-snug">
+                                    <span className="text-[#1d2939] text-sm font-medium font-mono leading-snug">
                                         {item.trim()}
                                     </span>
                                 </li>
@@ -128,7 +128,7 @@ const BenefitCard: React.FC<CourseBenefit & { icons: Record<string, Icon> }> = (
                         ))}
                     </ul>
                 ) : (
-                    <p className="justify-start text-[#1d2939] text-sm font-medium leading-snug">
+                    <p className="justify-start text-[#1d2939] text-sm font-medium leading-snug font-mono">
                         {description}
                     </p>
                 )

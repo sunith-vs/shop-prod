@@ -17,7 +17,7 @@ const inter = Inter({
 const monaSans = localFont({
   src: [
     {
-      path: '../public/fonts/MonaSans-Italic-VariableFont_wdth,wght.ttf',
+      path: '../public/fonts/Mona-Sans.ttf',
       weight: '200 900', // Variable font weight range
       style: 'normal',
     },
