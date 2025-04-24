@@ -57,7 +57,7 @@ export default async function CourseDashboard() {
     <div className="flex flex-col md:flex-row h-screen">
       {/* Mobile Header */}
       <div className="md:hidden border-b p-4 flex items-center justify-between bg-background sticky top-0 z-10">
-        <h1 className="text-xl font-bold font-display">Course Management</h1>
+        <h1 className="text-xl font-bold font-mono">Course Management</h1>
         <Sheet>
           <SheetTrigger asChild>
             <Button variant="ghost" size="icon">
@@ -67,7 +67,7 @@ export default async function CourseDashboard() {
           <SheetContent side="left" className="p-0">
             <div className="flex flex-col h-full">
               <div className="p-4 border-b">
-                <h1 className="text-xl font-bold font-display">Course Management</h1>
+                <h1 className="text-xl font-bold font-mono">Course Management</h1>
               </div>
               <ScrollArea className="flex-1 p-4">
                 <Button asChild className="w-full" size="sm">
@@ -85,7 +85,7 @@ export default async function CourseDashboard() {
       {/* Sidebar - Hidden on mobile */}
       <div className="hidden md:flex w-64 border-r bg-background flex-col">
         <div className="p-4 border-b">
-          <h1 className="text-xl font-bold font-display">Course Management</h1>
+          <h1 className="text-xl font-bold font-mono">Course Management</h1>
         </div>
         <ScrollArea className="flex-1 p-4">
           <Button asChild className="w-full" size="sm">
@@ -102,7 +102,7 @@ export default async function CourseDashboard() {
         {/* Header - Hidden on mobile */}
         <div className="border-b hidden md:block">
           <div className="flex h-16 items-center px-4 md:px-6 justify-between">
-            <h2 className="text-xl md:text-2xl font-bold font-display">Courses</h2>
+            <h2 className="text-xl md:text-2xl font-bold font-mono">Courses</h2>
             <div className="flex items-center gap-4">
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -157,7 +157,7 @@ export default async function CourseDashboard() {
                         </div>
                       )}
                       <div className="space-y-2">
-                        <h3 className="font-semibold text-base md:text-lg font-display">{course.title}</h3>
+                        <h3 className="font-semibold text-base md:text-lg font-mono">{course.title} 17</h3>
                         <Badge variant={
                           course.status === 'active' ? 'default' :
                           course.status === 'draft' ? 'secondary' : 'destructive'
