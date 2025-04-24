@@ -178,15 +178,17 @@ const CourseOffering = ({ batches, course }: CourseOfferingProps) => {
     <div className=" lg:pl-[40px]  lg:w-[900px]">
       <div className="border border-gray-200 rounded-3xl overflow-hidden shadow-sm">
         {/* Header with Special Offer */}
-        <div className="relative">
-          <Image
-            src={course?.tag_url || ''}
-            alt="Special Offer"
-            width={135}
-            height={40}
-            className="object-contain"
-          />
-        </div>
+        {course?.tag_url && (
+          <div className="relative">
+            <Image
+              src={course?.tag_url || ''}
+              alt="Special Offer"
+              width={135}
+              height={40}
+              className="object-contain"
+            />
+          </div>
+        )}
 
         <div className="px-6 pb-6 pt-[12px]">
           {/* Title */}
