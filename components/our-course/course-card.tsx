@@ -3,6 +3,7 @@ import React from 'react'
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { ArrowRight } from 'lucide-react';
 import { Icons } from '@/components/icons';
+import Link from "next/link";
 
 
 
@@ -13,6 +14,7 @@ type CourseCardProps = {
 
 export const CourseCard: React.FC<CourseCardProps> = ({ course, className }) => {
     return (
+        <Link href={`/${course.slug}`} className="group">
         <Card
             className={`course-card bg-white rounded-[20px] p-3 border sm:hover:border-0 relative overflow-hidden group h-full flex flex-col ${className}`}
         >
@@ -68,5 +70,6 @@ export const CourseCard: React.FC<CourseCardProps> = ({ course, className }) => 
                 )}
             </CardContent>
         </Card>
+        </Link>
     )
 }
