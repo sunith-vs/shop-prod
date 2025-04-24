@@ -6,7 +6,7 @@ export function MainNav() {
     <nav className="flex h-16 items-center justify-between border px-4 sticky top-0 bg-white z-10">
       <div className="flex space-x-4">
         <NavItem href="/">Home</NavItem>
-        <NavItem href="/our-courses">Our Courses</NavItem>
+        <NavItem href="/">Our Courses</NavItem>
         <NavItem href="/client">Client</NavItem>
         <NavItem href="/server">Server</NavItem>
         <NavItem href="/protected">Protected</NavItem>
