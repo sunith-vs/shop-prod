@@ -79,7 +79,7 @@ const PaymentConfirmation = ({ isOpen, onClose, success, paymentId, details }: P
                 </svg>
               </div>
               <h2 className="text-2xl font-bold text-gray-800 mb-2">Payment Failed</h2>
-              <p className="text-gray-600 mb-6">We couldn't process your payment. Please try again or contact support.</p>
+              <p className="text-gray-600 mb-6">We couldn&#39;t process your payment. Please try again or contact support.</p>
             </>
           )}
           
