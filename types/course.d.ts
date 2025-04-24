@@ -1,9 +1,20 @@
-export type Course = {
-    id: number;
+export type OurCourse = {
+    id: string;
     title: string;
-    description: string | null;
-    imageUrl: string | '';
+    slug: string;
+    sub_heading: string;
+    description: string;
+    highlights: string[];
+    brochure_url: string;
+    tagUrl: string;
+    status: string;
+    createdAt: string;
+    updatedAt: string;
+    thumbnail: string;
+    popular: boolean;
+    courseType: string;
+    eduportCourseId: number | null;
+    bannerUrl: string;
+    bannerMobile: string | null;
     board: string[];
-    tab_title: string;
-    tab_id: number;
-};
+}

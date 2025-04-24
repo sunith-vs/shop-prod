@@ -1,4 +1,4 @@
-import { Course } from '@/types/course';
+import { OurCourse } from '@/types/course';
 import React from 'react'
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { ArrowRight } from 'lucide-react';
@@ -7,7 +7,7 @@ import { Icons } from '@/components/icons';
 
 
 type CourseCardProps = {
-    course: Course;
+    course: OurCourse;
     className?: string;
 };
 
@@ -23,7 +23,7 @@ export const CourseCard: React.FC<CourseCardProps> = ({ course, className }) => 
 
             <div className="bg-[#00000000] rounded-[20px] overflow-hidden relative" style={{ paddingTop: '60.57%' }}>
                 <img
-                    src={course.imageUrl}
+                    src={course.thumbnail}
                     alt={`${course.title} thumbnail`}
                     className="absolute inset-0 w-full h-full object-cover object-center"
                     loading="lazy"
@@ -44,26 +44,28 @@ export const CourseCard: React.FC<CourseCardProps> = ({ course, className }) => 
                 <div className="flex-grow">
                     <h3 className="text-xl font-semibold sm:font-bold text-[#1D2939] mt-4 line-clamp-2">{course.title}</h3>
                     <p className="text-base font-normal text-[#667085] mt-1.5 line-clamp-3 overflow-hidden text-ellipsis">
-                        {course.description}
+                        {course.sub_heading}
                     </p>
                 </div>
-                <div className="flex items-center gap-2 mt-auto pt-4">
-                    <div className="w-4 h-4 sm:w-5 sm:h-5 flex items-center justify-center">
-                        <Icons.book className="w-full h-full text-orange-500" />
+                {course.board && course.board.length > 0 && (
+                    <div className="flex items-center gap-2 mt-auto pt-4">
+                        <div className="w-4 h-4 sm:w-5 sm:h-5 flex items-center justify-center">
+                            <Icons.book className="w-full h-full text-orange-500" />
+                        </div>
+                        <div className="flex items-center flex-wrap gap-x-1.5">
+                            {course.board.map((board, index) => (
+                                <React.Fragment key={board}>
+                                    <span className="rounded-full text-base font-semibold text-[#667085]">
+                                        {board}
+                                    </span>
+                                    {index !== course.board.length - 1 && (
+                                        <span className="rounded-full text-base text-[#D0D5DD] px-1.5">|</span>
+                                    )}
+                                </React.Fragment>
+                            ))}
+                        </div>
                     </div>
-                    <div className="flex items-center flex-wrap gap-x-1.5">
-                        {course.board?.map((board, index) => (
-                            <React.Fragment key={board}>
-                                <span className="rounded-full text-base font-semibold text-[#667085]">
-                                    {board}
-                                </span>
-                                {index !== course.board.length - 1 && (
-                                    <span className="rounded-full text-base text-[#D0D5DD] px-1.5">|</span>
-                                )}
-                            </React.Fragment>
-                        ))}
-                    </div>
-                </div>
+                )}
             </CardContent>
         </Card>
     )
