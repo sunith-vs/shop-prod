@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -8,6 +8,9 @@ import { Label } from '@/components/ui/label';
 import { createClient } from '@/lib/supabase/client';
 import { Loader2, Plus, Search } from 'lucide-react';
 import { toast } from 'sonner';
+import { Dropzone, DropzoneContent, DropzoneEmptyState } from '@/components/dropzone';
+import { useSupabaseUpload } from '@/hooks/use-supabase-upload';
+import type { UseSupabaseUploadOptions } from '@/hooks/use-supabase-upload';
 
 interface Icon {
   id: string;
@@ -26,11 +29,97 @@ export function IconSelector({ selectedIconId, onSelect }: IconSelectorProps) {
   const [loading, setLoading] = useState(false);
   const [showAll, setShowAll] = useState(false);
   const [isAddIconOpen, setIsAddIconOpen] = useState(false);
-  const [newIconUrl, setNewIconUrl] = useState('');
   const [newIconName, setNewIconName] = useState('');
   const [addingIcon, setAddingIcon] = useState(false);
+  const [uploadedPath, setUploadedPath] = useState<string | null>(null);
+  const [uploadedFileName, setUploadedFileName] = useState<string | null>(null);
 
   const supabase = createClient();
+
+  const uploadOptions: UseSupabaseUploadOptions = {
+    bucketName: 'courses',
+    path: 'icons',
+    maxFiles: 1,
+    maxFileSize: 1024 * 1024, // 1MB
+    allowedMimeTypes: ['image/svg+xml', 'image/png', 'image/jpeg'],
+    cacheControl: 3600,
+    upsert: false
+  };
+
+  const uploadProps = useSupabaseUpload(uploadOptions);
+
+  // Subscribe to successful uploads
+  useEffect(() => {
+    if (uploadProps.isSuccess && uploadProps.successes.length > 0) {
+      const path = uploadProps.successes[0];
+      const file = uploadProps.files[0];
+      if (path && file) {
+        setUploadedPath(path);
+        setUploadedFileName(file.name);
+        if (!newIconName) {
+          setNewIconName(file.name.split('.')[0]);
+        }
+      }
+    }
+  }, [uploadProps.isSuccess, uploadProps.successes]);
+
+  const getPublicUrl = (path: string) => {
+    // If path already includes 'icons/', use it as is
+    // Otherwise, prepend 'icons/' to ensure correct storage path
+    const fullPath = path.startsWith('icons/') ? path : `icons/${path}`;
+    const { data: { publicUrl } } = supabase.storage
+      .from('courses')
+      .getPublicUrl(fullPath);
+    return publicUrl;
+  };
+
+  const handleSave = async () => {
+    if (!uploadedPath || !uploadedFileName) {
+      toast.error('Please upload an icon first');
+      return;
+    }
+
+    setAddingIcon(true);
+    try {
+      const name = newIconName || uploadedFileName.split('.')[0];
+      const publicUrl = getPublicUrl(uploadedPath);
+
+      const { data, error } = await supabase
+        .from('icons')
+        .insert({
+          url: publicUrl,
+          name
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      toast.success('Icon added successfully');
+      setIsAddIconOpen(false);
+      setNewIconName('');
+      setUploadedPath(null);
+      setUploadedFileName(null);
+      uploadProps.reset();
+      fetchIcons();
+
+      if (data) {
+        onSelect(data);
+      }
+    } catch (error) {
+      toast.error('Failed to add icon');
+    } finally {
+      setAddingIcon(false);
+    }
+  };
+
+  const handleClose = () => {
+    setIsAddIconOpen(false);
+    setNewIconName('');
+    setUploadedPath(null);
+    setUploadedFileName(null);
+    uploadProps.reset();
+  };
 
   const fetchIcons = async () => {
     setLoading(true);
@@ -62,41 +151,6 @@ export function IconSelector({ selectedIconId, onSelect }: IconSelectorProps) {
   useEffect(() => {
     fetchIcons();
   }, [searchQuery, showAll]);
-
-  const handleAddIcon = async () => {
-    if (!newIconUrl || !newIconName) {
-      toast.error('Please provide both URL and name for the icon');
-      return;
-    }
-
-    setAddingIcon(true);
-    try {
-      const { data, error } = await supabase
-        .from('icons')
-        .insert({
-          url: newIconUrl,
-          name: newIconName
-        })
-        .select()
-        .single();
-
-      if (error) throw error;
-
-      toast.success('Icon added successfully');
-      setIsAddIconOpen(false);
-      setNewIconUrl('');
-      setNewIconName('');
-      fetchIcons();
-
-      if (data) {
-        onSelect(data);
-      }
-    } catch (error) {
-      toast.error('Failed to add icon');
-    } finally {
-      setAddingIcon(false);
-    }
-  };
 
   return (
     <div className="space-y-4">
@@ -153,47 +207,37 @@ export function IconSelector({ selectedIconId, onSelect }: IconSelectorProps) {
         </>
       )}
 
-      <Dialog open={isAddIconOpen} onOpenChange={setIsAddIconOpen}>
+      <Dialog open={isAddIconOpen} onOpenChange={handleClose}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Add New Icon</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
             <div>
-              <Label>Icon URL</Label>
-              <Input
-                value={newIconUrl}
-                onChange={(e) => setNewIconUrl(e.target.value)}
-                placeholder="https://example.com/icon.svg"
-              />
+              <Label>Upload Icon</Label>
+              <Dropzone {...uploadProps} className="mt-2">
+                <DropzoneContent />
+                <DropzoneEmptyState />
+              </Dropzone>
             </div>
             <div>
-              <Label>Icon Name</Label>
+              <Label>Icon Name (optional)</Label>
               <Input
                 value={newIconName}
                 onChange={(e) => setNewIconName(e.target.value)}
-                placeholder="Enter icon name"
+                placeholder="Enter icon name or leave empty to use file name"
               />
             </div>
-            {newIconUrl && (
-              <div className="flex justify-center p-4 border rounded">
-                <img
-                  src={newIconUrl}
-                  alt="Icon preview"
-                  className="w-16 h-16 object-contain"
-                  onError={(e) => {
-                    e.currentTarget.src = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>';
-                  }}
-                />
-              </div>
-            )}
             <div className="flex justify-end gap-2">
-              <Button variant="outline" onClick={() => setIsAddIconOpen(false)}>
+              <Button variant="outline" onClick={handleClose}>
                 Cancel
               </Button>
-              <Button onClick={handleAddIcon} disabled={addingIcon || !newIconUrl || !newIconName}>
+              <Button 
+                onClick={handleSave} 
+                disabled={addingIcon || !uploadedPath}
+              >
                 {addingIcon && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Add Icon
+                Save
               </Button>
             </div>
           </div>
