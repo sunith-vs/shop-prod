@@ -14,11 +14,11 @@ type CourseCardProps = {
 export const CourseCard: React.FC<CourseCardProps> = ({ course, className }) => {
     return (
         <Card
-            className={`course-card bg-white rounded-[20px] p-3 border hover:border-0 relative overflow-hidden group h-full flex flex-col ${className}`}
+            className={`course-card bg-white rounded-[20px] p-3 border sm:hover:border-0 relative overflow-hidden group h-full flex flex-col ${className}`}
         >
             {/* Dimming overlay layer - visible on hover using group-hover */}
             <div
-                className="absolute inset-0 bg-[rgba(255,97,42,0.18)] rounded-[20px] opacity-0 group-hover:opacity-100 z-10"
+                className="absolute inset-0 bg-[rgba(255,97,42,0.18)] rounded-[20px] opacity-0 sm:group-hover:opacity-100 z-10"
             />
 
             <div className="bg-[#00000000] rounded-[20px] overflow-hidden relative" style={{ paddingTop: '60.57%' }}>
@@ -31,8 +31,8 @@ export const CourseCard: React.FC<CourseCardProps> = ({ course, className }) => 
             </div>
 
             {/* View Now button - visible on hover using group-hover */}
-            <div className="absolute inset-0 flex items-center justify-center transition-opacity duration-300 opacity-0 group-hover:opacity-100 z-20">
-                <button className="flex items-center gap-2 bg-[#EC4909] text-white px-4 py-3 rounded-[10px] transition-colors">
+            <div className="absolute inset-0 flex items-center justify-center transition-opacity duration-300 opacity-0 sm:group-hover:opacity-100 z-20">
+                <button className="flex items-center gap-2 bg-[#EC4909] text-white px-4 py-3 rounded-[10px] transition-colors text-lg font-semibold">
                     View Now
                     <div className="w-6 h-6 relative bg-white rounded-[39px] flex justify-center items-center gap-[3px] overflow-hidden">
                         <ArrowRight size={12} color="#FB6514" />
@@ -42,8 +42,8 @@ export const CourseCard: React.FC<CourseCardProps> = ({ course, className }) => 
 
             <CardContent className="p-0 flex flex-col flex-1">
                 <div className="flex-grow">
-                    <h3 className="text-xl font-semibold sm:font-bold text-[#1D2939] mt-4 line-clamp-2">{course.title}</h3>
-                    <p className="text-base font-normal text-[#667085] mt-1.5 line-clamp-3 overflow-hidden text-ellipsis">
+                    <h3 className="text-lg font-semibold lg:font-bold lg:text-xl text-[#1D2939] mt-4 line-clamp-2 ml-0.5 mr-0.5">{course.title}</h3>
+                    <p className="text-sm font-normal text-[#667085] mt-1.5 lg:text-base line-clamp-3 overflow-hidden text-ellipsis ml-0.5 mr-0.5">
                         {course.sub_heading}
                     </p>
                 </div>
