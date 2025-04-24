@@ -4,10 +4,16 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { useEffect, useState } from 'react';
-import { createClient } from '@/lib/supabase/client';
+import { useState } from 'react';
 import { Loader2 } from 'lucide-react';
 import { Label } from '@/components/ui/label';
+import { IconSelector } from './icon-selector';
+
+interface Icon {
+  id: string;
+  url: string;
+  name: string;
+}
 
 interface CourseBenefit {
   id?: string;
@@ -38,17 +44,7 @@ export function CourseBenefitModal({
   const [description, setDescription] = useState(benefit?.description || '');
   const [color, setColor] = useState(benefit?.color || '#FF7B34');
   const [iconId, setIconId] = useState(benefit?.icon_id || '');
-  const [icons, setIcons] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
-
-  useEffect(() => {
-    const fetchIcons = async () => {
-      const supabase = createClient();
-      const { data } = await supabase.from('icons').select('*');
-      if (data) setIcons(data);
-    };
-    fetchIcons();
-  }, []);
 
   const handleSubmit = async () => {
     setLoading(true);
@@ -110,18 +106,10 @@ export function CourseBenefitModal({
           </div>
           <div>
             <Label>Icon</Label>
-            <div className="grid grid-cols-4 gap-2 mt-2">
-              {icons.map((icon) => (
-                <Button
-                  key={icon.id}
-                  variant={iconId === icon.id ? 'default' : 'outline'}
-                  className="p-2 h-auto aspect-square"
-                  onClick={() => setIconId(icon.id)}
-                >
-                  <img src={icon.url} alt={icon.name} className="w-full h-full object-contain" />
-                </Button>
-              ))}
-            </div>
+            <IconSelector
+              selectedIconId={iconId}
+              onSelect={(icon) => setIconId(icon.id)}
+            />
           </div>
           <div className="flex justify-end gap-2">
             <Button variant="outline" onClick={onClose}>
