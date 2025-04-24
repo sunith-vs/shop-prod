@@ -18,6 +18,7 @@ import { FileText, Image, Layout, Gift, Calendar, Plus, X } from 'lucide-react';
 import { CarouselSection } from './components/carousel-section';
 import { HighlightsSection } from './components/highlights-section';
 import { MediaSection } from './components/media-section';
+import { CourseBenefitsManager } from './components/course-benefits-manager';
 
 type CourseType = 'JEE' | 'NEET' | 'CUET' | '11-12' | '5-10';
 
@@ -480,18 +481,7 @@ export default function EditCourse({ params }: { params: { slug: string } }) {
               <CardTitle>Course Benefits</CardTitle>
             </CardHeader>
             <CardContent>
-              <HighlightsSection
-                courseId={course.id}
-                slug={params.slug}
-                initialHighlights={course.highlights || []}
-                onUpdate={(highlights) => {
-                  if (!course) return;
-                  setCourse({
-                    ...course,
-                    highlights
-                  });
-                }}
-              />
+              <CourseBenefitsManager courseId={course.id} />
             </CardContent>
           </Card>
         );
