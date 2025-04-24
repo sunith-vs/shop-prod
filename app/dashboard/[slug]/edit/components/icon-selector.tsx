@@ -27,7 +27,6 @@ export function IconSelector({ selectedIconId, onSelect }: IconSelectorProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [icons, setIcons] = useState<Icon[]>([]);
   const [loading, setLoading] = useState(false);
-  const [showAll, setShowAll] = useState(false);
   const [isAddIconOpen, setIsAddIconOpen] = useState(false);
   const [newIconName, setNewIconName] = useState('');
   const [addingIcon, setAddingIcon] = useState(false);
@@ -133,10 +132,6 @@ export function IconSelector({ selectedIconId, onSelect }: IconSelectorProps) {
         query = query.ilike('name', `%${searchQuery}%`);
       }
 
-      if (!showAll) {
-        query = query.limit(5);
-      }
-
       const { data, error } = await query;
       
       if (error) throw error;
@@ -150,7 +145,7 @@ export function IconSelector({ selectedIconId, onSelect }: IconSelectorProps) {
 
   useEffect(() => {
     fetchIcons();
-  }, [searchQuery, showAll]);
+  }, [searchQuery]);
 
   return (
     <div className="space-y-4">
@@ -174,41 +169,46 @@ export function IconSelector({ selectedIconId, onSelect }: IconSelectorProps) {
       </div>
 
       {loading ? (
-        <div className="flex justify-center p-4">
+        <div className="h-[240px] flex justify-center items-center border rounded-md">
           <Loader2 className="h-6 w-6 animate-spin" />
         </div>
       ) : (
-        <>
-          <div className="grid grid-cols-4 gap-2">
-            {icons.map((icon) => (
-              <Button
-                key={icon.id}
-                variant={selectedIconId === icon.id ? 'default' : 'outline'}
-                className="p-2 h-auto aspect-square relative group"
-                onClick={() => onSelect(icon)}
-              >
-                <img src={icon.url} alt={icon.name} className="w-full h-full object-contain" />
-                <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
-                  <span className="text-white text-xs text-center p-1">{icon.name}</span>
-                </div>
-              </Button>
-            ))}
+        <div className="space-y-2">
+          <div className="h-[240px] overflow-y-auto rounded-md border">
+            {icons.length === 0 ? (
+              <div className="h-full flex flex-col gap-2 items-center justify-center text-muted-foreground">
+                <p>No icons found</p>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setIsAddIconOpen(true)}
+                >
+                  Add Icons
+                </Button>
+              </div>
+            ) : (
+              <div className="grid grid-cols-3 gap-2 p-2">
+                {icons.map((icon) => (
+                  <Button
+                    key={icon.id}
+                    variant={selectedIconId === icon.id ? 'default' : 'outline'}
+                    className="h-50 aspect-square relative group"
+                    onClick={() => onSelect(icon)}
+                  >
+                    <img src={icon.url} alt={icon.name} className="w-full h-full" />
+                    <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
+                      <span className="text-white text-xs text-center p-1">{icon.name}</span>
+                    </div>
+                  </Button>
+                ))}
+              </div>
+            )}
           </div>
-
-          {!showAll && icons.length === 5 && (
-            <Button
-              variant="outline"
-              className="w-full"
-              onClick={() => setShowAll(true)}
-            >
-              Show All Icons
-            </Button>
-          )}
-        </>
+        </div>
       )}
 
       <Dialog open={isAddIconOpen} onOpenChange={handleClose}>
-        <DialogContent>
+        <DialogContent className="max-h-[90vh]">
           <DialogHeader>
             <DialogTitle>Add New Icon</DialogTitle>
           </DialogHeader>
