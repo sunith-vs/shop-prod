@@ -8,7 +8,10 @@ import { Button } from '@/components/ui/button';
 import { ComboboxSearch } from "@/components/ui/combobox-search";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from "@/components/ui/command";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Check, ChevronsUpDown } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { useState, useEffect } from 'react';
 import { useToast } from "@/components/ui/use-toast";
 import { useRouter } from 'next/navigation';
@@ -35,7 +38,7 @@ interface Course {
   highlights: string[];
   status: 'draft' | 'active' | 'inactive';
   popular: boolean;
-  course_type: CourseType;
+  course_type: string;
   eduport_course_id?: string;
   carousel_items?: Array<{
     id: string;
@@ -65,6 +68,9 @@ const tabs = [
 const COURSE_TYPES: CourseType[] = ['JEE', 'NEET', 'CUET', '11-12', '5-10'];
 
 export default function EditCourse({ params }: { params: { slug: string } }) {
+  const supabase = createClient();
+  const router = useRouter();
+  const { toast } = useToast();
   const [course, setCourse] = useState<Course | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -75,14 +81,37 @@ export default function EditCourse({ params }: { params: { slug: string } }) {
   const [eduportCourses, setEduportCourses] = useState<EduportCourse[]>([]);
   const [isLoadingCourses, setIsLoadingCourses] = useState(false);
   const [selectedEduportCourse, setSelectedEduportCourse] = useState<string>();
-  const { toast } = useToast();
-  const router = useRouter();
+  const [courseTypes, setCourseTypes] = useState<string[]>([]);
+  const [courseTypeOpen, setCourseTypeOpen] = useState(false);
+  const [courseTypeValue, setCourseTypeValue] = useState("");
+  const [courseTypeInput, setCourseTypeInput] = useState("");
+
+  useEffect(() => {
+    const fetchCourseTypes = async () => {
+      const { data, error } = await supabase
+        .from('courses')
+        .select('course_type')
+        .not('course_type', 'is', null);
+
+      if (error) {
+        console.error('Error fetching course types:', error);
+        return;
+      }
+
+      // Get unique types and filter out nulls/empty strings
+      const uniqueTypes = Array.from(new Set(data.map(item => item.course_type)))
+        .filter(type => type && type.trim());
+
+      setCourseTypes(uniqueTypes.sort());
+    };
+
+    fetchCourseTypes();
+  }, []);
 
   useEffect(() => {
     const fetchCourse = async () => {
       try {
         setIsLoading(true);
-        const supabase = createClient();
         
         // Fetch course data
         const { data: courseData, error: courseError } = await supabase
@@ -158,12 +187,18 @@ export default function EditCourse({ params }: { params: { slug: string } }) {
     }
   }, [course]);
 
+  useEffect(() => {
+    if (course?.course_type) {
+      setCourseTypeValue(course.course_type);
+      setCourseTypeInput(course.course_type);
+    }
+  }, [course]);
+
   const handleStatusChange = async () => {
     if (!course) return;
     
     try {
       setIsSubmitting(true);
-      const supabase = createClient();
       const newStatus = course.status === 'active' ? 'draft' : 'active';
 
       const { error } = await supabase
@@ -201,20 +236,49 @@ export default function EditCourse({ params }: { params: { slug: string } }) {
     try {
       setIsSubmitting(true);
       const formData = new FormData(event.currentTarget);
-      const supabase = createClient();
 
-      const newSlug = formData.get('slug') as string;
+      // Required field validation
+      const requiredFields = ['title', 'subHeading', 'slug', 'eduportCourseId'];
+      const missingFields = requiredFields.filter(field => !formData.get(field));
+      if (missingFields.length > 0) {
+        toast({
+          title: "Required Fields Missing",
+          description: `Please fill in: ${missingFields.join(', ')}`,
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Slug validation and formatting
+      const rawSlug = formData.get('slug') as string;
+      const formattedSlug = rawSlug
+        .toLowerCase()
+        .replace(/[^a-z0-9-]/g, '-') // Replace invalid chars with hyphens
+        .replace(/-+/g, '-')         // Replace multiple hyphens with single hyphen
+        .replace(/^-|-$/g, '');      // Remove leading/trailing hyphens
+
+      if (!formattedSlug) {
+        toast({
+          title: "Invalid Slug",
+          description: "Please enter a valid slug using letters, numbers, and hyphens",
+          variant: "destructive",
+        });
+        return;
+      }
+
       const updates = {
         title: formData.get('title') as string,
         description: formData.get('description') as string,
         sub_heading: formData.get('subHeading') as string,
-        slug: newSlug,
-        course_type: formData.get('courseType') as CourseType,
+        slug: formattedSlug,
+        course_type: formData.get('courseType') as string,
         popular: isPopular,
         eduport_course_id: formData.get('eduportCourseId') as string,
         highlights: highlights.filter(Boolean),
         updated_at: new Date().toISOString(),
       };
+
+      const supabase = createClient();
 
       const { error } = await supabase
         .from('courses')
@@ -233,8 +297,8 @@ export default function EditCourse({ params }: { params: { slug: string } }) {
       });
       
       // Redirect if slug changed
-      if (newSlug !== params.slug) {
-        router.push(`/dashboard/${newSlug}/edit`);
+      if (formattedSlug !== params.slug) {
+        router.push(`/dashboard/${formattedSlug}/edit`);
       } else {
         router.refresh();
       }
@@ -305,55 +369,121 @@ export default function EditCourse({ params }: { params: { slug: string } }) {
             <CardContent>
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="space-y-2">
-                  <label htmlFor="title" className="text-sm font-medium">Title</label>
+                  <label htmlFor="title" className="text-sm font-medium">
+                    Title <span className="text-red-500">*</span>
+                  </label>
                   <Input
                     id="title"
                     name="title"
-                    placeholder="Enter course title"
+                    defaultValue={course?.title}
                     required
-                    defaultValue={course.title}
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <label htmlFor="slug" className="text-sm font-medium">URL Slug</label>
-                  <Input
-                    id="slug"
-                    name="slug"
-                    placeholder="Enter URL slug"
-                    required
-                    value={editedSlug}
-                    onChange={(e) => setEditedSlug(e.target.value)}
-                    pattern="[a-z0-9-]+"
-                    title="Only lowercase letters, numbers, and hyphens are allowed"
-                  />
-                  <p className="text-sm text-muted-foreground">
-                    This will be used in the course URL. Use only lowercase letters, numbers, and hyphens.
-                  </p>
-                </div>
-                <div className="space-y-2">
-                  <label htmlFor="subHeading" className="text-sm font-medium">Sub Heading</label>
+                  <label htmlFor="subHeading" className="text-sm font-medium">
+                    Sub Heading <span className="text-red-500">*</span>
+                  </label>
                   <Input
                     id="subHeading"
                     name="subHeading"
-                    placeholder="Enter course sub heading"
-                    defaultValue={course.sub_heading}
+                    defaultValue={course?.sub_heading}
+                    required
                   />
                 </div>
+
+                <div className="space-y-2">
+                  <label htmlFor="slug" className="text-sm font-medium">
+                    URL Slug <span className="text-red-500">*</span>
+                  </label>
+                  <Input
+                    id="slug"
+                    name="slug"
+                    defaultValue={course?.slug}
+                    required
+                    pattern="^[a-z0-9-]+$"
+                    title="Only lowercase letters, numbers, and hyphens allowed"
+                    onChange={(e) => {
+                      e.target.value = e.target.value
+                        .toLowerCase()
+                        .replace(/[^a-z0-9-]/g, '-')
+                        .replace(/-+/g, '-')
+                        .replace(/^-|-$/g, '');
+                    }}
+                  />
+                  <p className="text-sm text-muted-foreground">
+                    Use lowercase letters, numbers, and hyphens only
+                  </p>
+                </div>
+
                 <div className="space-y-2">
                   <label htmlFor="courseType" className="text-sm font-medium">Course Type</label>
-                  <Select name="courseType" defaultValue={course.course_type}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select course type" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="JEE">JEE</SelectItem>
-                      <SelectItem value="NEET">NEET</SelectItem>
-                      <SelectItem value="CUET">CUET</SelectItem>
-                      <SelectItem value="11-12">11-12</SelectItem>
-                      <SelectItem value="5-10">5-10</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <Popover open={courseTypeOpen} onOpenChange={setCourseTypeOpen}>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        role="combobox"
+                        aria-expanded={courseTypeOpen}
+                        className="w-full justify-between"
+                      >
+                        {courseTypeValue || "Select course type..."}
+                        <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
+                      <Command>
+                        <CommandInput 
+                          placeholder="Search or enter new type..." 
+                          value={courseTypeInput}
+                          onValueChange={setCourseTypeInput}
+                        />
+                        {courseTypeInput && !courseTypes.includes(courseTypeInput) && (
+                          <CommandEmpty className="py-2 px-4 text-sm">
+                            <Button 
+                              variant="ghost" 
+                              className="w-full justify-start text-left font-normal"
+                              onClick={() => {
+                                setCourseTypeValue(courseTypeInput);
+                                setCourseTypeOpen(false);
+                              }}
+                            >
+                              Add "{courseTypeInput}"
+                            </Button>
+                          </CommandEmpty>
+                        )}
+                        <CommandGroup>
+                          {courseTypes
+                            .filter(type => 
+                              type.toLowerCase().includes(courseTypeInput.toLowerCase())
+                            )
+                            .map((type) => (
+                              <CommandItem
+                                key={type}
+                                onSelect={() => {
+                                  setCourseTypeValue(type);
+                                  setCourseTypeInput(type);
+                                  setCourseTypeOpen(false);
+                                }}
+                                className="cursor-pointer"
+                              >
+                                <Check
+                                  className={cn(
+                                    "mr-2 h-4 w-4",
+                                    courseTypeValue === type ? "opacity-100" : "opacity-0"
+                                  )}
+                                />
+                                {type}
+                              </CommandItem>
+                            ))}
+                        </CommandGroup>
+                      </Command>
+                    </PopoverContent>
+                  </Popover>
+                  <input 
+                    type="hidden" 
+                    name="courseType" 
+                    value={courseTypeValue} 
+                  />
                 </div>
 
                 <div className="flex items-center space-x-2">
@@ -371,20 +501,23 @@ export default function EditCourse({ params }: { params: { slug: string } }) {
                 </div>
 
                 <div className="space-y-2">
-                  <label htmlFor="eduportCourseId" className="text-sm font-medium">Eduport Course</label>
+                  <label htmlFor="eduportCourseId" className="text-sm font-medium">
+                    Eduport Course <span className="text-red-500">*</span>
+                  </label>
                   {isLoadingCourses ? (
                     <div className="w-full h-10 bg-muted animate-pulse rounded-md" />
                   ) : (
                     <ComboboxSearch
-                      name="eduportCourseId"
                       options={eduportCourses.map(course => ({
                         value: course.id.toString(),
                         label: course.title
                       }))}
                       value={selectedEduportCourse}
                       onValueChange={setSelectedEduportCourse}
-                      placeholder="Select a course"
-                      searchPlaceholder="Search by title or ID..."
+                      name="eduportCourseId"
+                      id="eduportCourseId"
+                      required
+                      placeholder="Select an Eduport course"
                     />
                   )}
                 </div>
@@ -435,7 +568,7 @@ export default function EditCourse({ params }: { params: { slug: string } }) {
                     name="description"
                     placeholder="Enter course description"
                     rows={5}
-                    defaultValue={course.description}
+                    defaultValue={course?.description}
                   />
                 </div>
 
