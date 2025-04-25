@@ -494,7 +494,7 @@ export default function EditCourse({ params }: { params: { slug: string } }) {
                                 setCourseTypeOpen(false);
                               }}
                             >
-                              Add "{courseTypeInput}"
+                              Add &#34;{courseTypeInput}&#34;
                             </Button>
                           </CommandEmpty>
                         )}
@@ -562,8 +562,8 @@ export default function EditCourse({ params }: { params: { slug: string } }) {
                       value={selectedEduportCourse}
                       onValueChange={setSelectedEduportCourse}
                       name="eduportCourseId"
-                      id="eduportCourseId"
-                      required
+                      // id="eduportCourseId"
+                      // required
                       placeholder="Select an Eduport course"
                     />
                   )}
