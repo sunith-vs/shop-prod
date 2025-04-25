@@ -18,12 +18,13 @@ import { useRouter } from 'next/navigation';
 import { notFound } from 'next/navigation';
 import { SideTabs } from './components/side-tabs';
 import { BatchesSection } from './components/batches-section';
-import { FileText, Image, Layout, Gift, Calendar, Plus, X } from 'lucide-react';
+import { FileText, Image, Layout, Gift, Calendar, Plus, X, Menu } from 'lucide-react';
 import { CarouselSection } from './components/carousel-section';
 import { HighlightsSection } from './components/highlights-section';
 import { MediaSection } from './components/media-section';
 import { CourseBenefitsManager } from './components/course-benefits-manager';
 import { Skeleton } from "@/components/ui/skeleton";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 
 type CourseType = 'JEE' | 'NEET' | 'CUET' | '11-12' | '5-10';
 
@@ -76,6 +77,7 @@ export default function EditCourse({ params }: { params: { slug: string } }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('general');
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [editedSlug, setEditedSlug] = useState('');
   const [isPopular, setIsPopular] = useState(false);
   const [highlights, setHighlights] = useState<string[]>([]);
@@ -359,26 +361,31 @@ export default function EditCourse({ params }: { params: { slug: string } }) {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-background">
-        <div className="sticky top-0 z-50 bg-background border-b">
-          <div className="container flex items-center justify-between h-16">
-            <Skeleton className="h-6 w-48" />
-            <div className="flex items-center gap-4">
-              <Skeleton className="h-10 w-24" />
-              <Skeleton className="h-10 w-24" />
-              <Skeleton className="h-10 w-24" />
+        <header className="sticky top-0 z-50 bg-background border-b">
+          <div className="container px-4 py-2 sm:py-3">
+            <div className="flex items-center justify-between mb-2 sm:mb-0">
+              <div className="flex items-center gap-3">
+                <Skeleton className="h-10 w-10" />
+                <Skeleton className="h-6 w-48" />
+              </div>
+            </div>
+            <div className="flex flex-wrap gap-2 sm:gap-3 justify-end">
+              <Skeleton className="h-10 w-full sm:w-24" />
+              <Skeleton className="h-10 w-full sm:w-24" />
+              <Skeleton className="h-10 w-full sm:w-24" />
             </div>
           </div>
-        </div>
+        </header>
 
-        <div className="flex">
-          <div className="w-64 p-4 border-r min-h-[calc(100vh-4rem)]">
+        <div className="flex flex-col sm:flex-row">
+          <div className="hidden sm:block w-64 border-r p-4">
             {Array(5).fill(0).map((_, i) => (
               <div key={i} className="mb-2">
                 <Skeleton className="h-10 w-full" />
               </div>
             ))}
           </div>
-          <div className="flex-1 p-6">
+          <div className="flex-1 p-4 sm:p-6">
             <div className="space-y-4">
               <Skeleton className="h-10 w-48" />
               <div className="grid gap-4">
@@ -721,30 +728,71 @@ export default function EditCourse({ params }: { params: { slug: string } }) {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="sticky top-0 z-50 bg-background border-b">
-        <div className="container flex items-center justify-between h-16">
-          <h1 className="text-lg font-medium">Editing: {course.title}</h1>
-          <div className="flex items-center gap-4">
-            <Button
-              variant={course.status === 'active' ? "destructive" : "default"}
-              onClick={handleStatusChange}
-              disabled={isSubmitting}
-            >
-              {course.status === 'active' ? 'Unpublish' : 'Publish'}
-            </Button>
-            <Button variant="outline" onClick={() => router.push('/dashboard')}>
-              Cancel
-            </Button>
-            <Button onClick={() => router.push(`/${params.slug}`)}>
-              View Course
-            </Button>
+      <header className="sticky top-0 z-50 bg-background border-b">
+        <div className="container px-4 py-2 sm:py-3">
+          {/* Title and Menu Row */}
+          <div className="flex items-center justify-between mb-2 sm:mb-0">
+            <div className="flex items-center gap-3">
+              <Sheet>
+                <SheetTrigger asChild className="sm:hidden">
+                  <Button variant="ghost" size="icon" className="-ml-3">
+                    <Menu className="h-5 w-5" />
+                  </Button>
+                </SheetTrigger>
+                <SheetContent side="left" className="w-[240px] sm:hidden p-0">
+                  <nav className="h-full py-4">
+                    <SideTabs tabs={tabs} activeTab={activeTab} onTabChange={(tab) => {
+                      setActiveTab(tab);
+                      const sheetClose = document.querySelector('[data-sheet-close]');
+                      if (sheetClose instanceof HTMLElement) {
+                        sheetClose.click();
+                      }
+                    }} />
+                  </nav>
+                </SheetContent>
+              </Sheet>
+              <h1 className="text-lg font-medium truncate">
+                {course.title}
+              </h1>
+            </div>
+          </div>
+
+          {/* Actions Row */}
+          <div className="flex flex-wrap gap-2 sm:gap-3 justify-end">
+            <div className="flex-1 sm:flex-none flex gap-2 sm:gap-3 order-1 sm:order-none">
+              <Button
+                variant={course.status === 'active' ? "destructive" : "default"}
+                onClick={handleStatusChange}
+                disabled={isSubmitting}
+                className="flex-1 sm:flex-none"
+              >
+                {course.status === 'active' ? 'Unpublish' : 'Publish'}
+              </Button>
+            </div>
+            <div className="flex gap-2 sm:gap-3 flex-[2] sm:flex-none order-0 sm:order-none">
+              <Button 
+                variant="outline" 
+                onClick={() => router.push('/dashboard')}
+                className="flex-1 sm:flex-none"
+              >
+                Cancel
+              </Button>
+              <Button 
+                onClick={() => router.push(`/${params.slug}`)}
+                className="flex-1 sm:flex-none"
+              >
+                View Course
+              </Button>
+            </div>
           </div>
         </div>
-      </div>
+      </header>
 
-      <div className="flex">
-        <SideTabs tabs={tabs} activeTab={activeTab} onTabChange={setActiveTab} />
-        <div className="flex-1 p-6">
+      <div className="flex flex-col sm:flex-row">
+        <div className="hidden sm:block w-64 border-r">
+          <SideTabs tabs={tabs} activeTab={activeTab} onTabChange={setActiveTab} />
+        </div>
+        <div className="flex-1 p-4 sm:p-6">
           {renderTabContent()}
         </div>
       </div>
