@@ -92,13 +92,12 @@ const CourseOption = ({ id, type, name, price, isSelected, onClick, batches }: C
       className={`border ${isSelected ? 'border-orange-500' : 'border-gray-200'} 
     rounded-xl p-4 mb-[10px] bg-[#FFF8E4] relative `}
     >
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between" onClick={() => onClick(id)}>
         <div className="flex items-center">
           <div
-            className={`w-[21.67px] h-[21.67px] relative rounded-[10.83px] border-[1.50px] ${isSelected ? 'border-[#fb6514]' : 'border-[#1d2939]'} rounded-full border border-gray-400 mr-3 flex items-center justify-center cursor-pointer`}
-            onClick={() => onClick(id)}
+            className={`p-[1px] relative rounded-[10.83px] border-[1.50px] ${isSelected ? 'border-[#fb6514]' : 'border-[#1d2939]'} rounded-full border border-gray-400 mr-3 flex items-center justify-center cursor-pointer`}
           >
-            {isSelected && <div className="w-4 h-4 bg-[#fb6514] rounded-full"></div>}
+            {isSelected ? <div className="w-4 h-4 bg-[#fb6514] rounded-full"></div> : <div className="w-4 h-4 rounded-full"></div>}
           </div>
           <div>
             <p className="text-[#1d2939] text-base font-bold">{name}</p>
