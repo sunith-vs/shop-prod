@@ -23,6 +23,7 @@ import { CarouselSection } from './components/carousel-section';
 import { HighlightsSection } from './components/highlights-section';
 import { MediaSection } from './components/media-section';
 import { CourseBenefitsManager } from './components/course-benefits-manager';
+import { Skeleton } from "@/components/ui/skeleton";
 
 type CourseType = 'JEE' | 'NEET' | 'CUET' | '11-12' | '5-10';
 
@@ -355,8 +356,47 @@ export default function EditCourse({ params }: { params: { slug: string } }) {
     }
   };
 
-  if (isLoading) return null;
-  if (!course) return notFound();
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-background">
+        <div className="sticky top-0 z-50 bg-background border-b">
+          <div className="container flex items-center justify-between h-16">
+            <Skeleton className="h-6 w-48" />
+            <div className="flex items-center gap-4">
+              <Skeleton className="h-10 w-24" />
+              <Skeleton className="h-10 w-24" />
+              <Skeleton className="h-10 w-24" />
+            </div>
+          </div>
+        </div>
+
+        <div className="flex">
+          <div className="w-64 p-4 border-r min-h-[calc(100vh-4rem)]">
+            {Array(5).fill(0).map((_, i) => (
+              <div key={i} className="mb-2">
+                <Skeleton className="h-10 w-full" />
+              </div>
+            ))}
+          </div>
+          <div className="flex-1 p-6">
+            <div className="space-y-4">
+              <Skeleton className="h-10 w-48" />
+              <div className="grid gap-4">
+                <Skeleton className="h-12 w-full" />
+                <Skeleton className="h-12 w-full" />
+                <Skeleton className="h-32 w-full" />
+                <Skeleton className="h-12 w-full" />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!course) {
+    return notFound();
+  }
 
   const renderTabContent = () => {
     switch (activeTab) {
