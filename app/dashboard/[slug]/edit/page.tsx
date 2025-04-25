@@ -569,6 +569,7 @@ export default function EditCourse({ params }: { params: { slug: string } }) {
                   )}
                 </div>
 
+
                 <div className="space-y-2">
                   <label className="text-sm font-medium">Course Highlights</label>
                   <div className="space-y-3">
