@@ -12,7 +12,7 @@ export const revalidate = 3600;
 
 export default async function HomePage() {
   const supabase = createClient();
-  
+
   const { data: coursesData, error: coursesError } = await supabase
     .from('courses')
     .select('*')
@@ -52,9 +52,9 @@ export default async function HomePage() {
           </p>
         </div>
 
-        <CourseTabs 
-          courses={courses} 
-          error={coursesError ? coursesError.message : null} 
+        <CourseTabs
+          courses={courses}
+          error={coursesError ? coursesError.message : null}
         />
       </div>
     </div>
