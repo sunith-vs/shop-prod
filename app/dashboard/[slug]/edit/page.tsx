@@ -5,9 +5,10 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { ComboboxSearch } from "@/components/ui/combobox-search";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useState, useEffect } from 'react';
 import { useToast } from "@/components/ui/use-toast";
 import { useRouter } from 'next/navigation';
@@ -46,6 +47,13 @@ interface Course {
   updated_at: string;
 }
 
+interface EduportCourse {
+  id: number;
+  title: string;
+  order: number;
+  batches: any[];
+}
+
 const tabs = [
   { id: 'general', label: 'General Details', icon: <FileText className="h-4 w-4" /> },
   { id: 'media', label: 'Images & Files', icon: <Image className="h-4 w-4" /> },
@@ -62,8 +70,11 @@ export default function EditCourse({ params }: { params: { slug: string } }) {
   const [isLoading, setIsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('general');
   const [editedSlug, setEditedSlug] = useState('');
-  const [isPopular, setIsPopular] = useState(course?.popular || false);
-  const [highlights, setHighlights] = useState<string[]>(course?.highlights || []);
+  const [isPopular, setIsPopular] = useState(false);
+  const [highlights, setHighlights] = useState<string[]>([]);
+  const [eduportCourses, setEduportCourses] = useState<EduportCourse[]>([]);
+  const [isLoadingCourses, setIsLoadingCourses] = useState(false);
+  const [selectedEduportCourse, setSelectedEduportCourse] = useState<string>();
   const { toast } = useToast();
   const router = useRouter();
 
@@ -121,6 +132,31 @@ export default function EditCourse({ params }: { params: { slug: string } }) {
 
     fetchCourse();
   }, [params.slug, toast]);
+
+  useEffect(() => {
+    const fetchEduportCourses = async () => {
+      setIsLoadingCourses(true);
+      try {
+        const response = await fetch('https://uat.eduport.in/staffapp/api/v3/v1/course/lists');
+        const data = await response.json();
+        if (!data.error && data.courses) {
+          setEduportCourses(data.courses);
+        }
+      } catch (error) {
+        console.error('Failed to fetch Eduport courses:', error);
+      } finally {
+        setIsLoadingCourses(false);
+      }
+    };
+
+    fetchEduportCourses();
+  }, []);
+
+  useEffect(() => {
+    if (course?.eduport_course_id) {
+      setSelectedEduportCourse(course.eduport_course_id.toString());
+    }
+  }, [course]);
 
   const handleStatusChange = async () => {
     if (!course) return;
@@ -295,7 +331,15 @@ export default function EditCourse({ params }: { params: { slug: string } }) {
                     This will be used in the course URL. Use only lowercase letters, numbers, and hyphens.
                   </p>
                 </div>
-
+                <div className="space-y-2">
+                  <label htmlFor="subHeading" className="text-sm font-medium">Sub Heading</label>
+                  <Input
+                    id="subHeading"
+                    name="subHeading"
+                    placeholder="Enter course sub heading"
+                    defaultValue={course.sub_heading}
+                  />
+                </div>
                 <div className="space-y-2">
                   <label htmlFor="courseType" className="text-sm font-medium">Course Type</label>
                   <Select name="courseType" defaultValue={course.course_type}>
@@ -303,11 +347,11 @@ export default function EditCourse({ params }: { params: { slug: string } }) {
                       <SelectValue placeholder="Select course type" />
                     </SelectTrigger>
                     <SelectContent>
-                      {COURSE_TYPES.map((type) => (
-                        <SelectItem key={type} value={type}>
-                          {type}
-                        </SelectItem>
-                      ))}
+                      <SelectItem value="JEE">JEE</SelectItem>
+                      <SelectItem value="NEET">NEET</SelectItem>
+                      <SelectItem value="CUET">CUET</SelectItem>
+                      <SelectItem value="11-12">11-12</SelectItem>
+                      <SelectItem value="5-10">5-10</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -327,23 +371,22 @@ export default function EditCourse({ params }: { params: { slug: string } }) {
                 </div>
 
                 <div className="space-y-2">
-                  <label htmlFor="eduportCourseId" className="text-sm font-medium">Eduport Course ID</label>
-                  <Input
-                    id="eduportCourseId"
-                    name="eduportCourseId"
-                    placeholder="Enter Eduport course ID"
-                    defaultValue={course.eduport_course_id}
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <label htmlFor="subHeading" className="text-sm font-medium">Sub Heading</label>
-                  <Input
-                    id="subHeading"
-                    name="subHeading"
-                    placeholder="Enter course sub heading"
-                    defaultValue={course.sub_heading}
-                  />
+                  <label htmlFor="eduportCourseId" className="text-sm font-medium">Eduport Course</label>
+                  {isLoadingCourses ? (
+                    <div className="w-full h-10 bg-muted animate-pulse rounded-md" />
+                  ) : (
+                    <ComboboxSearch
+                      name="eduportCourseId"
+                      options={eduportCourses.map(course => ({
+                        value: course.id.toString(),
+                        label: course.title
+                      }))}
+                      value={selectedEduportCourse}
+                      onValueChange={setSelectedEduportCourse}
+                      placeholder="Select a course"
+                      searchPlaceholder="Search by title or ID..."
+                    />
+                  )}
                 </div>
 
                 <div className="space-y-2">
