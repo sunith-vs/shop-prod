@@ -112,7 +112,7 @@ export function MediaSection({ courseId, initialData, onUpdate }: MediaSectionPr
                       className="object-contain"
                     />
                   </div>
-                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                  <div className="absolute inset-0 hover:bg-black/20 flex items-center justify-center">
                     <Button
                       variant="secondary"
                       size="sm"
@@ -154,7 +154,7 @@ export function MediaSection({ courseId, initialData, onUpdate }: MediaSectionPr
                       className="object-contain"
                     />
                   </div>
-                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                  <div className="absolute inset-0 bg-black/20 flex items-center justify-center">
                     <Button
                       variant="secondary"
                       size="sm"
@@ -199,24 +199,14 @@ export function MediaSection({ courseId, initialData, onUpdate }: MediaSectionPr
                     </p>
                   )}
                 </div>
-                <div className="flex gap-2">
-                  {brochureUrl && (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => window.open(brochureUrl, '_blank')}
-                    >
-                      View
-                    </Button>
-                  )}
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setActiveUpload('brochure')}
-                  >
-                    {brochureUrl ? 'Change' : 'Upload'}
-                  </Button>
-                </div>
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => setActiveUpload('brochure')}
+                >
+                  <Edit className="h-4 w-4 mr-2" />
+                  {brochureUrl ? 'Change' : 'Upload'}
+                </Button>
               </div>
             </div>
           </CardContent>
