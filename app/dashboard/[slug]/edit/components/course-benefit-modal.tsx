@@ -4,7 +4,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Loader2 } from 'lucide-react';
 import { Label } from '@/components/ui/label';
 import { IconSelector } from './icon-selector';
@@ -45,6 +45,16 @@ export function CourseBenefitModal({
   const [color, setColor] = useState(benefit?.color || '#FF7B34');
   const [iconId, setIconId] = useState(benefit?.icon_id || '');
   const [loading, setLoading] = useState(false);
+
+  // Update state when benefit prop changes
+  useEffect(() => {
+    if (benefit) {
+      setTitle(benefit.title || '');
+      setDescription(benefit.description || '');
+      setColor(benefit.color || '#FF7B34');
+      setIconId(benefit.icon_id || '');
+    }
+  }, [benefit]);
 
   const handleSubmit = async () => {
     setLoading(true);
