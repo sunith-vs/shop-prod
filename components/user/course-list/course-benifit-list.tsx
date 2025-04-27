@@ -10,70 +10,6 @@ interface BenefitItem {
     color: string; // Using hex value for background color
 }
 
-// Constants file to store all benefit data
-const COURSE_BENEFITS: BenefitItem[] = [
-    {
-        icon: '/svgs/class-hours.svg',
-        title: '140+',
-        description: 'Class Hours',
-        color: '#E3F7FF', // Light blue background
-    },
-    {
-        icon: '/svgs/revision.svg',
-        title: '7 DAYS',
-        description: 'Revision',
-        color: '#ACDDC0', // Light green background
-    },
-    {
-        icon: '/svgs/moc-test.svg',
-        title: '22',
-        description: 'Mock Tests',
-        color: '#FFFFE8', // Light yellow background
-    },
-    {
-        icon: '/svgs/doubt-clearence.svg',
-        title: 'DOUBT CLEARANCE',
-        description: 'BY NIT, IIT ALUMNI',
-        color: '#FFF0E8', // Light orange background
-    },
-    {
-        icon: '/svgs/expert-facalties.svg',
-        title: 'EXPERT FACULTIES',
-        description: 'From NIT, IIT ALUMNI',
-        color: '#FDEDFF', // Light purple background
-    },
-    {
-        icon: '/svgs/toppers-strategy.svg',
-        title: 'TOPPERS STRATEGY',
-        description: 'Exclusive study plans, motivational talks, and tips and tricks for MCQ',
-        color: '#FFF2F9', // Light pink background
-    },
-    {
-        icon: '/svgs/premium-study.svg',
-        title: 'PREMIUM STUDY MATERIALS',
-        description: 'Comprehensive textbooks with theory, practice, NCERT, and PYQs.',
-        color: '#FFF0E8', // Light orange background
-    },
-    {
-        icon: '/svgs/question-library.svg',
-        title: 'QUESTION LIBRARY',
-        description: 'All attempted questions in one place, where you can revisit, correct, and improve.',
-        color: '#E3F7FF', // Light blue background
-    },
-    {
-        icon: '/svgs/quick-notes.svg',
-        title: 'QUICK NOTES',
-        description: 'Digital notes where you can add reminders and explanations.',
-        color: '#FFFFE8', // Light yellow background
-    },
-    {
-        icon: '/svgs/mentorship.svg',
-        title: 'MENTORSHIP',
-        description: 'Each student is assigned a dedicated mentor.',
-        color: '#EEFFF4', // Light green background
-    }
-];
-
 // Interface for Icon data from the database
 interface Icon {
     id: string;
@@ -201,7 +137,7 @@ const CourseBenefitsSection: React.FC<CourseBenefitsListProps> = ({ courseBenefi
     }, [courseBenefits]);
 
     console.log("courseBenefits from props", courseBenefits);
-    return (
+    return  !courseBenefits ? (<></>) : (
         <section className="course-benefits py-10">
             <h2 className="text-[#1d2939] text-4xl md:text-[52px] font-bold text-center mb-10">
                 Course Benefits

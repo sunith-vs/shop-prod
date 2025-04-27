@@ -13,7 +13,7 @@ type CourseCardProps = {
 
 export const CourseCard: React.FC<CourseCardProps> = ({ course, className }) => {
     return (
-        <Link href={`/${course.slug}`} className="group">
+        <Link href={`/${course.slug}`} className="group" prefetch={true}>
             <Card
                 className={`course-card bg-white rounded-[20px] p-3 border hover:border-2 hover:border-[#FB6514] relative overflow-hidden group h-full flex flex-col ${className}`}
             >
