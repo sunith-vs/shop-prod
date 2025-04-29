@@ -6,11 +6,7 @@ const RouteListNav = ({ courseTitle }: { courseTitle: string }) => {
     <div className='text-sm font-normal'>
       <ul className="flex list-none space-x-2">
         <li>
-          <Link href="/" className="hover:text-orange-500">Home</Link>
-        </li>
-        <span className="text-gray-500 mx-2">{'>'}</span>
-        <li>
-          <Link href="/course" className="hover:text-orange-500">Course</Link>
+          <Link href="/" className="hover:text-orange-500">Course</Link>
         </li>
         <span className="text-gray-500 mx-2">{'>'}</span>
         <li>
