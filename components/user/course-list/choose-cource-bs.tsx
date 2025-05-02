@@ -180,8 +180,8 @@ const CourseBottomSheet: React.FC<CourseBottomSheetProps> = ({ isOpen, onClose, 
                                     courses.map((course) => (
                                         <div key={course.id}>
                                             <h3 className="text-[#1d2939] text-sm md:text-lg font-bold mb-[14px]">{course.title}</h3>
-                                            <div className={`border rounded-lg p-4 flex items-center justify-between transition-all ${selectedCourse === course.id ? 'border-orange-500' : 'border-gray-300'}`}>
-                                                <div className="flex items-center space-x-3" onClick={() => setSelectedCourse(course.id)}>
+                                            <div className={`border rounded-lg p-4 flex items-center cursor-pointer justify-between transition-all ${selectedCourse === course.id ? 'border-orange-500' : 'border-gray-300'}`} onClick={() => setSelectedCourse(course.id)}>
+                                                <div className="flex items-center space-x-3">
                                                     <div
                                                         className={`w-6 h-6 flex items-center justify-center rounded border ${selectedCourse === course.id
                                                             ? 'bg-orange-500 border-orange-500'

@@ -12,29 +12,29 @@ const CoursesOfferBanner = ({ bannerUrl, bannerMobile }: { bannerUrl: string, ba
     const checkScreenSize = () => {
       setIsMediumOrSmall(window.innerWidth < 1024)
     }
-    
+
     // Initial check
     checkScreenSize()
-    
+
     // Add event listener for window resize
     window.addEventListener('resize', checkScreenSize)
-    
+
     // Clean up event listener
     return () => window.removeEventListener('resize', checkScreenSize)
   }, [])
 
   return (
-    <div style={{ position: 'relative', width: '100%' }}>
-      <Image 
+    <div style={{ position: 'relative', width: '100%' }} className='lg:h-[220px]'>
+      <Image
         src={isMediumOrSmall ? bannerMobile : bannerUrl}
         alt="Our Courses Offer Banner"
         width={0}
         height={0}
         sizes="100vw"
-        style={{ 
-          width: '100%', 
+        style={{
+          width: '100%',
           height: 'auto',
-          objectFit: 'contain' 
+          objectFit: 'contain'
         }}
         priority
       />
