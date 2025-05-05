@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { validateEmail, validatePhone } from '@/utils/validation';
+import { validateEmail, validatePhone, validateName } from '@/utils/validation';
 
 interface PurchaseModalProps {
   isOpen: boolean;
@@ -57,7 +57,7 @@ const PurchaseModal = ({ isOpen, onClose, courseId, courseAmount, courseName }: 
     // Validate inputs
     let isValid = true;
 
-    if (!name) {
+    if (!validateName(name)) {
       newErrors.name = true;
       isValid = false;
     }
@@ -180,7 +180,7 @@ const PurchaseModal = ({ isOpen, onClose, courseId, courseAmount, courseName }: 
               className={`w-full px-4 py-2 border ${errors.name ? 'border-red-500' : 'border-gray-300'} rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500`}
               placeholder="Enter your full name"
             />
-            {errors.name && <p id="name-error" className="text-red-500 text-sm mt-1">Please enter your name</p>}
+            {errors.name && <p id="name-error" className="text-red-500 text-sm mt-1">Please enter a valid name (letters, spaces, hyphens, and apostrophes only)</p>}
           </div>
           
           <div className="mb-4">
