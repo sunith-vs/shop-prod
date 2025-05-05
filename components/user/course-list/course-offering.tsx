@@ -236,7 +236,17 @@ const CourseOffering = ({ batches, course }: CourseOfferingProps) => {
             BUY NOW
           </button>
 
-          <button className="w-full text-[#FB6514] font-bold py-4 flex items-center justify-center bg-[#fff6f1] rounded-xl">
+          <button 
+            className="w-full text-[#FB6514] font-bold py-4 flex items-center justify-center bg-[#fff6f1] rounded-xl"
+            onClick={() => {
+              if (course?.brochure_url) {
+                // Open the brochure URL in a new tab
+                window.open(course.brochure_url, '_blank', 'noopener,noreferrer');
+              } else {
+                console.log('Brochure URL not available');
+              }
+            }}
+          >
             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
             </svg>
