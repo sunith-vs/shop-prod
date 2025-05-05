@@ -14,20 +14,23 @@ interface MediaSectionProps {
     banner_url?: string;
     thumbnail?: string;
     brochure_url?: string;
+    tag_url?: string;
   };
   onUpdate: (updates: Partial<{
     banner_url: string;
     thumbnail: string;
     brochure_url: string;
+    tag_url: string;
   }>) => void;
 }
 
-type UploadType = 'banner' | 'thumbnail' | 'brochure' | null;
+type UploadType = 'banner' | 'thumbnail' | 'brochure' | 'tag' |null;
 
 export function MediaSection({ courseId, initialData, onUpdate }: MediaSectionProps) {
   const [bannerUrl, setBannerUrl] = useState(initialData.banner_url || '');
   const [thumbnailUrl, setThumbnailUrl] = useState(initialData.thumbnail || '');
   const [brochureUrl, setBrochureUrl] = useState(initialData.brochure_url || '');
+    const [tagUrl, setTagUrl] = useState(initialData.tag_url || '');
   const [activeUpload, setActiveUpload] = useState<UploadType>(null);
 
   const bannerUpload = useSupabaseUpload({
@@ -50,6 +53,13 @@ export function MediaSection({ courseId, initialData, onUpdate }: MediaSectionPr
     allowedMimeTypes: ['application/pdf'],
     maxFiles: 1,
   });
+  const tagUpload = useSupabaseUpload({
+    bucketName: 'courses',
+    path: 'tag',
+    allowedMimeTypes: ['image/*'],
+    maxFiles: 1,
+  });
+
 
   useEffect(() => {
     if (bannerUpload.isSuccess && bannerUpload.successes.length > 0) {
@@ -59,6 +69,15 @@ export function MediaSection({ courseId, initialData, onUpdate }: MediaSectionPr
       // Don't close modal immediately on success to show the preview
     }
   }, [bannerUpload.isSuccess, bannerUpload.successes]);
+
+    useEffect(() => {
+        if (tagUpload.isSuccess && tagUpload.successes.length > 0) {
+        const url = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/courses/tag/${tagUpload.successes[0]}`;
+        setTagUrl(url);
+        onUpdate({ tag_url: url });
+        // Don't close modal immediately on success to show the preview
+        }
+    }, [tagUpload.isSuccess, tagUpload.successes]);
 
   useEffect(() => {
     if (thumbnailUpload.isSuccess && thumbnailUpload.successes.length > 0) {
@@ -82,7 +101,8 @@ export function MediaSection({ courseId, initialData, onUpdate }: MediaSectionPr
     // Only close if there's no active upload
     const upload = activeUpload === 'banner' ? bannerUpload 
       : activeUpload === 'thumbnail' ? thumbnailUpload 
-      : activeUpload === 'brochure' ? brochureUpload 
+      : activeUpload === 'brochure' ? brochureUpload
+        : activeUpload === 'tag' ? tagUpload
       : null;
       
     if (upload && !upload.loading) {
@@ -95,6 +115,95 @@ export function MediaSection({ courseId, initialData, onUpdate }: MediaSectionPr
   return (
     <>
       <div className="space-y-6">
+        <Card>
+          <CardHeader>
+            <CardTitle>Tag Image</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="relative w-48 bg-muted rounded-lg overflow-hidden">
+              {tagUrl ? (
+                <>
+                  <div className="aspect-[135/40]">
+                    <Image
+                      src={tagUrl}
+                      alt="Tag"
+                      fill
+                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                      className="object-contain"
+                    />
+                  </div>
+                  <div className="absolute inset-0 bg-black/20 flex items-center justify-center">
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      onClick={() => setActiveUpload('tag')}
+                    >
+                      <Edit className="h-4 w-4 mr-2" />
+                      Change
+                    </Button>
+                  </div>
+                </>
+              ) : (
+                <div className="aspect-[135/40] flex items-center justify-center">
+                  <Button
+                    variant="secondary"
+                    onClick={() => setActiveUpload('tag')}
+                  >
+                    Upload Tag
+                  </Button>
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+        {/*<Card>*/}
+        {/*  <CardHeader>*/}
+        {/*    <CardTitle>Tag Image</CardTitle>*/}
+        {/*  </CardHeader>*/}
+        {/*  <CardContent>*/}
+        {/*    /!*<div className="aspect-[374/232] flex items-center justify-center">*!/*/}
+        {/*    /!*  <Button*!/*/}
+        {/*    /!*    variant="secondary"*!/*/}
+        {/*    /!*    onClick={() => setActiveUpload('tag')}*!/*/}
+        {/*    /!*  >*!/*/}
+        {/*    /!*    Upload Tag Image*!/*/}
+        {/*    /!*  </Button>*!/*/}
+        {/*    /!*</div>*!/*/}
+        {/*    {tagUrl ? (*/}
+        {/*        <>*/}
+        {/*          <div className="aspect-[374/232]">*/}
+        {/*            <Image*/}
+        {/*              src={tagUrl}*/}
+        {/*              alt="tag"*/}
+        {/*              fill*/}
+        {/*              sizes="(max-width: 120) 50vw, (max-width: 120px) 50vw, 33vw"*/}
+        {/*              className="object-contain"*/}
+        {/*            />*/}
+        {/*          </div>*/}
+        {/*          <div className="absolute inset-0 bg-black/20 flex items-center justify-center">*/}
+        {/*            <Button*/}
+        {/*              variant="secondary"*/}
+        {/*              size="sm"*/}
+        {/*              onClick={() => setActiveUpload('tag')}*/}
+        {/*            >*/}
+        {/*              <Edit className="h-4 w-4 mr-2" />*/}
+        {/*              Change*/}
+        {/*            </Button>*/}
+        {/*          </div>*/}
+        {/*        </>*/}
+        {/*      ) : (*/}
+        {/*        <div className="aspect-[374/232] flex items-center justify-center">*/}
+        {/*          <Button*/}
+        {/*            variant="secondary"*/}
+        {/*            onClick={() => setActiveUpload('tag')}*/}
+        {/*          >*/}
+        {/*            Upload Tag Image*/}
+        {/*          </Button>*/}
+        {/*        </div>*/}
+        {/*      )}*/}
+        {/*  </CardContent>*/}
+        {/*</Card>*/}
+
         <Card>
           <CardHeader>
             <CardTitle>Banner Image</CardTitle>
@@ -220,7 +329,13 @@ export function MediaSection({ courseId, initialData, onUpdate }: MediaSectionPr
         type="image"
         upload={bannerUpload}
       />
-
+      <FileUploadModal
+        isOpen={activeUpload === 'tag'}
+        onClose={handleCloseModal}
+        title="Upload Tag Image"
+        type="image"
+        upload={tagUpload}
+      />
       <FileUploadModal
         isOpen={activeUpload === 'thumbnail'}
         onClose={handleCloseModal}

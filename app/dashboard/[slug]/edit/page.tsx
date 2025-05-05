@@ -642,6 +642,7 @@ export default function EditCourse({ params }: { params: { slug: string } }) {
                   courseId={course.id}
                   initialData={{
                     banner_url: course.banner_url,
+                    tag_url: course.tag_url,
                     thumbnail: course.thumbnail,
                     brochure_url: course.brochure_url
                   }}
