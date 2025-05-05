@@ -1,4 +1,3 @@
-
 'use client'
 import React from 'react'
 import Image from 'next/image'
@@ -23,10 +22,14 @@ const CoursesOfferBanner = ({ bannerUrl, bannerMobile }: { bannerUrl: string, ba
     return () => window.removeEventListener('resize', checkScreenSize)
   }, [])
 
+  // Ensure we have valid image URLs by providing fallbacks
+  const mobileSrc = bannerMobile || bannerUrl || '/images/default-banner-mobile.jpg'
+  const desktopSrc = bannerUrl || bannerMobile || '/images/default-banner.jpg'
+
   return (
     <div style={{ position: 'relative', width: '100%' }} className='lg:h-[220px]'>
       <Image
-        src={isMediumOrSmall ? bannerMobile : bannerUrl}
+        src={isMediumOrSmall ? mobileSrc : desktopSrc}
         alt="Our Courses Offer Banner"
         width={0}
         height={0}
