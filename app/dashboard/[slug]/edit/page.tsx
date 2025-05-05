@@ -36,6 +36,7 @@ interface Course {
   banner_url: string;
   thumbnail: string;
   brochure_url: string;
+  tag_url?: string;
   slug: string;
   highlights: string[];
   status: 'draft' | 'active' | 'inactive';

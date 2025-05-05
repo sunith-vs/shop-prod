@@ -6,7 +6,7 @@ import { useSupabaseUpload } from '@/hooks/use-supabase-upload';
 import { Button } from '@/components/ui/button';
 import Image from 'next/image';
 import { FileUploadModal } from './file-upload-modal';
-import { Edit, FileText } from 'lucide-react';
+import { Edit, FileText, Trash } from 'lucide-react';
 
 interface MediaSectionProps {
   courseId: string;
@@ -120,10 +120,10 @@ export function MediaSection({ courseId, initialData, onUpdate }: MediaSectionPr
             <CardTitle>Tag Image</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="relative w-48 bg-muted rounded-lg overflow-hidden">
+            <div className="w-full max-w-md">
               {tagUrl ? (
-                <>
-                  <div className="aspect-[135/40]">
+                <div className="space-y-3">
+                  <div className="aspect-[135/40] bg-white p-2 relative rounded-lg border">
                     <Image
                       src={tagUrl}
                       alt="Tag"
@@ -132,77 +132,46 @@ export function MediaSection({ courseId, initialData, onUpdate }: MediaSectionPr
                       className="object-contain"
                     />
                   </div>
-                  <div className="absolute inset-0 bg-black/20 flex items-center justify-center">
+                  <div className="flex items-center justify-end gap-2">
                     <Button
-                      variant="secondary"
+                      variant="outline"
                       size="sm"
                       onClick={() => setActiveUpload('tag')}
                     >
                       <Edit className="h-4 w-4 mr-2" />
                       Change
                     </Button>
+                    <Button
+                      variant="destructive"
+                      size="sm"
+                      onClick={() => {
+                        setTagUrl('');
+                        onUpdate({ tag_url: '' });
+                      }}
+                    >
+                      <Trash className="h-4 w-4 mr-2" />
+                      Remove
+                    </Button>
                   </div>
-                </>
+                </div>
               ) : (
-                <div className="aspect-[135/40] flex items-center justify-center">
-                  <Button
-                    variant="secondary"
-                    onClick={() => setActiveUpload('tag')}
-                  >
-                    Upload Tag
-                  </Button>
+                <div className="aspect-[135/40] flex items-center justify-center p-6 border-2 border-dashed border-muted-foreground/25 rounded-lg">
+                  <div className="text-center">
+                    <Button
+                      variant="outline"
+                      onClick={() => setActiveUpload('tag')}
+                      className="mb-2"
+                    >
+                      <FileText className="h-4 w-4 mr-2" />
+                      Upload Tag Image
+                    </Button>
+                    <p className="text-sm text-muted-foreground">Recommended size: 135x40</p>
+                  </div>
                 </div>
               )}
             </div>
           </CardContent>
         </Card>
-        {/*<Card>*/}
-        {/*  <CardHeader>*/}
-        {/*    <CardTitle>Tag Image</CardTitle>*/}
-        {/*  </CardHeader>*/}
-        {/*  <CardContent>*/}
-        {/*    /!*<div className="aspect-[374/232] flex items-center justify-center">*!/*/}
-        {/*    /!*  <Button*!/*/}
-        {/*    /!*    variant="secondary"*!/*/}
-        {/*    /!*    onClick={() => setActiveUpload('tag')}*!/*/}
-        {/*    /!*  >*!/*/}
-        {/*    /!*    Upload Tag Image*!/*/}
-        {/*    /!*  </Button>*!/*/}
-        {/*    /!*</div>*!/*/}
-        {/*    {tagUrl ? (*/}
-        {/*        <>*/}
-        {/*          <div className="aspect-[374/232]">*/}
-        {/*            <Image*/}
-        {/*              src={tagUrl}*/}
-        {/*              alt="tag"*/}
-        {/*              fill*/}
-        {/*              sizes="(max-width: 120) 50vw, (max-width: 120px) 50vw, 33vw"*/}
-        {/*              className="object-contain"*/}
-        {/*            />*/}
-        {/*          </div>*/}
-        {/*          <div className="absolute inset-0 bg-black/20 flex items-center justify-center">*/}
-        {/*            <Button*/}
-        {/*              variant="secondary"*/}
-        {/*              size="sm"*/}
-        {/*              onClick={() => setActiveUpload('tag')}*/}
-        {/*            >*/}
-        {/*              <Edit className="h-4 w-4 mr-2" />*/}
-        {/*              Change*/}
-        {/*            </Button>*/}
-        {/*          </div>*/}
-        {/*        </>*/}
-        {/*      ) : (*/}
-        {/*        <div className="aspect-[374/232] flex items-center justify-center">*/}
-        {/*          <Button*/}
-        {/*            variant="secondary"*/}
-        {/*            onClick={() => setActiveUpload('tag')}*/}
-        {/*          >*/}
-        {/*            Upload Tag Image*/}
-        {/*          </Button>*/}
-        {/*        </div>*/}
-        {/*      )}*/}
-        {/*  </CardContent>*/}
-        {/*</Card>*/}
 
         <Card>
           <CardHeader>
