@@ -3,6 +3,7 @@
 import React, { useState } from 'react'
 import CourseBottomSheet from './choose-cource-bs'
 import EnquiryBottomSheet from './enquiry-bs'
+import TallyFormModal from './tally-form-modal'
 
 // Define the interface for the form data to match what EnquiryBottomSheet expects
 interface Batch {
@@ -31,32 +32,16 @@ interface CourseListFooterProps {
 const CourseListFooter = ({ batches = [], courseSlug = '' }: CourseListFooterProps) => {
     const [isBottomSheetOpen, setIsBottomSheetOpen] = useState(false);
     const [isEnquiryOpen, setIsEnquiryOpen] = useState(false);
+    const [isTallyFormOpen, setIsTallyFormOpen] = useState(false);
 
     const openBottomSheet = () => setIsBottomSheetOpen(true);
     const closeBottomSheet = () => setIsBottomSheetOpen(false);
     const openEnquiry = () => setIsEnquiryOpen(true);
     const closeEnquiry = () => setIsEnquiryOpen(false);
-
-    // Function to open Tally form with pre-filled hidden fields
-    const openTallyForm = () => {
-        // Base Tally form URL
-        const tallyFormUrl = 'https://tally.so/r/w2VrQM';
-        
-        // Get URL parameters for UTM tracking
-        const urlParams = new URLSearchParams(window.location.search);
-        const utmSource = urlParams.get('utm_source') || '';
-        const utmMedium = urlParams.get('utm_medium') || '';
-        const utmCampaign = urlParams.get('utm_campaign') || '';
-        
-        // Use the course slug from props instead of URL parameters
-        const courseName = courseSlug;
-        
-        // Construct URL with pre-filled hidden fields
-        const formUrlWithParams = `${tallyFormUrl}?course_name=${encodeURIComponent(courseName)}&utm_source=${encodeURIComponent(utmSource)}&utm_medium=${encodeURIComponent(utmMedium)}&utm_campaign=${encodeURIComponent(utmCampaign)}`;
-        
-        // Open in a new tab
-        window.open(formUrlWithParams, '_blank');
-    };
+    
+    // Function to open Tally form modal
+    const openTallyForm = () => setIsTallyFormOpen(true);
+    const closeTallyForm = () => setIsTallyFormOpen(false);
 
     // Handle the enquiry form submission
     const handleEnquirySubmit = (formData: EnquiryFormData) => {
@@ -101,6 +86,12 @@ const CourseListFooter = ({ batches = [], courseSlug = '' }: CourseListFooterPro
                 isOpen={isBottomSheetOpen}
                 onClose={closeBottomSheet}
                 batches={batches}
+            />
+            
+            <TallyFormModal
+                isOpen={isTallyFormOpen}
+                onClose={closeTallyForm}
+                courseSlug={courseSlug}
             />
         </>
     )
