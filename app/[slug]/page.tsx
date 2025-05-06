@@ -84,7 +84,9 @@ const CourseList = async ({ params }: { params: { slug: string } }) => {
 
   return (
     <div className='max-w-[1580px] mx-auto pb-[150px]'>
-      <CoursesOfferBanner bannerUrl={course.banner_url} bannerMobile={course.banner_mobile} />
+      {((course.banner_url && course.banner_url.trim() !== '') || (course.banner_mobile && course.banner_mobile.trim() !== '')) && (
+        <CoursesOfferBanner bannerUrl={course.banner_url} bannerMobile={course.banner_mobile} />
+      )}
       <div className='max-w-[1380px] mx-auto px-[16px] md:px-[24px]'>
         <div className="lg:flex mt-[60px]">
           <CarouselList courseId={course.id} courseTitle={course.title} />

@@ -137,7 +137,8 @@ const CourseBenefitsSection: React.FC<CourseBenefitsListProps> = ({ courseBenefi
     }, [courseBenefits]);
 
     console.log("courseBenefits from props", courseBenefits);
-    return  !courseBenefits ? (<></>) : (
+    // Hide the section if courseBenefits is null, undefined, or an empty array
+    return (!courseBenefits || courseBenefits.length === 0) ? (<></>) : (
         <section className="course-benefits py-10">
             <h2 className="text-[#1d2939] text-4xl md:text-[52px] font-bold text-center mb-10">
                 Course Benefits
