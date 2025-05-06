@@ -16,6 +16,8 @@ interface Batch {
     course_id: string;
     created_at: string;
     offline?: boolean;
+    discount: number;
+    duration: string;
 }
 
 interface EnquiryFormData {
@@ -33,7 +35,7 @@ interface CourseListFooterProps {
 const CourseListFooter = ({ batches = [], courseSlug = '' }: CourseListFooterProps) => {
     // Use the Zustand store for bottom sheet state
     const { isBottomSheetOpen, openBottomSheet, closeBottomSheet } = usePurchaseStore();
-    
+    console.log(batches)
     const [isEnquiryOpen, setIsEnquiryOpen] = React.useState(false);
     const [isTallyFormOpen, setIsTallyFormOpen] = React.useState(false);
 

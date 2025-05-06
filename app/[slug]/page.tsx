@@ -77,11 +77,6 @@ const CourseList = async ({ params }: { params: { slug: string } }) => {
     throw new Error('Failed to fetch course benefits');
   }
 
-  console.log("course", course);
-  console.log("courseDetails", courseDetails);
-  console.log("batches", batches);
-  console.log("courseBenefits", courseBenefits);
-
   return (
     <div className='max-w-[1580px] mx-auto pb-[150px]'>
       <CoursesOfferBanner bannerUrl={course.banner_url} bannerMobile={course.banner_mobile} />

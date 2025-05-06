@@ -13,6 +13,8 @@ interface Batch {
     course_id: string;
     created_at: string;
     offline?: boolean;
+    discount: number;
+    duration: string;
 }
 
 interface CourseBottomSheetProps {
@@ -34,17 +36,18 @@ const CourseBottomSheet: React.FC<CourseBottomSheetProps> = ({ isOpen, onClose, 
         email: false,
         phone: false
     });
+    console.log(batches)
 
     // Convert batches to the format needed for display
     const courses = batches.map(batch => ({
         id: batch.id,
         title: batch.name,
         type: batch.type === 'offline' ? 'Offline' : 'Online',
-        price: batch.amount,
-        priceFormatted: `₹${batch.amount.toLocaleString()}`,
-        duration: '2 years',
-        originalPrice: `₹${Math.round(batch.amount * 1.1).toLocaleString()}`,
-        discount: '(10% OFF)',
+        price: batch.amount * (1 - batch.discount / 100),
+        priceFormatted: batch.amount * (1 - batch.discount / 100),
+        duration: {12: '1 year', 24: '2 years', 36: '3 years'}[batch.duration] || `${batch.duration} months` ,
+        originalPrice: batch.amount,
+        discount: batch.discount,
         highlighted: batch.type !== 'offline'
     }));
 

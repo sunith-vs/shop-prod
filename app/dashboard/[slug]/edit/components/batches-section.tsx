@@ -44,6 +44,7 @@ interface Batch {
     course_id: string;
     created_at?: string;
     discount?: number;
+    duration?: number;
 }
 
 interface EduportBatch {
@@ -78,6 +79,7 @@ const batchFormSchema = z.object({
     amount: z.coerce.number().positive("Amount must be positive"),
     eduport_batch_id: z.coerce.number().int().nullable(),
     discount: z.coerce.number().min(0, "Discount cannot be negative").max(100, "Discount cannot exceed 100%").default(0),
+    duration: z.coerce.number().int().positive("Duration must be a positive number")
 });
 
 type BatchFormData = z.infer<typeof batchFormSchema>;
@@ -107,6 +109,7 @@ export function BatchesSection({ courseId }: BatchesSectionProps) {
             amount: 0,
             eduport_batch_id: null,
             discount: 0,
+            duration: 0,
         }
     });
 
@@ -212,6 +215,7 @@ export function BatchesSection({ courseId }: BatchesSectionProps) {
                 amount: 0,
                 eduport_batch_id: null,
                 discount: 0,
+                duration: 0,
             });
         }
     }, [isModalOpen, form]);
@@ -225,6 +229,7 @@ export function BatchesSection({ courseId }: BatchesSectionProps) {
             amount: batch.amount,
             eduport_batch_id: batch.eduport_batch_id,
             discount: batch.discount || 0,
+            duration: batch.duration || 0,
         });
         setIsModalOpen(true);
     };
@@ -257,6 +262,7 @@ export function BatchesSection({ courseId }: BatchesSectionProps) {
             eduport_batch_id: values.eduport_batch_id || null, // Ensure null if empty
             course_id: courseId,
             discount: values.discount,
+            duration: values.duration,
         };
 
         let error = null;
@@ -398,6 +404,26 @@ export function BatchesSection({ courseId }: BatchesSectionProps) {
                                     />
                                     <FormField
                                         control={form.control}
+                                        name="duration"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>Duration</FormLabel>
+                                                <FormControl>
+                                                    <Input 
+                                                        type="number" 
+                                                        min="1" 
+                                                        step="1" 
+                                                        placeholder="e.g., 24" 
+                                                        {...field} 
+                                                    />
+                                                </FormControl>
+                                                <p className="text-sm text-muted-foreground mt-1">Duration in months (e.g., 12 for 1 year, 24 for 2 years)</p>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+                                    <FormField
+                                        control={form.control}
                                         name="eduport_batch_id"
                                         render={({ field }) => (
                                             <FormItem>
@@ -472,6 +498,7 @@ export function BatchesSection({ courseId }: BatchesSectionProps) {
                                 <TableHead>Type</TableHead>
                                 <TableHead>Amount</TableHead>
                                 <TableHead>Discount</TableHead>
+                                <TableHead>Duration</TableHead>
                                 <TableHead>Eduport ID</TableHead>
                                 <TableHead>Actions</TableHead>
                             </TableRow>
@@ -483,6 +510,7 @@ export function BatchesSection({ courseId }: BatchesSectionProps) {
                                     <TableCell>{batch.type}</TableCell>
                                     <TableCell>{batch.amount.toFixed(2)}</TableCell>
                                     <TableCell>{batch.discount ? `${batch.discount}%` : '-'}</TableCell>
+                                    <TableCell>{batch.duration ? `${batch.duration} months` : '0 months'}</TableCell>
                                     <TableCell>{batch.eduport_batch_id || '-'}</TableCell>
                                     <TableCell className="space-x-2">
                                         <Button variant="ghost" size="icon" onClick={() => handleEdit(batch)} disabled={isSubmitting}>
