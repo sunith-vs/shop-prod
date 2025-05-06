@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import Image from 'next/image';
 import PurchaseModal from '../purchase/purchase-modal';
+import { usePurchaseStore } from '@/lib/store/purchase-store';
 
 // Define TypeScript interfaces
 interface CourseOptionProps {
@@ -130,6 +131,9 @@ const CourseOffering = ({ batches, course }: CourseOfferingProps) => {
   const defaultSelectedCourse = batches && batches.length > 0 ? batches[0].id : 'offline-neet';
   const [selectedCourse, setSelectedCourse] = useState(defaultSelectedCourse);
   const [isPurchaseModalOpen, setIsPurchaseModalOpen] = useState(false);
+  
+  // Access the Zustand store
+  const { openBottomSheet } = usePurchaseStore();
 
   // Use provided batches or sample data if none provided
   const batchesToUse = batches && batches.length > 0 ? batches : [];
@@ -231,7 +235,12 @@ const CourseOffering = ({ batches, course }: CourseOfferingProps) => {
           {/* CTA Buttons */}
           <button
             className="w-full bg-[#FB6514] text-white font-bold py-4 rounded-xl mb-[14px] transition duration-200 hover:bg-orange-600"
-            onClick={() => setIsPurchaseModalOpen(true)}
+            onClick={() => {
+              // Open the bottom sheet instead of the purchase modal
+              openBottomSheet();
+              // Set the selected course in case it's needed
+              setSelectedCourse(selectedCourse);
+            }}
           >
             BUY NOW
           </button>

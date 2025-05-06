@@ -1,9 +1,10 @@
 "use client"
 
-import React, { useState } from 'react'
+import React from 'react'
 import CourseBottomSheet from './choose-cource-bs'
 import EnquiryBottomSheet from './enquiry-bs'
 import TallyFormModal from './tally-form-modal'
+import { usePurchaseStore } from '@/lib/store/purchase-store'
 
 // Define the interface for the form data to match what EnquiryBottomSheet expects
 interface Batch {
@@ -30,12 +31,12 @@ interface CourseListFooterProps {
 }
 
 const CourseListFooter = ({ batches = [], courseSlug = '' }: CourseListFooterProps) => {
-    const [isBottomSheetOpen, setIsBottomSheetOpen] = useState(false);
-    const [isEnquiryOpen, setIsEnquiryOpen] = useState(false);
-    const [isTallyFormOpen, setIsTallyFormOpen] = useState(false);
+    // Use the Zustand store for bottom sheet state
+    const { isBottomSheetOpen, openBottomSheet, closeBottomSheet } = usePurchaseStore();
+    
+    const [isEnquiryOpen, setIsEnquiryOpen] = React.useState(false);
+    const [isTallyFormOpen, setIsTallyFormOpen] = React.useState(false);
 
-    const openBottomSheet = () => setIsBottomSheetOpen(true);
-    const closeBottomSheet = () => setIsBottomSheetOpen(false);
     const openEnquiry = () => setIsEnquiryOpen(true);
     const closeEnquiry = () => setIsEnquiryOpen(false);
     
