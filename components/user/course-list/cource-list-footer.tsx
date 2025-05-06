@@ -25,9 +25,10 @@ interface EnquiryFormData {
 
 interface CourseListFooterProps {
     batches?: Batch[];
+    courseSlug?: string;
 }
 
-const CourseListFooter = ({ batches = [] }: CourseListFooterProps) => {
+const CourseListFooter = ({ batches = [], courseSlug = '' }: CourseListFooterProps) => {
     const [isBottomSheetOpen, setIsBottomSheetOpen] = useState(false);
     const [isEnquiryOpen, setIsEnquiryOpen] = useState(false);
 
@@ -35,6 +36,27 @@ const CourseListFooter = ({ batches = [] }: CourseListFooterProps) => {
     const closeBottomSheet = () => setIsBottomSheetOpen(false);
     const openEnquiry = () => setIsEnquiryOpen(true);
     const closeEnquiry = () => setIsEnquiryOpen(false);
+
+    // Function to open Tally form with pre-filled hidden fields
+    const openTallyForm = () => {
+        // Base Tally form URL
+        const tallyFormUrl = 'https://tally.so/r/w2VrQM';
+        
+        // Get URL parameters for UTM tracking
+        const urlParams = new URLSearchParams(window.location.search);
+        const utmSource = urlParams.get('utm_source') || '';
+        const utmMedium = urlParams.get('utm_medium') || '';
+        const utmCampaign = urlParams.get('utm_campaign') || '';
+        
+        // Use the course slug from props instead of URL parameters
+        const courseName = courseSlug;
+        
+        // Construct URL with pre-filled hidden fields
+        const formUrlWithParams = `${tallyFormUrl}?course_name=${encodeURIComponent(courseName)}&utm_source=${encodeURIComponent(utmSource)}&utm_medium=${encodeURIComponent(utmMedium)}&utm_campaign=${encodeURIComponent(utmCampaign)}`;
+        
+        // Open in a new tab
+        window.open(formUrlWithParams, '_blank');
+    };
 
     // Handle the enquiry form submission
     const handleEnquirySubmit = (formData: EnquiryFormData) => {
@@ -56,7 +78,7 @@ const CourseListFooter = ({ batches = [] }: CourseListFooterProps) => {
                 <div className="flex space-x-4 mt-[12px] lg:w-[720px] mx-auto">
                     <button
                         className="w-full p-3 rounded-[10px] outline outline-1 outline-offset-[-1px] outline-[#fb6514]  justify-center gap-2.5 text-[#fb6514] font-bold"
-                        onClick={openEnquiry}
+                        onClick={openTallyForm}
                     >
                         Enquire Now
                     </button>
