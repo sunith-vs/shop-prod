@@ -231,7 +231,14 @@ const CourseOffering = ({ batches, course }: CourseOfferingProps) => {
           {/* CTA Buttons */}
           <button
             className="w-full bg-[#FB6514] text-white font-bold py-4 rounded-xl mb-[14px] transition duration-200 hover:bg-orange-600"
-            onClick={() => setIsPurchaseModalOpen(true)}
+            onClick={() => {
+              setIsPurchaseModalOpen(true);
+              // Hide the CourseListFooter when BUY NOW is clicked
+              const footerContainer = document.getElementById('course-list-footer-container');
+              if (footerContainer) {
+                footerContainer.style.display = 'none';
+              }
+            }}
           >
             BUY NOW
           </button>
@@ -253,6 +260,7 @@ const CourseOffering = ({ batches, course }: CourseOfferingProps) => {
           courseId={selectedCourse}
           courseAmount={courseCategories[0].courses.find(course => course.id === selectedCourse)?.price || 0}
           courseName={courseCategories[0].courses.find(course => course.id === selectedCourse)?.name || ''}
+          batches={batches}
         />
       )}
     </div>
