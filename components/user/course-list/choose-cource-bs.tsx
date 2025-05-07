@@ -45,7 +45,7 @@ const CourseBottomSheet: React.FC<CourseBottomSheetProps> = ({ isOpen, onClose, 
         type: batch.type === 'offline' ? 'Offline' : 'Online',
         price: batch.amount * (1 - batch.discount / 100),
         priceFormatted: `₹ ${batch.amount * (1 - batch.discount / 100)}`,
-        duration: {12: '1 year', 24: '2 years', 36: '3 years'}[batch.duration] || `${batch.duration} months` ,
+        duration: { 12: '1 year', 24: '2 years', 36: '3 years' }[batch.duration] || `${batch.duration} months`,
         originalPrice: batch.amount,
         discount: batch.discount,
         highlighted: batch.type !== 'offline'
@@ -204,9 +204,9 @@ const CourseBottomSheet: React.FC<CourseBottomSheetProps> = ({ isOpen, onClose, 
                                                 </div>
                                                 <div className="text-right">
                                                     <p className="text-[#1d2939] text-sm md:text-xl font-bold">{course.priceFormatted} <span className="text-gray-600 font-normal">for {course.duration}</span></p>
-                                                    {course.discount > 0 && ( <p>
+                                                    {course.discount > 0 && (<p>
                                                         <span className="line-through text-[#1d2939] text-xs md:text-lg font-normal">{course.originalPrice}</span>
-                                                        <span className="text-[#1d2939] text-[#0e9a49] text-xs md:text-lg font-bold">{course.discount}</span>
+                                                        <span className="text-[#0e9a49] text-xs md:text-lg font-bold"> ({course.discount}% OFF)</span>
                                                     </p>)}
                                                 </div>
                                             </div>

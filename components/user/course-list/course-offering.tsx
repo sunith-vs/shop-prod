@@ -29,6 +29,7 @@ interface CourseData {
   originalPrice?: number;
   discount?: number;
   highlighted?: boolean;
+  duration?: string;
 }
 
 interface CourseCategory {
@@ -45,6 +46,8 @@ interface Batch {
   created_at: string;
   offline?: boolean;
   eduport_batch_id?: number;
+  discount: number;
+  duration: string;
   offer_claims?: {
     id: string;
     created_at: string;
@@ -85,9 +88,10 @@ interface CourseOfferingProps {
 // Course option component for better reusability
 const CourseOption = ({ id, type, name, price, isSelected, onClick, batches }: CourseOptionProps) => {
   const batch = batches?.find(batch => batch.id === id);
-  const offer = batch?.offer_claims?.find(claim => claim.offer.is_active && new Date(claim.offer.expiry) > new Date())?.offer;
-  const discountPercentage = offer ? offer.percentage : 0;
-  const discountedPrice = offer ? Math.round(price * (1 - discountPercentage / 100)) : price;
+  // Get discount directly from the batch object, similar to choose-cource-bs.tsx
+  const discountPercentage = batch?.discount || 0;
+  // Calculate discounted price using the same formula as in choose-cource-bs.tsx
+  const discountedPrice = Math.round(price * (1 - discountPercentage / 100));
   return (
     <div
       className={`border ${isSelected ? 'border-orange-500' : 'border-gray-200'} 
@@ -106,7 +110,7 @@ const CourseOption = ({ id, type, name, price, isSelected, onClick, batches }: C
           </div>
         </div>
         <div className="text-right">
-          <p className="text-[#1d2939] text-sm md:text-base font-bold">₹{discountedPrice.toLocaleString()} <span className="text-[#1d2939] font-normal text-sm md:text-base">for 2 years</span></p>
+          <p className="text-[#1d2939] text-sm md:text-base font-bold">₹{discountedPrice.toLocaleString()} <span className="text-[#1d2939] font-normal text-sm md:text-base">{batch?.duration ? { 12: 'for 1 year', 24: 'for 2 years', 36: 'for 3 years' }[batch.duration] || `for ${batch.duration} months` : 'for 2 years'}</span></p>
           <div className="flex items-center justify-end">
             <p className="text-[#1d2939] text-xs md:text-sm font-normal line-through mr-1">₹{price.toLocaleString()}</p>
             <p className="text-[#0e9a49] text-xs md:text-sm font-bold">({discountPercentage}% OFF)</p>
@@ -138,35 +142,20 @@ const CourseOffering = ({ batches, course }: CourseOfferingProps) => {
   // Use provided batches or sample data if none provided
   const batchesToUse = batches && batches.length > 0 ? batches : [];
 
-  // Convert batches to course categories format
+  // Convert batches to course categories format using the same approach as in choose-cource-bs.tsx
   const courseCategories: CourseCategory[] = [
     {
       courses: batchesToUse.map(batch => {
-        // Get the active offer with highest discount percentage if available
-        const activeOffers = batch.offer_claims?.filter(
-          (claim: any) => claim.offer?.is_active && new Date(claim.offer?.expiry) > new Date()
-        ) || [];
-
-        // Sort by percentage in descending order and take the first (highest discount)
-        const bestOffer = activeOffers.length > 0
-          ? [...activeOffers].sort((a: any, b: any) => b.offer.percentage - a.offer.percentage)[0].offer
-          : null;
-
-        // Calculate discounted price if offer exists
-        const discountPercentage = bestOffer?.percentage || 0;
-        const originalPrice = batch.amount;
-        const discountedPrice = discountPercentage > 0
-          ? Math.round(originalPrice * (1 - discountPercentage / 100))
-          : originalPrice;
-
+        // Using the same approach as in choose-cource-bs.tsx
         return {
           id: batch.id,
           type: batch.type === 'offline' ? 'Offline' : 'Online',
           name: batch.name,
-          price: discountedPrice,
-          originalPrice: discountPercentage > 0 ? originalPrice : undefined,
-          discount: discountPercentage > 0 ? discountPercentage : undefined,
-          highlighted: batch.type !== 'offline'
+          price: batch.amount * (1 - batch.discount / 100),
+          originalPrice: batch.amount,
+          discount: batch.discount,
+          highlighted: batch.type !== 'offline',
+          duration: { 12: '1 year', 24: '2 years', 36: '3 years' }[batch.duration] || `${batch.duration} months`
         };
       })
     }
