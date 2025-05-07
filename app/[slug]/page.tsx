@@ -3,7 +3,7 @@ import CarouselList from '@/components/user/course-list/carousel-list'
 import CourseBenefitsList from '@/components/user/course-list/course-benifit-list'
 import CourseOffering from '@/components/user/course-list/course-offering'
 import StudentProfileCards from '@/components/user/course-list/stories-list'
-import React from 'react'
+import React, { useState } from 'react'
 import CourseListFooter from '@/components/user/course-list/cource-list-footer'
 import { createClient } from '@/lib/supabase/server';
 import CoursesOfferBanner from '@/components/user/course-list/courses-offer-banner'
@@ -79,7 +79,9 @@ const CourseList = async ({ params }: { params: { slug: string } }) => {
 
   return (
     <div className='max-w-[1580px] mx-auto pb-[150px]'>
-      <CoursesOfferBanner bannerUrl={course.banner_url} bannerMobile={course.banner_mobile} />
+      {((course.banner_url && course.banner_url.trim() !== '') || (course.banner_mobile && course.banner_mobile.trim() !== '')) && (
+        <CoursesOfferBanner bannerUrl={course.banner_url} bannerMobile={course.banner_mobile} />
+      )}
       <div className='max-w-[1380px] mx-auto px-[16px] md:px-[24px]'>
         <div className="lg:flex mt-[60px]">
           <CarouselList courseId={course.id} courseTitle={course.title} />
@@ -90,7 +92,9 @@ const CourseList = async ({ params }: { params: { slug: string } }) => {
         {/*<StudentProfileCards />*/}
 
       </div>
-      <CourseListFooter batches={batches} courseSlug={params.slug} />
+      <div id="course-list-footer-container">
+        <CourseListFooter batches={batches} />
+      </div>
 
     </div>
   )
