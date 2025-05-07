@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { validateEmail, validatePhone, validateName } from '@/utils/validation';
+import CourseListFooter from '@/components/user/course-list/cource-list-footer';
 
 interface PurchaseModalProps {
   isOpen: boolean;
@@ -9,12 +10,14 @@ interface PurchaseModalProps {
   courseId: string;
   courseAmount: number;
   courseName: string;
+  batches?: any[];
 }
 
-const PurchaseModal = ({ isOpen, onClose, courseId, courseAmount, courseName }: PurchaseModalProps) => {
+const PurchaseModal = ({ isOpen, onClose, courseId, courseAmount, courseName, batches = [] }: PurchaseModalProps) => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
+  const [showFooter, setShowFooter] = useState(false);
   const [errors, setErrors] = useState({
     name: false,
     email: false,
@@ -24,7 +27,9 @@ const PurchaseModal = ({ isOpen, onClose, courseId, courseAmount, courseName }: 
   // Close modal when escape key is pressed
   useEffect(() => {
     const handleEsc = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') onClose();
+      if (event.key === 'Escape') {
+        handleClose();
+      }
     };
     
     window.addEventListener('keydown', handleEsc);
@@ -35,6 +40,7 @@ const PurchaseModal = ({ isOpen, onClose, courseId, courseAmount, courseName }: 
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden';
+      setShowFooter(false);
     } else {
       document.body.style.overflow = 'auto';
     }
@@ -43,6 +49,17 @@ const PurchaseModal = ({ isOpen, onClose, courseId, courseAmount, courseName }: 
       document.body.style.overflow = 'auto';
     };
   }, [isOpen]);
+
+  // Handle close button click
+  const handleClose = () => {
+    setShowFooter(true);
+    // Make the CourseListFooter visible again
+    const footerContainer = document.getElementById('course-list-footer-container');
+    if (footerContainer) {
+      footerContainer.style.display = 'block';
+    }
+    onClose();
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -135,18 +152,19 @@ const PurchaseModal = ({ isOpen, onClose, courseId, courseAmount, courseName }: 
         }
       });
       rzp.open();
-      onClose();
+      handleClose();
     }
   };
 
   return (
-    <div 
-      className={`fixed inset-0 z-50 flex items-center justify-center transition-opacity duration-300 ease-in-out ${isOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}
-    >
+    <>
+      <div 
+        className={`fixed inset-0 z-50 flex items-center justify-center transition-opacity duration-300 ease-in-out ${isOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}
+      >
       <div 
         className="absolute inset-0 bg-black transition-opacity duration-300 ease-in-out"
         style={{ opacity: isOpen ? '0.5' : '0' }}
-        onClick={onClose}
+        onClick={handleClose}
       ></div>
       <div 
         className="bg-white rounded-xl p-6 w-full max-w-md mx-4 relative transition-all duration-300 ease-in-out transform z-10"
@@ -157,7 +175,7 @@ const PurchaseModal = ({ isOpen, onClose, courseId, courseAmount, courseName }: 
         }}
       >
         <button 
-          onClick={onClose}
+          onClick={handleClose}
           className="absolute top-4 right-4 text-gray-500 hover:text-gray-700"
         >
           <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -223,6 +241,8 @@ const PurchaseModal = ({ isOpen, onClose, courseId, courseAmount, courseName }: 
         </form>
       </div>
     </div>
+    {showFooter && !isOpen && <CourseListFooter batches={batches} />}
+    </>
   );
 };
 

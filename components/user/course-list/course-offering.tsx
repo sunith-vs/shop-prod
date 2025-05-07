@@ -87,6 +87,7 @@ interface CourseOfferingProps {
 
 // Course option component for better reusability
 const CourseOption = ({ id, type, name, price, isSelected, onClick, batches }: CourseOptionProps) => {
+  console.log('duration', batches?.find(batch => batch.id === id)?.duration);
   const batch = batches?.find(batch => batch.id === id);
   // Get discount directly from the batch object, similar to choose-cource-bs.tsx
   const discountPercentage = batch?.discount || 0;
@@ -110,11 +111,11 @@ const CourseOption = ({ id, type, name, price, isSelected, onClick, batches }: C
           </div>
         </div>
         <div className="text-right">
-          <p className="text-[#1d2939] text-sm md:text-base font-bold">₹{discountedPrice.toLocaleString()} <span className="text-[#1d2939] font-normal text-sm md:text-base">{batch?.duration ? { 12: 'for 1 year', 24: 'for 2 years', 36: 'for 3 years' }[batch.duration] || `for ${batch.duration} months` : 'for 2 years'}</span></p>
-          <div className="flex items-center justify-end">
+          <p className="text-[#1d2939] text-sm md:text-base font-bold">₹{discountedPrice.toLocaleString()} <span className="text-[#1d2939] font-normal text-sm md:text-base">{batch?.duration ? (batch.duration === '0' ? '' : { 12: 'for 1 year', 24: 'for 2 years', 36: 'for 3 years' }[batch.duration] || `for ${batch.duration} months`) : 'for 0 months'}</span></p>
+          {discountPercentage > 0 && (<div className="flex items-center justify-end">
             <p className="text-[#1d2939] text-xs md:text-sm font-normal line-through mr-1">₹{price.toLocaleString()}</p>
             <p className="text-[#0e9a49] text-xs md:text-sm font-bold">({discountPercentage}% OFF)</p>
-          </div>
+          </div>)}
         </div>
       </div>
     </div>
@@ -135,7 +136,7 @@ const CourseOffering = ({ batches, course }: CourseOfferingProps) => {
   const defaultSelectedCourse = batches && batches.length > 0 ? batches[0].id : 'offline-neet';
   const [selectedCourse, setSelectedCourse] = useState(defaultSelectedCourse);
   const [isPurchaseModalOpen, setIsPurchaseModalOpen] = useState(false);
-  
+
   // Access the Zustand store
   const { openBottomSheet } = usePurchaseStore();
 
@@ -225,17 +226,19 @@ const CourseOffering = ({ batches, course }: CourseOfferingProps) => {
           <button
             className="w-full bg-[#FB6514] text-white font-bold py-4 rounded-xl mb-[14px] transition duration-200 hover:bg-orange-600"
             onClick={() => {
-              // Open the bottom sheet instead of the purchase modal
-              openBottomSheet();
-              // Set the selected course in case it's needed
-              setSelectedCourse(selectedCourse);
+              setIsPurchaseModalOpen(true);
+              // Hide the CourseListFooter when BUY NOW is clicked
+              const footerContainer = document.getElementById('course-list-footer-container');
+              if (footerContainer) {
+                footerContainer.style.display = 'none';
+              }
             }}
           >
             BUY NOW
           </button>
 
           {course?.brochure_url && course.brochure_url.trim() !== '' && (
-            <button 
+            <button
               className="w-full text-[#FB6514] font-bold py-4 flex items-center justify-center bg-[#fff6f1] rounded-xl"
               onClick={() => {
                 // Open the brochure URL in a new tab
@@ -259,6 +262,7 @@ const CourseOffering = ({ batches, course }: CourseOfferingProps) => {
           courseId={selectedCourse}
           courseAmount={courseCategories[0].courses.find(course => course.id === selectedCourse)?.price || 0}
           courseName={courseCategories[0].courses.find(course => course.id === selectedCourse)?.name || ''}
+          batches={batches}
         />
       )}
     </div>

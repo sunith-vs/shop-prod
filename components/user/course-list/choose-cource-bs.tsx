@@ -203,9 +203,9 @@ const CourseBottomSheet: React.FC<CourseBottomSheetProps> = ({ isOpen, onClose, 
                                                     </div>
                                                 </div>
                                                 <div className="text-right">
-                                                    <p className="text-[#1d2939] text-sm md:text-xl font-bold">{course.priceFormatted} <span className="text-gray-600 font-normal">for {course.duration}</span></p>
+                                                    <p className="text-[#1d2939] text-sm md:text-xl font-bold">{course.price.toLocaleString()} <span className="text-gray-600 font-normal">for {course.duration}</span></p>
                                                     {course.discount > 0 && (<p>
-                                                        <span className="line-through text-[#1d2939] text-xs md:text-lg font-normal">{course.originalPrice}</span>
+                                                        <span className="line-through text-[#1d2939] text-xs md:text-lg font-normal">{course.originalPrice.toLocaleString()}</span>
                                                         <span className="text-[#0e9a49] text-xs md:text-lg font-bold"> ({course.discount}% OFF)</span>
                                                     </p>)}
                                                 </div>

@@ -3,7 +3,7 @@ import CarouselList from '@/components/user/course-list/carousel-list'
 import CourseBenefitsList from '@/components/user/course-list/course-benifit-list'
 import CourseOffering from '@/components/user/course-list/course-offering'
 import StudentProfileCards from '@/components/user/course-list/stories-list'
-import React from 'react'
+import React, { useState } from 'react'
 import CourseListFooter from '@/components/user/course-list/cource-list-footer'
 import { createClient } from '@/lib/supabase/server';
 import CoursesOfferBanner from '@/components/user/course-list/courses-offer-banner'
@@ -92,7 +92,9 @@ const CourseList = async ({ params }: { params: { slug: string } }) => {
         {/*<StudentProfileCards />*/}
 
       </div>
-      <CourseListFooter batches={batches} courseSlug={params.slug} />
+      <div id="course-list-footer-container">
+        <CourseListFooter batches={batches} />
+      </div>
 
     </div>
   )
