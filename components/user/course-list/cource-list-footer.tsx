@@ -1,8 +1,10 @@
 "use client"
 
-import React, { useState } from 'react'
+import React from 'react'
 import CourseBottomSheet from './choose-cource-bs'
 import EnquiryBottomSheet from './enquiry-bs'
+import TallyFormModal from './tally-form-modal'
+import { usePurchaseStore } from '@/lib/store/purchase-store'
 
 // Define the interface for the form data to match what EnquiryBottomSheet expects
 interface Batch {
@@ -14,6 +16,8 @@ interface Batch {
     course_id: string;
     created_at: string;
     offline?: boolean;
+    discount: number;
+    duration: string;
 }
 
 interface EnquiryFormData {
@@ -25,16 +29,22 @@ interface EnquiryFormData {
 
 interface CourseListFooterProps {
     batches?: Batch[];
+    courseSlug?: string;
 }
 
-const CourseListFooter = ({ batches = [] }: CourseListFooterProps) => {
-    const [isBottomSheetOpen, setIsBottomSheetOpen] = useState(false);
-    const [isEnquiryOpen, setIsEnquiryOpen] = useState(false);
+const CourseListFooter = ({ batches = [], courseSlug = '' }: CourseListFooterProps) => {
+    // Use the Zustand store for bottom sheet state
+    const { isBottomSheetOpen, openBottomSheet, closeBottomSheet } = usePurchaseStore();
+    console.log(batches)
+    const [isEnquiryOpen, setIsEnquiryOpen] = React.useState(false);
+    const [isTallyFormOpen, setIsTallyFormOpen] = React.useState(false);
 
-    const openBottomSheet = () => setIsBottomSheetOpen(true);
-    const closeBottomSheet = () => setIsBottomSheetOpen(false);
     const openEnquiry = () => setIsEnquiryOpen(true);
     const closeEnquiry = () => setIsEnquiryOpen(false);
+    
+    // Function to open Tally form modal
+    const openTallyForm = () => setIsTallyFormOpen(true);
+    const closeTallyForm = () => setIsTallyFormOpen(false);
 
     // Handle the enquiry form submission
     const handleEnquirySubmit = (formData: EnquiryFormData) => {
@@ -56,7 +66,7 @@ const CourseListFooter = ({ batches = [] }: CourseListFooterProps) => {
                 <div className="flex space-x-4 mt-[12px] lg:w-[720px] mx-auto">
                     <button
                         className="w-full p-3 rounded-[10px] outline outline-1 outline-offset-[-1px] outline-[#fb6514]  justify-center gap-2.5 text-[#fb6514] font-bold"
-                        onClick={openEnquiry}
+                        onClick={openTallyForm}
                     >
                         Enquire Now
                     </button>
@@ -79,6 +89,12 @@ const CourseListFooter = ({ batches = [] }: CourseListFooterProps) => {
                 isOpen={isBottomSheetOpen}
                 onClose={closeBottomSheet}
                 batches={batches}
+            />
+            
+            <TallyFormModal
+                isOpen={isTallyFormOpen}
+                onClose={closeTallyForm}
+                courseSlug={courseSlug}
             />
         </>
     )

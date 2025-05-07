@@ -77,11 +77,6 @@ const CourseList = async ({ params }: { params: { slug: string } }) => {
     throw new Error('Failed to fetch course benefits');
   }
 
-  console.log("course", course);
-  console.log("courseDetails", courseDetails);
-  console.log("batches", batches);
-  console.log("courseBenefits", courseBenefits);
-
   return (
     <div className='max-w-[1580px] mx-auto pb-[150px]'>
       {((course.banner_url && course.banner_url.trim() !== '') || (course.banner_mobile && course.banner_mobile.trim() !== '')) && (
@@ -97,7 +92,7 @@ const CourseList = async ({ params }: { params: { slug: string } }) => {
         {/*<StudentProfileCards />*/}
 
       </div>
-      <CourseListFooter batches={batches} />
+      <CourseListFooter batches={batches} courseSlug={params.slug} />
 
     </div>
   )

@@ -13,6 +13,8 @@ interface Batch {
     course_id: string;
     created_at: string;
     offline?: boolean;
+    discount: number;
+    duration: string;
 }
 
 interface CourseBottomSheetProps {
@@ -34,17 +36,18 @@ const CourseBottomSheet: React.FC<CourseBottomSheetProps> = ({ isOpen, onClose, 
         email: false,
         phone: false
     });
+    console.log(batches)
 
     // Convert batches to the format needed for display
     const courses = batches.map(batch => ({
         id: batch.id,
         title: batch.name,
         type: batch.type === 'offline' ? 'Offline' : 'Online',
-        price: batch.amount,
-        priceFormatted: `₹${batch.amount.toLocaleString()}`,
-        duration: '2 years',
-        originalPrice: `₹${Math.round(batch.amount * 1.1).toLocaleString()}`,
-        discount: '(10% OFF)',
+        price: batch.amount * (1 - batch.discount / 100),
+        priceFormatted: `₹ ${batch.amount * (1 - batch.discount / 100)}`,
+        duration: {12: '1 year', 24: '2 years', 36: '3 years'}[batch.duration] || `${batch.duration} months` ,
+        originalPrice: batch.amount,
+        discount: batch.discount,
         highlighted: batch.type !== 'offline'
     }));
 
@@ -179,7 +182,6 @@ const CourseBottomSheet: React.FC<CourseBottomSheetProps> = ({ isOpen, onClose, 
                                 {courses.length > 0 ? (
                                     courses.map((course) => (
                                         <div key={course.id}>
-                                            <h3 className="text-[#1d2939] text-sm md:text-lg font-bold mb-[14px]">{course.title}</h3>
                                             <div className={`border rounded-lg p-4 flex items-center cursor-pointer justify-between transition-all ${selectedCourse === course.id ? 'border-orange-500' : 'border-gray-300'}`} onClick={() => setSelectedCourse(course.id)}>
                                                 <div className="flex items-center space-x-3">
                                                     <div
@@ -202,10 +204,10 @@ const CourseBottomSheet: React.FC<CourseBottomSheetProps> = ({ isOpen, onClose, 
                                                 </div>
                                                 <div className="text-right">
                                                     <p className="text-[#1d2939] text-sm md:text-xl font-bold">{course.priceFormatted} <span className="text-gray-600 font-normal">for {course.duration}</span></p>
-                                                    <p>
+                                                    {course.discount > 0 && ( <p>
                                                         <span className="line-through text-[#1d2939] text-xs md:text-lg font-normal">{course.originalPrice}</span>
                                                         <span className="text-[#1d2939] text-[#0e9a49] text-xs md:text-lg font-bold">{course.discount}</span>
-                                                    </p>
+                                                    </p>)}
                                                 </div>
                                             </div>
                                         </div>
