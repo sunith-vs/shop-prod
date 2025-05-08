@@ -45,17 +45,17 @@ const students = [
         percentile: '98.61',
         description: 'I came here in class 12 with Eduport. The classes and teachers are amazing, and the mentors are always supportive. The test series helped improve my score, making it a better exam for me.'
     },
-    {
-        id: 7,
-        name: 'LIHAN MAQBOOL',
-        imageUrl: '/students/maqbool.svg',
-        dpUrl: '/dp/maqbool_dp.svg',
-        color: '#FFA76D', // Orange color for profile picture background
-        examType: 'JEE',
-        examYear: '2023',
-        percentile: '98.6',
-        description: 'Content Missing'
-    },
+    // {
+    //     id: 7,
+    //     name: 'LIHAN MAQBOOL',
+    //     imageUrl: '/students/maqbool.svg',
+    //     dpUrl: '/dp/maqbool_dp.svg',
+    //     color: '#FFA76D', // Orange color for profile picture background
+    //     examType: 'JEE',
+    //     examYear: '2023',
+    //     percentile: '98.6',
+    //     description: 'Content Missing'
+    // },
     {
         id: 9,
         name: 'FATHIMATHUL HASEEBA',
@@ -78,28 +78,28 @@ const students = [
         percentile: '98.3',
         description: 'Eduport has the best faculty, test series, and helpful facilities. I\'ve made great improvements since joining, and I\'m grateful that I can achieve my dream of becoming a doctor.'
     },
-    {
-        id: 5,
-        name: 'MUHAMMED ADAAN T',
-        imageUrl: '/students/adaan.svg',
-        dpUrl: '/dp/adaan_dp.svg',
-        color: '#FFD66D', // Yellow color for profile picture background
-        examType: 'JEE',
-        examYear: '2023',
-        percentile: '98.2',
-        description: 'Content Missing'
-    },
-    {
-        id: 8,
-        name: 'ANSIL LAKKAL',
-        imageUrl: '/students/ansillakkal.svg',
-        dpUrl: '/dp/ansillakkal_dp.svg',
-        color: '#1FD546', // Green color for profile picture background
-        examType: 'JEE',
-        examYear: '2023',
-        percentile: '98.08',
-        description: 'Content Missing'
-    },
+    // {
+    //     id: 5,
+    //     name: 'MUHAMMED ADAAN T',
+    //     imageUrl: '/students/adaan.svg',
+    //     dpUrl: '/dp/adaan_dp.svg',
+    //     color: '#FFD66D', // Yellow color for profile picture background
+    //     examType: 'JEE',
+    //     examYear: '2023',
+    //     percentile: '98.2',
+    //     description: 'Content Missing'
+    // },
+    // {
+    //     id: 8,
+    //     name: 'ANSIL LAKKAL',
+    //     imageUrl: '/students/ansillakkal.svg',
+    //     dpUrl: '/dp/ansillakkal_dp.svg',
+    //     color: '#1FD546', // Green color for profile picture background
+    //     examType: 'JEE',
+    //     examYear: '2023',
+    //     percentile: '98.08',
+    //     description: 'Content Missing'
+    // },
     {
         id: 10,
         name: 'BHARGAV S SHENOY',
