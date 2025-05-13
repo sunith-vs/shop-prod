@@ -88,8 +88,8 @@ const CourseList = async ({ params }: { params: { slug: string } }) => {
           <CourseOffering batches={batches} course={course} />
         </div>
         <CourseBenefitsList courseBenefits={courseBenefits} />
-        {/*<BorderText />*/}
-        {/*<StudentProfileCards />*/}
+        <BorderText />
+        <StudentProfileCards />
 
       </div>
       <div id="course-list-footer-container">
