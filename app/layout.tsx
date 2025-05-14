@@ -5,6 +5,7 @@ import { Inter } from "next/font/google";
 import localFont from 'next/font/local'
 
 import { RazorpayProvider } from "@/components/user/purchase/razorpay-provider";
+import {EduportHeader} from "@/components/header";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -39,6 +40,7 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${inter.variable} ${monaSans.variable}`}>
       <body className={inter.className}>
+      <EduportHeader/>
         <RazorpayProvider>
           {children}
           <Toaster />
