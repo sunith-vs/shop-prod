@@ -26,7 +26,7 @@ export const EduportHeader = () => {
 
         {/* Navigation */}
         <nav className="flex items-center space-x-6">
-          <Link href="https://eduport.app/" className="text-gray-700 hover:text-[#FF6B00] font-medium">
+          <Link href="/" className="text-gray-700 hover:text-[#FF6B00] font-medium">
             Home
           </Link>
           <Link href="https://eduport.app/about/" className="text-gray-700 hover:text-[#FF6B00] font-medium">
