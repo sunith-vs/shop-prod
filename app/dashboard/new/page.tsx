@@ -146,7 +146,32 @@ export default function NewCourse() {
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    
+    // Check if slug exists before submitting
+    if (slugError) {
+      toast({
+        title: "Validation Error",
+        description: "Please fix the slug error before submitting",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    // Perform one final check to ensure slug doesn't exist
+    setIsCheckingSlug(true);
     try {
+      const exists = await checkSlugExists(slug);
+      if (exists) {
+        setSlugError('This slug is already taken');
+        toast({
+          title: "Validation Error",
+          description: "This slug is already taken. Please choose a different one.",
+          variant: "destructive",
+        });
+        setIsCheckingSlug(false);
+        return;
+      }
+      
       setIsSubmitting(true);
       const formData = new FormData(event.currentTarget);
       await createCourse(formData);
@@ -164,6 +189,7 @@ export default function NewCourse() {
       });
     } finally {
       setIsSubmitting(false);
+      setIsCheckingSlug(false);
     }
   };
 
@@ -330,14 +356,17 @@ export default function NewCourse() {
               )} */}
             </div>
 
-            <div className="space-y-4 mt-4">
-              <Button type="submit" disabled={isSubmitting} className="w-full">
-                {isSubmitting ? 'Creating Course...' : 'Create Course'}
-              </Button>
-            </div>
-          </form>
-        </CardContent>
-      </Card>
+          <div className="space-y-4 mt-4">
+            <Button 
+              type="submit" 
+              disabled={isSubmitting || isCheckingSlug || !!slugError} 
+              className="w-full">
+              {isSubmitting ? 'Creating Course...' : 'Create Course'}
+            </Button>
+          </div>
+        </form>
+      </CardContent>
+    </Card>
     </div>
   );
 }
