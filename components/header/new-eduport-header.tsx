@@ -8,7 +8,7 @@ export const NewEduportHeader = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   return (
-    <header className="w-full bg-white shadow-sm">
+    <header className="w-full bg-red shadow-sm border-b border-gray-200">
       {/* Desktop Header */}
       <div className="container mx-auto px-4 hidden md:flex justify-between items-center h-20">
         {/* Logo Section */}
@@ -36,8 +36,10 @@ export const NewEduportHeader = () => {
             <Link href="/our-courses" className="text-gray-700 hover:text-[#FF6B00] font-medium">
               Our Courses
             </Link>
-            <Link href="/eduport-residential-campus" className="text-gray-700 hover:text-[#FF6B00] font-medium">
-              NEET JEE Campus
+            <Link href="/eduport-residential-campus" className="font-medium">
+              <span className="bg-gradient-to-r from-[#FF63A4] via-[#6000CE] to-[#F26623] bg-clip-text text-transparent font-bold">
+                NEET JEE Campus
+              </span>
             </Link>
             <Link href="/careers" className="text-gray-700 hover:text-[#FF6B00] font-medium">
               Careers
@@ -168,10 +170,12 @@ export const NewEduportHeader = () => {
             </Link>
             <Link 
               href="/eduport-residential-campus" 
-              className="py-3 px-4 text-gray-700 hover:text-[#FF6B00] font-medium border-b border-gray-100"
+              className="py-3 px-4 font-medium border-b border-gray-100"
               onClick={() => setIsMenuOpen(false)}
             >
-              NEET JEE Campus
+              <span className="bg-gradient-to-r from-[#FF63A4] via-[#6000CE] to-[#F26623] bg-clip-text text-transparent font-medium">
+                NEET JEE Campus
+              </span>
             </Link>
             <Link 
               href="/careers" 

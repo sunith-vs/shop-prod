@@ -8,7 +8,7 @@ export const EduportHeader = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   return (
-    <header className="w-full bg-white shadow-sm py-2">
+    <header className="w-full bg-white shadow-sm py-2 border-b border-gray-200 sticky top-0 z-50">
       {/* Desktop Header */}
       <div className="container mx-auto px-4 hidden lg:flex justify-between items-center h-16">
         {/* Logo */}
@@ -35,9 +35,11 @@ export const EduportHeader = () => {
           <Link href="https://eduport.app/our-courses/" className="text-gray-700 hover:text-[#FF6B00] font-medium">
             Our Courses
           </Link>
-          <Link href="https://eduport.app/eduport-residential-campus/" className="text-gray-700 hover:text-[#FF6B00] font-medium">
-            NEET JEE Campus
-          </Link>
+         <Link href="https://eduport.app/eduport-residential-campus/" className="font-medium">
+        <span className="bg-gradient-to-r from-[#FF63A4] via-[#6000CE] to-[#F26623] bg-clip-text text-transparent font-bold">
+          NEET JEE Campus
+        </span>
+      </Link>
           <Link href="https://eduport.app/careers/" className="text-gray-700 hover:text-[#FF6B00] font-medium">
             Careers
           </Link>
@@ -57,7 +59,7 @@ export const EduportHeader = () => {
               <span className="text-xs text-gray-500">For Admission</span>
             </div>
           </Link>
-          <Link href="https://shop.eduport.app" className="flex items-center group">
+          <Link href="/" className="flex items-center group">
             <div className="mr-2 text-[#FF6B00] group-hover:text-[#e05a00]">
               <ShoppingCart size={20} />
             </div>
@@ -66,7 +68,7 @@ export const EduportHeader = () => {
               <span className="text-xs text-gray-500">On Eduport Store</span>
             </div>
           </Link>
-          <Link href="https://web.eduport.app" className="flex items-center group">
+          <Link href="https://web.eduport.app" className="flex items-center group" >
             <div className="mr-2 text-[#FF6B00] group-hover:text-[#e05a00]">
               <Laptop size={20} />
             </div>
@@ -81,7 +83,7 @@ export const EduportHeader = () => {
       {/* Mobile Header */}
       <div className="lg:hidden flex justify-between items-center px-4 h-16">
         {/* Logo */}
-        <Link href="https://eduport.app/" className="flex items-center">
+        <Link target="_blank" href="https://eduport.app/" className="flex items-center">
           <div className="relative">
             <Image 
               src="https://eduport.app/wp-content/uploads/2024/09/Eduport-Logo1.svg.png"
@@ -95,10 +97,10 @@ export const EduportHeader = () => {
 
         {/* Mobile Actions */}
         <div className="flex items-center space-x-4">
-          <Link href="tel:+919048899553" className="flex items-center justify-center w-10 h-10 rounded-full bg-[#FF6B00] text-white">
+          <Link target="_blank" href="tel:+919048899553" className="flex items-center justify-center w-10 h-10 rounded-full bg-[#FF6B00] text-white">
             <Phone size={18} />
           </Link>
-          <Link href="https://shop.eduport.app" className="flex items-center justify-center w-10 h-10 rounded-full bg-[#FF6B00] text-white">
+          <Link target="_blank" href="https://shop.eduport.app" className="flex items-center justify-center w-10 h-10 rounded-full bg-[#FF6B00] text-white">
             <ShoppingCart size={18} />
           </Link>
           <button 
@@ -114,7 +116,7 @@ export const EduportHeader = () => {
       {isMenuOpen && (
         <div className="fixed inset-0 bg-white z-50 lg:hidden">
           <div className="flex justify-between items-center p-4 border-b">
-            <Link href="https://eduport.app/" className="flex items-center">
+            <Link target="_blank" href="https://eduport.app/" className="flex items-center">
               <div className="relative">
                 <Image 
                   src="https://eduport.app/wp-content/uploads/2024/09/Eduport-Logo1.svg.png"
@@ -133,42 +135,42 @@ export const EduportHeader = () => {
             </button>
           </div>
           <nav className="flex flex-col p-4">
-            <Link 
+            <Link target="_blank" 
               href="https://eduport.app/" 
               className="py-3 px-4 text-[#FF6B00] font-medium border-l-4 border-[#FF6B00]"
               onClick={() => setIsMenuOpen(false)}
             >
               Home
             </Link>
-            <Link 
+            <Link target="_blank" 
               href="https://eduport.app/about/" 
               className="py-3 px-4 text-gray-700 font-medium"
               onClick={() => setIsMenuOpen(false)}
             >
               About
             </Link>
-            <Link 
+            <Link target="_blank" 
               href="https://eduport.app/our-courses/" 
               className="py-3 px-4 text-gray-700 font-medium"
               onClick={() => setIsMenuOpen(false)}
             >
               Our Courses
             </Link>
-            <Link 
+            <Link target="_blank" 
               href="https://eduport.app/eduport-residential-campus/" 
               className="py-3 px-4 text-gray-700 font-medium"
               onClick={() => setIsMenuOpen(false)}
             >
               NEET JEE Campus
             </Link>
-            <Link 
+            <Link target="_blank" 
               href="https://eduport.app/careers/" 
               className="py-3 px-4 text-gray-700 font-medium"
               onClick={() => setIsMenuOpen(false)}
             >
               Careers
             </Link>
-            <Link 
+            <Link target="_blank" 
               href="https://eduport.app/contact/" 
               className="py-3 px-4 text-gray-700 font-medium"
               onClick={() => setIsMenuOpen(false)}
