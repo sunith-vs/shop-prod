@@ -144,34 +144,58 @@ export default function NewCourse() {
     return () => clearTimeout(timeoutId);
   }, []);
 
-  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
+  // const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+  //   event.preventDefault();
     
-    // Check if slug exists before submitting
-    if (slugError) {
-      toast({
-        title: "Validation Error",
-        description: "Please fix the slug error before submitting",
-        variant: "destructive",
-      });
-      return;
-    }
+  //   // Check if slug exists before submitting
+  //   if (slugError) {
+  //     toast({
+  //       title: "Validation Error",
+  //       description: "Please fix the slug error before submitting",
+  //       variant: "destructive",
+  //     });
+  //     return;
+  //   }
     
-    // Perform one final check to ensure slug doesn't exist
-    setIsCheckingSlug(true);
-    try {
-      const exists = await checkSlugExists(slug);
-      if (exists) {
-        setSlugError('This slug is already taken');
-        toast({
-          title: "Validation Error",
-          description: "This slug is already taken. Please choose a different one.",
-          variant: "destructive",
-        });
-        setIsCheckingSlug(false);
-        return;
-      }
+  //   // Perform one final check to ensure slug doesn't exist
+  //   setIsCheckingSlug(true);
+  //   try {
+  //     const exists = await checkSlugExists(slug);
+  //     if (exists) {
+  //       setSlugError('This slug is already taken');
+  //       toast({
+  //         title: "Validation Error",
+  //         description: "This slug is already taken. Please choose a different one.",
+  //         variant: "destructive",
+  //       });
+  //       setIsCheckingSlug(false);
+  //       return;
+  //     }
       
+  //     setIsSubmitting(true);
+  //     const formData = new FormData(event.currentTarget);
+  //     await createCourse(formData);
+  //     toast({
+  //       title: "Success",
+  //       description: "Course created successfully!",
+  //       variant: "default",
+  //     });
+  //   } catch (error) {
+  //     const errorMessage = error instanceof Error ? error.message : 'Failed to create course';
+  //     toast({
+  //       title: "Error",
+  //       description: errorMessage,
+  //       variant: "destructive",
+  //     });
+  //   } finally {
+  //     setIsSubmitting(false);
+  //     setIsCheckingSlug(false);
+  //   }
+  // };
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    console.log('submit',event, event.currentTarget);
+    event.preventDefault();
+    try {
       setIsSubmitting(true);
       const formData = new FormData(event.currentTarget);
       await createCourse(formData);
@@ -189,10 +213,8 @@ export default function NewCourse() {
       });
     } finally {
       setIsSubmitting(false);
-      setIsCheckingSlug(false);
     }
   };
-
   return (
     <div className="container max-w-3xl py-6 space-y-6">
       <div className="flex items-center justify-between">
