@@ -6,7 +6,6 @@ import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { PlusCircle, Menu, LogOut, User } from 'lucide-react';
-import Image from 'next/image';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -148,10 +147,9 @@ export default async function CourseDashboard() {
               <CardHeader className="p-4 md:p-6">
                       {course.thumbnail && (
                         <div className="relative w-full h-40 mb-4">
-                          <Image
+                          <img
                             src={course.thumbnail}
                             alt={course.title}
-                            fill
                             className="object-cover rounded-md"
                           />
                         </div>

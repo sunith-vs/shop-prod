@@ -124,10 +124,9 @@ export function MediaSection({ courseId, initialData, onUpdate }: MediaSectionPr
               {tagUrl ? (
                 <div className="space-y-3">
                   <div className="aspect-[135/40] bg-white p-2 relative rounded-lg border">
-                    <Image
+                    <img
                       src={tagUrl}
                       alt="Tag"
-                      fill
                       sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                       className="object-contain"
                     />
@@ -182,10 +181,9 @@ export function MediaSection({ courseId, initialData, onUpdate }: MediaSectionPr
               {bannerUrl ? (
                 <>
                   <div className="aspect-[1728/245]">
-                    <Image
+                    <img
                       src={bannerUrl}
                       alt="Banner"
-                      fill
                       sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                       className="object-contain"
                     />
@@ -224,10 +222,9 @@ export function MediaSection({ courseId, initialData, onUpdate }: MediaSectionPr
               {thumbnailUrl ? (
                 <>
                   <div className="aspect-[374/232]">
-                    <Image
+                    <img
                       src={thumbnailUrl}
                       alt="Thumbnail"
-                      fill
                       sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                       className="object-contain"
                     />

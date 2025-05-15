@@ -342,10 +342,9 @@ export function CarouselSection({ courseId, initialItems = [], onSave }: Carouse
               <CardContent className="flex items-center gap-4 p-4">
                 {! item.url.includes("youtube.com") ? (
                   <div className="relative h-24 w-24 overflow-hidden rounded">
-                    <Image
+                    <img
                       src={item.url}
                       alt={`Image ${index + 1}`}
-                      fill
                       className="object-cover"
                       onError={(e) => { e.currentTarget.style.display = 'none'; /* Hide broken image */ }}
                     />
@@ -353,10 +352,9 @@ export function CarouselSection({ courseId, initialItems = [], onSave }: Carouse
                 ) : (
                   <div className="flex items-center gap-4">
                     <div className="relative h-24 w-24 overflow-hidden rounded">
-                      <Image
+                      <img
                         src={`https://img.youtube.com/vi/${getYoutubeVideoId(item.url)}/hqdefault.jpg`}
                         alt={`Video ${index + 1}`}
-                        fill
                         className="object-cover"
                         onError={(e) => { e.currentTarget.src = '/placeholder-video.png'; /* Fallback placeholder */ }}
                       />
