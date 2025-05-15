@@ -144,13 +144,7 @@ export function BatchesSection({ courseId }: BatchesSectionProps) {
             setIsLoadingEduportBatches(true);
             try {
                 const response = await fetch(
-                    'https://uat.eduport.in/api/v3/courses_list?has_batches=true',
-                    {
-                        headers: {
-                            'Authorization': `Bearer ${process.env.NEXT_PUBLIC_EDUPORT}`
-                        }
-                    }
-                );
+                    `${process.env.NEXT_PUBLIC_EDUPORT_API}/v3/courses_list?has_batches=true`,);
 
                 if (!response.ok) {
                     throw new Error('Failed to fetch Eduport batches');

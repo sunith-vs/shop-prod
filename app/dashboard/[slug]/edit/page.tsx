@@ -170,7 +170,7 @@ export default function EditCourse({ params }: { params: { slug: string } }) {
     const fetchEduportCourses = async () => {
       setIsLoadingCourses(true);
       try {
-        const response = await fetch('https://uat.eduport.in/staffapp/api/v3/v1/course/lists');
+        const response = await fetch(`${process.env.NEXT_PUBLIC_EDUPORT_API}staffapp/api/v3/v1/course/lists`);
         const data = await response.json();
         if (!data.error && data.courses) {
           setEduportCourses(data.courses);
