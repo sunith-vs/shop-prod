@@ -106,12 +106,6 @@ const PurchaseModal = ({ isOpen, onClose, courseId, courseAmount, courseName, ba
         'user_phone': phone
       });
     }
-      console.log("notes", {
-                  name,
-                  email,
-                  contact: phone,
-                  batch: courseId
-              })
     // Initialize Razorpay
     if (typeof window !== 'undefined') {
       const options = {
@@ -127,7 +121,7 @@ const PurchaseModal = ({ isOpen, onClose, courseId, courseAmount, courseName, ba
               name,
               email,
               phone,
-              courseId,
+              courseId: String(courseId),
               courseName,
               amount: courseAmount
             });

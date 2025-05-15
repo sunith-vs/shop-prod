@@ -18,6 +18,7 @@ interface Batch {
     offline?: boolean;
     discount: number;
     duration: string;
+    eduport_batch_id: number;
 }
 
 interface EnquiryFormData {

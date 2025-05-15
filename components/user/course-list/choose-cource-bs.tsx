@@ -126,7 +126,7 @@ const CourseBottomSheet: React.FC<CourseBottomSheetProps> = ({ isOpen, onClose, 
                             name,
                             email,
                             phone,
-                            courseId: selectedCourse,
+                            courseId: String(selectedCourse),
                             courseName: selectedCourseData.title,
                             amount: selectedCourseData.price
                         });

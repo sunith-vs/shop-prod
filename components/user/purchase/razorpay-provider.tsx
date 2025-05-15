@@ -112,14 +112,7 @@ export const RazorpayProvider = ({ children }: RazorpayProviderProps) => {
 declare global {
   interface Window {
     Razorpay: any;
-    showPaymentConfirmation: (success: boolean, paymentId: string | null, details?: {
-        name: string;
-        email: string;
-        phone: string;
-        courseId: unknown;
-        courseName: any;
-        amount: number
-    }) => void;
+    showPaymentConfirmation: (success: boolean, paymentId: string | null, details?: PaymentDetails) => void;
     dataLayer: any[];
   }
 }
