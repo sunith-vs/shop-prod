@@ -13,6 +13,7 @@ interface PurchaseModalProps {
   batches?: any[];
 }
 
+
 const PurchaseModal = ({ isOpen, onClose, courseId, courseAmount, courseName, batches = [] }: PurchaseModalProps) => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
