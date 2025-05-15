@@ -2,7 +2,7 @@
 
 // CourseBottomSheet.tsx
 import React, { useState } from 'react';
-import { validateEmail, validatePhone } from '@/utils/validation';
+import {validateEmail, validateName, validatePhone} from '@/utils/validation';
 
 interface Batch {
     id: string;
@@ -68,7 +68,7 @@ const CourseBottomSheet: React.FC<CourseBottomSheetProps> = ({ isOpen, onClose, 
         // Validate inputs
         let isValid = true;
 
-        if (!name) {
+        if (!validateName(name)) {
             newErrors.name = true;
             isValid = false;
         }
