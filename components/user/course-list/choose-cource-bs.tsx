@@ -198,8 +198,8 @@ const CourseBottomSheet: React.FC<CourseBottomSheetProps> = ({ isOpen, onClose, 
                                                         )}
                                                     </div>
                                                     <div>
-                                                        <p className="text-[#1d2939] text-sm md:text-xl font-bold">{course.type}</p>
-                                                        <p className="text-gray-600 text-sm md:text-xl">{course.title}</p>
+                                                        <p className="text-[#1d2939] text-sm md:text-xl font-bold">{course.title}</p>
+                                                        <p className="text-gray-600 text-sm md:text-xl">{course.type}</p>
                                                     </div>
                                                 </div>
                                                 <div className="text-right">
