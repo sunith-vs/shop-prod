@@ -7,7 +7,7 @@ import CourseListFooter from '@/components/user/course-list/cource-list-footer';
 interface PurchaseModalProps {
   isOpen: boolean;
   onClose: () => void;
-  courseId: string;
+  courseId: number;
   courseAmount: number;
   courseName: string;
   batches?: any[];
@@ -106,7 +106,12 @@ const PurchaseModal = ({ isOpen, onClose, courseId, courseAmount, courseName, ba
         'user_phone': phone
       });
     }
-
+      console.log("notes", {
+                  name,
+                  email,
+                  contact: phone,
+                  batch: courseId
+              })
     // Initialize Razorpay
     if (typeof window !== 'undefined') {
       const options = {

@@ -15,6 +15,7 @@ interface Batch {
     offline?: boolean;
     discount: number;
     duration: string;
+    eduport_batch_id: number;
 }
 
 interface CourseBottomSheetProps {
@@ -25,7 +26,7 @@ interface CourseBottomSheetProps {
 
 const CourseBottomSheet: React.FC<CourseBottomSheetProps> = ({ isOpen, onClose, batches = [] }) => {
     // Use the first batch ID as the default selected course or fallback to a default
-    const defaultSelectedCourse = batches && batches.length > 0 ? batches[0].id : '';
+    const defaultSelectedCourse = batches && batches.length > 0 ? batches[0].eduport_batch_id : -1;
     const [selectedCourse, setSelectedCourse] = useState(defaultSelectedCourse);
     const [showPurchaseForm, setShowPurchaseForm] = useState(false);
     const [name, setName] = useState('');
@@ -40,7 +41,7 @@ const CourseBottomSheet: React.FC<CourseBottomSheetProps> = ({ isOpen, onClose, 
 
     // Convert batches to the format needed for display
     const courses = batches.map(batch => ({
-        id: batch.id,
+        id: batch.eduport_batch_id,
         title: batch.name,
         type: batch.type === 'offline' ? 'Offline' : 'Online',
         price: batch.amount * (1 - batch.discount / 100),
@@ -50,7 +51,6 @@ const CourseBottomSheet: React.FC<CourseBottomSheetProps> = ({ isOpen, onClose, 
         discount: batch.discount,
         highlighted: batch.type !== 'offline'
     }));
-
     const handleBuyNow = () => {
         setShowPurchaseForm(true);
     };
@@ -104,6 +104,12 @@ const CourseBottomSheet: React.FC<CourseBottomSheetProps> = ({ isOpen, onClose, 
                 'user_phone': phone
             });
         }
+        console.log("notes", {
+            name,
+            email,
+            contact: phone,
+            batch: selectedCourse
+        })
 
         // Initialize Razorpay
         if (typeof window !== 'undefined') {

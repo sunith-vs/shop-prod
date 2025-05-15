@@ -7,12 +7,12 @@ import { usePurchaseStore } from '@/lib/store/purchase-store';
 
 // Define TypeScript interfaces
 interface CourseOptionProps {
-  id: string;
+  id: number;
   type: string;
   name: string;
   price: number;
   isSelected: boolean;
-  onClick: (id: string) => void;
+  onClick: (id: number) => void;
   highlighted?: boolean;
   batches?: Batch[];
 }
@@ -22,7 +22,7 @@ interface FeatureItemProps {
 }
 
 interface CourseData {
-  id: string;
+  id: number;
   type: string;
   name: string;
   price: number;
@@ -45,7 +45,7 @@ interface Batch {
   course_id: string;
   created_at: string;
   offline?: boolean;
-  eduport_batch_id?: number;
+  eduport_batch_id: number;
   discount: number;
   duration: string;
   offer_claims?: {
@@ -63,7 +63,7 @@ interface Batch {
 }
 
 interface Course {
-  id: string;
+  id: number;
   banner_url: string;
   title: string;
   slug: string;
@@ -87,8 +87,8 @@ interface CourseOfferingProps {
 
 // Course option component for better reusability
 const CourseOption = ({ id, type, name, price, isSelected, onClick, batches }: CourseOptionProps) => {
-  console.log('duration', batches?.find(batch => batch.id === id)?.duration);
-  const batch = batches?.find(batch => batch.id === id);
+  console.log('duration', batches?.find(batch => batch.eduport_batch_id === id)?.duration);
+  const batch = batches?.find(batch => batch.eduport_batch_id === id);
   // Get discount directly from the batch object, similar to choose-cource-bs.tsx
   const discountPercentage = batch?.discount || 0;
   // Calculate discounted price using the same formula as in choose-cource-bs.tsx
@@ -133,7 +133,7 @@ const FeatureItem = ({ text }: FeatureItemProps) => (
 // Main component
 const CourseOffering = ({ batches, course }: CourseOfferingProps) => {
   // Use the first batch ID as the default selected course
-  const defaultSelectedCourse = batches && batches.length > 0 ? batches[0].id : 'offline-neet';
+  const defaultSelectedCourse = batches && batches.length > 0 ? batches[0].eduport_batch_id : -1;
   const [selectedCourse, setSelectedCourse] = useState(defaultSelectedCourse);
   const [isPurchaseModalOpen, setIsPurchaseModalOpen] = useState(false);
 
@@ -149,7 +149,7 @@ const CourseOffering = ({ batches, course }: CourseOfferingProps) => {
       courses: batchesToUse.map(batch => {
         // Using the same approach as in choose-cource-bs.tsx
         return {
-          id: batch.id,
+          id: batch.eduport_batch_id,
           type: batch.type === 'offline' ? 'Offline' : 'Online',
           name: batch.name,
           price: batch.amount * (1 - batch.discount / 100),
@@ -223,19 +223,19 @@ const CourseOffering = ({ batches, course }: CourseOfferingProps) => {
           ))}
 
           {/* CTA Buttons */}
-          <button
-            className="w-full bg-[#FB6514] text-white font-bold py-4 rounded-xl mb-[14px] transition duration-200 hover:bg-orange-600"
-            onClick={() => {
-              setIsPurchaseModalOpen(true);
-              // Hide the CourseListFooter when BUY NOW is clicked
-              const footerContainer = document.getElementById('course-list-footer-container');
-              if (footerContainer) {
-                footerContainer.style.display = 'none';
-              }
-            }}
+          {courseCategories.length > 0 && (<button
+              className="w-full bg-[#FB6514] text-white font-bold py-4 rounded-xl mb-[14px] transition duration-200 hover:bg-orange-600"
+              onClick={() => {
+                setIsPurchaseModalOpen(true);
+                // Hide the CourseListFooter when BUY NOW is clicked
+                const footerContainer = document.getElementById('course-list-footer-container');
+                if (footerContainer) {
+                  footerContainer.style.display = 'none';
+                }
+              }}
           >
             BUY NOW
-          </button>
+          </button>)}
 
           {course?.brochure_url && course.brochure_url.trim() !== '' && (
             <button
