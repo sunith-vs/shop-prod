@@ -40,7 +40,7 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${inter.variable} ${monaSans.variable}`}>
       <body className={inter.className}>
-      <EduportHeader/>
+      {/*<EduportHeader/>*/}
         <RazorpayProvider>
           {children}
           <Toaster />

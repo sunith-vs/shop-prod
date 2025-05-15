@@ -157,7 +157,7 @@ export default async function CourseDashboard() {
                         </div>
                       )}
                       <div className="space-y-2">
-                        <h3 className="font-semibold text-base md:text-lg font-mono">{course.title} 17</h3>
+                        <h3 className="font-semibold text-base md:text-lg font-mono">{course.title}</h3>
                         <Badge variant={
                           course.status === 'active' ? 'default' :
                           course.status === 'draft' ? 'secondary' : 'destructive'
