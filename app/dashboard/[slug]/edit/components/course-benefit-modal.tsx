@@ -78,13 +78,14 @@ export function CourseBenefitModal({
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent>
-        <DialogHeader>
-          <DialogTitle>{benefit ? 'Edit Benefit' : 'Add New Benefit'}</DialogTitle>
+        <DialogHeader >
+          <DialogTitle className="ml-0.25">{benefit ? 'Edit Benefit' : 'Add New Benefit'}</DialogTitle>
         </DialogHeader>
-        <div className="space-y-4">
+        <div className="space-y-4 overflow-y-auto pl-1 pr-5" style={{ maxHeight: 'calc(80vh)' }}>
           <div>
             <Label>Title</Label>
             <Input
+              className="mt-1"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="Enter benefit title"
@@ -93,6 +94,7 @@ export function CourseBenefitModal({
           <div>
             <Label>Description</Label>
             <Textarea
+              className="mt-1"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Enter benefit description"
@@ -100,7 +102,7 @@ export function CourseBenefitModal({
           </div>
           <div>
             <Label>Color</Label>
-            <div className="flex gap-2">
+            <div className="flex gap-2 mt-1">
               <Input
                 type="color"
                 value={color}
@@ -117,11 +119,12 @@ export function CourseBenefitModal({
           <div>
             <Label>Icon</Label>
             <IconSelector
+              className="mt-1"
               selectedIconId={iconId}
               onSelect={(icon) => setIconId(icon.id)}
             />
           </div>
-          <div className="flex justify-end gap-2">
+          <div className="flex justify-end gap-2 pb-2">
             <Button variant="outline" onClick={onClose}>
               Cancel
             </Button>

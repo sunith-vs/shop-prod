@@ -19,11 +19,12 @@ interface Icon {
 }
 
 interface IconSelectorProps {
+  className?: string;
   selectedIconId?: string;
   onSelect: (icon: Icon) => void;
 }
 
-export function IconSelector({ selectedIconId, onSelect }: IconSelectorProps) {
+export function IconSelector({ className, selectedIconId, onSelect }: IconSelectorProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [icons, setIcons] = useState<Icon[]>([]);
   const [loading, setLoading] = useState(false);
@@ -133,7 +134,7 @@ export function IconSelector({ selectedIconId, onSelect }: IconSelectorProps) {
       }
 
       const { data, error } = await query;
-      
+
       if (error) throw error;
       setIcons(data || []);
     } catch (error) {
@@ -148,7 +149,7 @@ export function IconSelector({ selectedIconId, onSelect }: IconSelectorProps) {
   }, [searchQuery]);
 
   return (
-    <div className="space-y-4">
+    <div className={`space-y-4 ${className || ''}`}>
       <div className="flex gap-2">
         <div className="relative flex-1">
           <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
@@ -176,7 +177,7 @@ export function IconSelector({ selectedIconId, onSelect }: IconSelectorProps) {
         <div className="space-y-2">
           <div className="h-[240px] overflow-y-auto rounded-md border">
             {icons.length === 0 ? (
-              <div className="h-full flex flex-col gap-2 items-center justify-center text-muted-foreground">
+              <div className="h-[240px] flex flex-col gap-2 items-center justify-center text-muted-foreground">
                 <p>No icons found</p>
                 <Button
                   variant="outline"
@@ -232,8 +233,8 @@ export function IconSelector({ selectedIconId, onSelect }: IconSelectorProps) {
               <Button variant="outline" onClick={handleClose}>
                 Cancel
               </Button>
-              <Button 
-                onClick={handleSave} 
+              <Button
+                onClick={handleSave}
                 disabled={addingIcon || !uploadedPath}
               >
                 {addingIcon && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
