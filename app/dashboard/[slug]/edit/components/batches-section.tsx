@@ -33,7 +33,6 @@ import { useToast } from "@/components/ui/use-toast";
 import { createClient } from '@/lib/supabase/client';
 import { Plus, Edit, Trash2 } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Label } from "@/components/ui/label";
 
 interface Batch {
     id: string;
