@@ -50,6 +50,10 @@ type UseSupabaseUploadOptions = {
    * When set to false, an error is thrown if the object already exists. Defaults to `false`
    */
   upsert?: boolean
+  /**
+   * Recommended size text to display to the user (e.g., "135 x 40 px")
+   */
+  recommendedSize?: string
 }
 
 // Define a more specific return type
@@ -65,6 +69,7 @@ interface UseSupabaseUploadReturnSpecific extends Omit<ReturnType<typeof useDrop
   maxFileSize?: number;
   maxFiles?: number;
   allowedMimeTypes?: string[];
+  recommendedSize?: string;
   getInputProps: <T extends DropzoneInputProps>(props?: T | undefined) => T;
   getRootProps: <T extends DropzoneRootProps>(props?: T | undefined) => T;
 }
@@ -78,6 +83,7 @@ const useSupabaseUpload = (options: UseSupabaseUploadOptions): UseSupabaseUpload
     maxFiles = 1,
     cacheControl = 3600,
     upsert = false,
+    recommendedSize,
   } = options
 
   const [files, setFiles] = useState<FileWithPreview[]>([])
@@ -232,6 +238,7 @@ const useSupabaseUpload = (options: UseSupabaseUploadOptions): UseSupabaseUpload
     maxFileSize: maxFileSize,
     maxFiles: maxFiles,
     allowedMimeTypes,
+    recommendedSize,
     ...dropzoneProps,
   }
 }
