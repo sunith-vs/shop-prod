@@ -2,7 +2,7 @@
 
 // CourseBottomSheet.tsx
 import React, { useState } from 'react';
-import {validateEmail, validateName, validatePhone} from '@/utils/validation';
+import { validateEmail, validateName, validatePhone } from '@/utils/validation';
 
 interface Batch {
     id: string;
@@ -37,6 +37,25 @@ const CourseBottomSheet: React.FC<CourseBottomSheetProps> = ({ isOpen, onClose, 
         email: false,
         phone: false
     });
+
+    // Function to reset form fields
+    const resetForm = () => {
+        setName('');
+        setEmail('');
+        setPhone('');
+        setShowPurchaseForm(false);
+        setErrors({
+            name: false,
+            email: false,
+            phone: false
+        });
+    };
+
+    // Create a wrapper for onClose that resets the form
+    const handleClose = () => {
+        resetForm();
+        onClose();
+    };
     console.log(batches)
 
     // Convert batches to the format needed for display
@@ -131,6 +150,8 @@ const CourseBottomSheet: React.FC<CourseBottomSheetProps> = ({ isOpen, onClose, 
                             amount: selectedCourseData.price
                         });
                     }
+                    // Reset form fields after successful payment
+                    resetForm();
                 },
                 prefill: {
                     name,
@@ -156,7 +177,7 @@ const CourseBottomSheet: React.FC<CourseBottomSheetProps> = ({ isOpen, onClose, 
                 }
             });
             rzp.open();
-            onClose();
+            handleClose();
         }
     };
 
@@ -165,7 +186,7 @@ const CourseBottomSheet: React.FC<CourseBottomSheetProps> = ({ isOpen, onClose, 
             {/* Overlay background */}
             <div
                 className="absolute inset-0 bg-black bg-opacity-30 transition-opacity duration-300 ease-in-out"
-                onClick={onClose}
+                onClick={handleClose}
                 style={{ opacity: isOpen ? '1' : '0' }}
             ></div>
 
@@ -228,7 +249,7 @@ const CourseBottomSheet: React.FC<CourseBottomSheetProps> = ({ isOpen, onClose, 
                             {/* Action buttons */}
                             <div className="mt-8 grid grid-cols-2 gap-4">
                                 <button
-                                    onClick={onClose}
+                                    onClick={handleClose}
                                     className="py-3 px-6 border border-orange-500 text-[#fb6514] text-sm md:text-xl font-bold rounded-lg hover:bg-orange-50 transition-colors"
                                 >
                                     Cancel
@@ -290,7 +311,10 @@ const CourseBottomSheet: React.FC<CourseBottomSheetProps> = ({ isOpen, onClose, 
                                 <div className="mt-8 grid grid-cols-2 gap-4">
                                     <button
                                         type="button"
-                                        onClick={() => setShowPurchaseForm(false)}
+                                        onClick={() => {
+                                            setShowPurchaseForm(false);
+                                            resetForm();
+                                        }}
                                         className="py-3 px-6 border border-orange-500 text-[#fb6514] text-sm md:text-xl font-bold rounded-lg hover:bg-orange-50 transition-colors"
                                     >
                                         Back
