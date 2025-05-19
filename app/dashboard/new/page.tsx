@@ -44,6 +44,7 @@ export default function NewCourse() {
     path: 'banner',
     allowedMimeTypes: ['image/*'],
     maxFiles: 1,
+    recommendedSize: "2560 x 423",
   });
 
   const thumbnailUpload = useSupabaseUpload({
@@ -51,6 +52,7 @@ export default function NewCourse() {
     path: 'thumbnail',
     allowedMimeTypes: ['image/*'],
     maxFiles: 1,
+    recommendedSize: "1920 x 1080",
   });
 
   const brochureUpload = useSupabaseUpload({
@@ -112,19 +114,19 @@ export default function NewCourse() {
   const validateSlug = useCallback((value: string) => {
     // Clear previous error
     setSlugError('');
-    
+
     // Don't validate empty slugs
     if (!value.trim()) return;
-    
+
     // Check if slug format is valid
     if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(value)) {
       setSlugError('Slug must contain only lowercase letters, numbers, and hyphens');
       return;
     }
-    
+
     // Set checking state and create a timeout
     setIsCheckingSlug(true);
-    
+
     // Clear any existing timeout
     const timeoutId = setTimeout(async () => {
       try {
@@ -139,14 +141,14 @@ export default function NewCourse() {
         setIsCheckingSlug(false);
       }
     }, 500); // 500ms delay to avoid frequent requests
-    
+
     // Clean up function to clear the timeout if component unmounts or slug changes again
     return () => clearTimeout(timeoutId);
   }, []);
 
   // const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
   //   event.preventDefault();
-    
+
   //   // Check if slug exists before submitting
   //   if (slugError) {
   //     toast({
@@ -156,7 +158,7 @@ export default function NewCourse() {
   //     });
   //     return;
   //   }
-    
+
   //   // Perform one final check to ensure slug doesn't exist
   //   setIsCheckingSlug(true);
   //   try {
@@ -171,7 +173,7 @@ export default function NewCourse() {
   //       setIsCheckingSlug(false);
   //       return;
   //     }
-      
+
   //     setIsSubmitting(true);
   //     const formData = new FormData(event.currentTarget);
   //     await createCourse(formData);
@@ -193,7 +195,7 @@ export default function NewCourse() {
   //   }
   // };
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-    console.log('submit',event, event.currentTarget);
+    console.log('submit', event, event.currentTarget);
     event.preventDefault();
     try {
       setIsSubmitting(true);
@@ -337,7 +339,7 @@ export default function NewCourse() {
                 )}
               </Dropzone>
               <input type="hidden" name="bannerUrl" value={bannerUrl} />
-               {/* {bannerUpload.files.length > 0 && !bannerUpload.isSuccess && (
+              {/* {bannerUpload.files.length > 0 && !bannerUpload.isSuccess && (
                 <Button type="button" onClick={bannerUpload.onUpload} disabled={bannerUpload.loading}>
                   {bannerUpload.loading ? 'Uploading...' : 'Upload Banner'}
                 </Button>
@@ -378,17 +380,17 @@ export default function NewCourse() {
               )} */}
             </div>
 
-          <div className="space-y-4 mt-4">
-            <Button 
-              type="submit" 
-              disabled={isSubmitting || isCheckingSlug || !!slugError} 
-              className="w-full">
-              {isSubmitting ? 'Creating Course...' : 'Create Course'}
-            </Button>
-          </div>
-        </form>
-      </CardContent>
-    </Card>
+            <div className="space-y-4 mt-4">
+              <Button
+                type="submit"
+                disabled={isSubmitting || isCheckingSlug || !!slugError}
+                className="w-full">
+                {isSubmitting ? 'Creating Course...' : 'Create Course'}
+              </Button>
+            </div>
+          </form>
+        </CardContent>
+      </Card>
     </div>
   );
 }

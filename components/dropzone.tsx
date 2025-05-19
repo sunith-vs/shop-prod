@@ -182,18 +182,21 @@ const DropzoneContent = ({ className }: { className?: string }) => {
 }
 
 const DropzoneEmptyState = ({ className }: { className?: string }) => {
-  const { maxFiles, maxFileSize = Number.POSITIVE_INFINITY, inputRef, isSuccess } = useDropzoneContext()
+  const { maxFiles, maxFileSize = Number.POSITIVE_INFINITY, recommendedSize, inputRef, isSuccess } = useDropzoneContext()
 
   if (isSuccess) {
     return null
   }
 
   return (
-    <div className={cn('flex flex-col items-center gap-y-2', className)}>
+    <div className={cn('flex flex-col items-center justify-center h-full gap-y-2', className)}>
       <Upload size={20} className="text-muted-foreground" />
       <p className="text-sm">
         Upload{!!maxFiles && maxFiles > 1 ? ` ${maxFiles}` : ''} file
         {!maxFiles || maxFiles > 1 ? 's' : ''}
+        {recommendedSize && recommendedSize.trim() !== '' && (
+          <span className="block text-xs text-muted-foreground mt-1">Recommended size: {recommendedSize}</span>
+        )}
       </p>
       <div className="flex flex-col items-center gap-y-1">
         <p className="text-xs text-muted-foreground">
