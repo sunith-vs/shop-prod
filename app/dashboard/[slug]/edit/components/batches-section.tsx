@@ -101,7 +101,6 @@ export function BatchesSection({ courseId }: BatchesSectionProps) {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [eduportBatches, setEduportBatches] = useState<EduportBatch[]>([]);
     const [isLoadingEduportBatches, setIsLoadingEduportBatches] = useState(false);
-    const [selectedEduportBatchId, setSelectedEduportBatchId] = useState<string>();
     const [eduportCourseId, setEduportCourseId] = useState<number | null>(null);
     const { toast } = useToast();
     const supabase = createClient();
