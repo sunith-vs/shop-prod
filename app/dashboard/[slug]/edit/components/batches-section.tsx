@@ -77,7 +77,12 @@ const batchFormSchema = z.object({
     name: z.string().min(1, "Name is required"),
     type: z.enum(['online', 'offline'], { required_error: "Type is required" }),
     amount: z.coerce.number().positive("Amount must be positive"),
-    eduport_batch_id: z.coerce.number().int().nullable(),
+    eduport_batch_id: z.union([
+        z.null(),
+        z.coerce.number().int()
+    ]).refine(val => val !== null && val !== undefined && val > 0, {
+        message: "Eduport batch selection is required"
+    }),
     discount: z.coerce.number().min(0, "Discount cannot be negative").max(100, "Discount cannot exceed 100%").default(0),
     duration: z.coerce.number().int().positive("Duration must be a positive number")
 });
