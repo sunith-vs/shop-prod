@@ -149,7 +149,7 @@ export function BatchesSection({ courseId }: BatchesSectionProps) {
             setIsLoadingEduportBatches(true);
             try {
                 const response = await fetch(
-                    `${process.env.NEXT_PUBLIC_EDUPORT_API}api/v3/courses_list?has_batches=true`,);
+                    `${process.env.NEXT_PUBLIC_EDUPORT_API}api/v3/courses_list?has_batches=true&open_for_reg=true`,);
 
                 if (!response.ok) {
                     throw new Error('Failed to fetch Eduport batches');
