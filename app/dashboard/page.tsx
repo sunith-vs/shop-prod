@@ -1,5 +1,5 @@
 import { createClient } from '@/lib/supabase/server';
-import {Card, CardHeader, CardContent, CardTitle} from '@/components/ui/card';
+import { Card, CardHeader, CardContent, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import Link from 'next/link';
@@ -29,7 +29,7 @@ type Course = {
 
 export default async function CourseDashboard() {
   const supabase = createClient();
-  
+
   const { data: { user }, error: userError } = await supabase.auth.getUser();
   if (!user || userError) {
     redirect('/signin');
@@ -143,44 +143,56 @@ export default async function CourseDashboard() {
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
               {courses.map((course) => (
-                <Card key={course.id}>
-              <CardHeader className="p-4 md:p-6">
-                      {course.thumbnail && (
-                        <div className="relative w-full h-40 mb-4">
+                <Card key={course.id}
+                  className="relative overflow-hidden group h-full flex flex-col rounded-[20px] p-0"
+                >
+                  <CardHeader className="p-4 md:p-5">
+                    <div className="bg-[#00000000] rounded-[20px] overflow-hidden relative  border border-1 border-gray-100">
+                      <div className="relative w-full" style={{ paddingBottom: 'calc(1080 / 1920 * 100%)' }}>
+                        {course.thumbnail ? (
                           <img
                             src={course.thumbnail}
                             alt={course.title}
-                            className="object-cover rounded-md"
+                            className="absolute inset-0 w-full h-full object-cover"
                           />
-                        </div>
-                      )}
-                      <div className="space-y-2">
-                        <h3 className="font-semibold text-base md:text-lg font-mono">{course.title}</h3>
-                        <Badge variant={
-                          course.status === 'active' ? 'default' :
-                          course.status === 'draft' ? 'secondary' : 'destructive'
-                        }>
-                          {course.status.charAt(0).toUpperCase() + course.status.slice(1)}
-                        </Badge>
+                        ) : (
+                          <div className="absolute inset-0 w-full h-full flex items-center justify-center bg-gray-100">
+                            <p className="text-gray-400 text-sm text">No thumbnail added</p>
+                          </div>
+                        )}
                       </div>
-                    </CardHeader>
-              <CardContent>
-                <p className="text-sm text-gray-500 mb-4">{course.sub_heading}</p>
-                <p className="text-sm text-gray-500 mb-4">Status: {course.status}</p>
-                <div className="flex gap-2">
-                  <Link href={`/${course.slug}`} className="flex-1">
-                    <Button variant="outline" className="w-full">
-                      View
-                    </Button>
-                  </Link>
-                  <Link href={`/dashboard/${course.slug}/edit`} className="flex-1">
-                    <Button className="w-full">
-                      Edit
-                    </Button>
-                  </Link>
-                </div>
-              </CardContent>
-            </Card>
+                    </div>
+                    <div className="space-y-2">
+                      <h3 className="font-semibold text-base md:text-lg font-mono mt-2">{course.title}</h3>
+                      <Badge variant={
+                        course.status === 'active' ? 'default' :
+                          course.status === 'draft' ? 'secondary' : 'destructive'
+                      }>
+                        {course.status.charAt(0).toUpperCase() + course.status.slice(1)}
+                      </Badge>
+                    </div>
+                  </CardHeader>
+                  <CardContent className=" flex flex-col flex-1">
+
+                    <div className="flex-grow">
+                      <p className="text-sm text-gray-500 mb-4">{course.sub_heading}</p>
+                      {/* <p className="text-sm text-gray-500 mb-4">Status: {course.status}</p> */}
+                    </div>
+
+                    <div className="flex gap-3">
+                      <Link href={`/${course.slug}`} className="flex-1">
+                        <Button variant="outline" className="w-full">
+                          View
+                        </Button>
+                      </Link>
+                      <Link href={`/dashboard/${course.slug}/edit`} className="flex-1">
+                        <Button className="w-full">
+                          Edit
+                        </Button>
+                      </Link>
+                    </div>
+                  </CardContent>
+                </Card>
               ))}
             </div>
           )}

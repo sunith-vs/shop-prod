@@ -33,7 +33,6 @@ import { useToast } from "@/components/ui/use-toast";
 import { createClient } from '@/lib/supabase/client';
 import { Plus, Edit, Trash2 } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Label } from "@/components/ui/label";
 
 interface Batch {
     id: string;
@@ -101,7 +100,6 @@ export function BatchesSection({ courseId }: BatchesSectionProps) {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [eduportBatches, setEduportBatches] = useState<EduportBatch[]>([]);
     const [isLoadingEduportBatches, setIsLoadingEduportBatches] = useState(false);
-    const [selectedEduportBatchId, setSelectedEduportBatchId] = useState<string>();
     const [eduportCourseId, setEduportCourseId] = useState<number | null>(null);
     const { toast } = useToast();
     const supabase = createClient();
@@ -165,8 +163,23 @@ export function BatchesSection({ courseId }: BatchesSectionProps) {
                         courseBatches.push(...course.batches);
                     }
                 });
-
-                setEduportBatches(courseBatches);
+                
+                // Create a Set of already used Eduport batch IDs for O(1) lookup
+                const usedEduportBatchIds = new Set<number>();
+                batches.forEach(batch => {
+                    if (batch.eduport_batch_id !== null && 
+                        // Allow the current batch being edited to use its own Eduport batch ID
+                        (!editingBatch || batch.id !== editingBatch.id)) {
+                        usedEduportBatchIds.add(batch.eduport_batch_id);
+                    }
+                });
+                
+                // Filter out already used Eduport batches in a single pass
+                const availableBatches = courseBatches.filter(eduportBatch => 
+                    !usedEduportBatchIds.has(eduportBatch.id)
+                );
+                
+                setEduportBatches(availableBatches);
             } catch (error) {
                 console.error('Error fetching Eduport batches:', error);
                 toast({
@@ -181,7 +194,7 @@ export function BatchesSection({ courseId }: BatchesSectionProps) {
         };
 
         fetchEduportBatches();
-    }, [eduportCourseId, toast]);
+    }, [eduportCourseId, batches, editingBatch, toast]);
 
     const fetchBatches = useCallback(async () => {
         setIsLoading(true);
