@@ -170,7 +170,7 @@ export default function EditCourse({ params }: { params: { slug: string } }) {
     const fetchEduportCourses = async () => {
       setIsLoadingCourses(true);
       try {
-        const response = await fetch('https://uat.eduport.in/staffapp/api/v3/v1/course/lists');
+        const response = await fetch(`${process.env.NEXT_PUBLIC_EDUPORT_API}staffapp/api/v3/v1/course/lists`);
         const data = await response.json();
         if (!data.error && data.courses) {
           setEduportCourses(data.courses);
@@ -205,6 +205,86 @@ export default function EditCourse({ params }: { params: { slug: string } }) {
       setIsSubmitting(true);
       const newStatus = course.status === 'active' ? 'draft' : 'active';
 
+      // If we're setting to draft, no validation needed
+      if (newStatus === 'draft') {
+        const { error } = await supabase
+          .from('courses')
+          .update({
+            status: newStatus,
+            updated_at: new Date().toISOString(),
+          })
+          .eq('slug', params.slug);
+
+        if (error) throw error;
+
+        setCourse(prev => ({
+          ...prev!,
+          status: newStatus
+        }));
+
+        toast({
+          title: "Success",
+          description: "Course unpublished successfully!",
+        });
+        return;
+      }
+
+      // Validation checks for publishing (making active)
+      const validationErrors = [];
+
+      // 1. Check if eduport_course_id is set
+      if (!course.eduport_course_id) {
+        validationErrors.push("Eduport course  must be selected");
+      }
+
+      // 2. Check if at least one batch is added
+      const { data: batches, error: batchError } = await supabase
+        .from('batches')
+        .select('id')
+        .eq('course_id', course.id);
+
+      if (batchError) throw batchError;
+      if (!batches || batches.length === 0) {
+        validationErrors.push("At least one batch must be added");
+      }
+
+      // 3. Check if banner image, thumbnail, and course brochure are set
+      if (!course.banner_url || course.banner_url.trim() === '') {
+        validationErrors.push("Banner image must be set");
+      }
+      if (!course.thumbnail || course.thumbnail.trim() === '') {
+        validationErrors.push("Thumbnail image must be set");
+      }
+      
+
+      // 4. Check if at least one carousel item is present
+      const { data: carouselItems, error: carouselError } = await supabase
+        .from('carousel')
+        .select('id')
+        .eq('course_id', course.id);
+
+      if (carouselError) throw carouselError;
+      if (!carouselItems || carouselItems.length === 0) {
+        validationErrors.push("At least one carousel item must be added");
+      }
+
+      // If there are validation errors, show them and abort
+      if (validationErrors.length > 0) {
+        toast({
+          title: "Cannot Publish Course",
+          description: (
+            <ul className="list-disc pl-4">
+              {validationErrors.map((error, index) => (
+                <li key={index}>{error}</li>
+              ))}
+            </ul>
+          ),
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // All checks passed, proceed with publishing
       const { error } = await supabase
         .from('courses')
         .update({
@@ -222,7 +302,7 @@ export default function EditCourse({ params }: { params: { slug: string } }) {
 
       toast({
         title: "Success",
-        description: `Course ${newStatus === 'active' ? 'published' : 'unpublished'} successfully!`,
+        description: "Course published successfully!",
       });
     } catch (error) {
       toast({

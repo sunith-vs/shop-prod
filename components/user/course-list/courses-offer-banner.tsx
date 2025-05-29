@@ -27,16 +27,13 @@ const CoursesOfferBanner = ({ bannerUrl, bannerMobile }: { bannerUrl: string, ba
   const desktopSrc = bannerUrl || bannerMobile || '/images/default-banner.jpg'
 
   return (
-    <div style={{ position: 'relative', width: '100%' }} className='lg:h-[220px]'>
+    <div className="relative w-full" style={{ aspectRatio: '2560/423' }}>
       <Image
         src={isMediumOrSmall ? mobileSrc : desktopSrc}
         alt="Our Courses Offer Banner"
-        width={0}
-        height={0}
+        fill
         sizes="100vw"
         style={{
-          width: '100%',
-          height: 'auto',
           objectFit: 'contain'
         }}
         priority

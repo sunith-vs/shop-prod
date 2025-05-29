@@ -4,7 +4,6 @@ import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useSupabaseUpload } from '@/hooks/use-supabase-upload';
 import { Button } from '@/components/ui/button';
-import Image from 'next/image';
 import { FileUploadModal } from './file-upload-modal';
 import { Edit, FileText, Trash } from 'lucide-react';
 
@@ -24,13 +23,13 @@ interface MediaSectionProps {
   }>) => void;
 }
 
-type UploadType = 'banner' | 'thumbnail' | 'brochure' | 'tag' |null;
+type UploadType = 'banner' | 'thumbnail' | 'brochure' | 'tag' | null;
 
 export function MediaSection({ courseId, initialData, onUpdate }: MediaSectionProps) {
   const [bannerUrl, setBannerUrl] = useState(initialData.banner_url || '');
   const [thumbnailUrl, setThumbnailUrl] = useState(initialData.thumbnail || '');
   const [brochureUrl, setBrochureUrl] = useState(initialData.brochure_url || '');
-    const [tagUrl, setTagUrl] = useState(initialData.tag_url || '');
+  const [tagUrl, setTagUrl] = useState(initialData.tag_url || '');
   const [activeUpload, setActiveUpload] = useState<UploadType>(null);
 
   const bannerUpload = useSupabaseUpload({
@@ -38,6 +37,7 @@ export function MediaSection({ courseId, initialData, onUpdate }: MediaSectionPr
     path: 'banner',
     allowedMimeTypes: ['image/*'],
     maxFiles: 1,
+    recommendedSize: "2560 x 423",
   });
 
   const thumbnailUpload = useSupabaseUpload({
@@ -45,6 +45,7 @@ export function MediaSection({ courseId, initialData, onUpdate }: MediaSectionPr
     path: 'thumbnail',
     allowedMimeTypes: ['image/*'],
     maxFiles: 1,
+    recommendedSize: "1920 x 1080",
   });
 
   const brochureUpload = useSupabaseUpload({
@@ -58,6 +59,7 @@ export function MediaSection({ courseId, initialData, onUpdate }: MediaSectionPr
     path: 'tag',
     allowedMimeTypes: ['image/*'],
     maxFiles: 1,
+    recommendedSize: "135 x 40",
   });
 
 
@@ -70,14 +72,14 @@ export function MediaSection({ courseId, initialData, onUpdate }: MediaSectionPr
     }
   }, [bannerUpload.isSuccess, bannerUpload.successes]);
 
-    useEffect(() => {
-        if (tagUpload.isSuccess && tagUpload.successes.length > 0) {
-        const url = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/courses/tag/${tagUpload.successes[0]}`;
-        setTagUrl(url);
-        onUpdate({ tag_url: url });
-        // Don't close modal immediately on success to show the preview
-        }
-    }, [tagUpload.isSuccess, tagUpload.successes]);
+  useEffect(() => {
+    if (tagUpload.isSuccess && tagUpload.successes.length > 0) {
+      const url = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/courses/tag/${tagUpload.successes[0]}`;
+      setTagUrl(url);
+      onUpdate({ tag_url: url });
+      // Don't close modal immediately on success to show the preview
+    }
+  }, [tagUpload.isSuccess, tagUpload.successes]);
 
   useEffect(() => {
     if (thumbnailUpload.isSuccess && thumbnailUpload.successes.length > 0) {
@@ -99,12 +101,12 @@ export function MediaSection({ courseId, initialData, onUpdate }: MediaSectionPr
 
   const handleCloseModal = () => {
     // Only close if there's no active upload
-    const upload = activeUpload === 'banner' ? bannerUpload 
-      : activeUpload === 'thumbnail' ? thumbnailUpload 
-      : activeUpload === 'brochure' ? brochureUpload
-        : activeUpload === 'tag' ? tagUpload
-      : null;
-      
+    const upload = activeUpload === 'banner' ? bannerUpload
+      : activeUpload === 'thumbnail' ? thumbnailUpload
+        : activeUpload === 'brochure' ? brochureUpload
+          : activeUpload === 'tag' ? tagUpload
+            : null;
+
     if (upload && !upload.loading) {
       // upload.setFiles([]);
 
@@ -124,10 +126,9 @@ export function MediaSection({ courseId, initialData, onUpdate }: MediaSectionPr
               {tagUrl ? (
                 <div className="space-y-3">
                   <div className="aspect-[135/40] bg-white p-2 relative rounded-lg border">
-                    <Image
+                    <img
                       src={tagUrl}
                       alt="Tag"
-                      fill
                       sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                       className="object-contain"
                     />
@@ -155,17 +156,14 @@ export function MediaSection({ courseId, initialData, onUpdate }: MediaSectionPr
                   </div>
                 </div>
               ) : (
-                <div className="aspect-[135/40] flex items-center justify-center p-6 border-2 border-dashed border-muted-foreground/25 rounded-lg">
-                  <div className="text-center">
+                <div className="space-y-3">
+                  <div className="aspect-[135/40] bg-muted p-2 relative rounded-lg overflow-hidden flex items-center justify-center">
                     <Button
-                      variant="outline"
+                      variant="secondary"
                       onClick={() => setActiveUpload('tag')}
-                      className="mb-2"
                     >
-                      <FileText className="h-4 w-4 mr-2" />
                       Upload Tag Image
                     </Button>
-                    <p className="text-sm text-muted-foreground">Recommended size: 135x40</p>
                   </div>
                 </div>
               )}
@@ -182,10 +180,9 @@ export function MediaSection({ courseId, initialData, onUpdate }: MediaSectionPr
               {bannerUrl ? (
                 <>
                   <div className="aspect-[1728/245]">
-                    <Image
+                    <img
                       src={bannerUrl}
                       alt="Banner"
-                      fill
                       sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                       className="object-contain"
                     />
@@ -224,10 +221,9 @@ export function MediaSection({ courseId, initialData, onUpdate }: MediaSectionPr
               {thumbnailUrl ? (
                 <>
                   <div className="aspect-[374/232]">
-                    <Image
+                    <img
                       src={thumbnailUrl}
                       alt="Thumbnail"
-                      fill
                       sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                       className="object-contain"
                     />

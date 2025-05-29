@@ -1,0 +1,22 @@
+name: Mirror to Repo B
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  mirror:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout source repo
+        uses: actions/checkout@v3
+
+      - name: Mirror to target repo
+        run: |
+          git config --global user.name "sunith-vs"
+          git config --global user.email "sunith.eduport@gmail.com"
+          
+          git remote add mirror https://x-access-token:${{ secrets.TARGET_REPO_TOKEN }}@github.com/sunith-vs/shop-prod.git
+          
+          git push mirror main --force

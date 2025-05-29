@@ -33,7 +33,6 @@ import { useToast } from "@/components/ui/use-toast";
 import { createClient } from '@/lib/supabase/client';
 import { Plus, Edit, Trash2 } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Label } from "@/components/ui/label";
 
 interface Batch {
     id: string;
@@ -77,7 +76,12 @@ const batchFormSchema = z.object({
     name: z.string().min(1, "Name is required"),
     type: z.enum(['online', 'offline'], { required_error: "Type is required" }),
     amount: z.coerce.number().positive("Amount must be positive"),
-    eduport_batch_id: z.coerce.number().int().nullable(),
+    eduport_batch_id: z.union([
+        z.null(),
+        z.coerce.number().int()
+    ]).refine(val => val !== null && val !== undefined && val > 0, {
+        message: "Eduport batch selection is required"
+    }),
     discount: z.coerce.number().min(0, "Discount cannot be negative").max(100, "Discount cannot exceed 100%").default(0),
     duration: z.coerce.number().int().positive("Duration must be a positive number")
 });
@@ -96,7 +100,6 @@ export function BatchesSection({ courseId }: BatchesSectionProps) {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [eduportBatches, setEduportBatches] = useState<EduportBatch[]>([]);
     const [isLoadingEduportBatches, setIsLoadingEduportBatches] = useState(false);
-    const [selectedEduportBatchId, setSelectedEduportBatchId] = useState<string>();
     const [eduportCourseId, setEduportCourseId] = useState<number | null>(null);
     const { toast } = useToast();
     const supabase = createClient();
@@ -144,20 +147,14 @@ export function BatchesSection({ courseId }: BatchesSectionProps) {
             setIsLoadingEduportBatches(true);
             try {
                 const response = await fetch(
-                    'https://uat.eduport.in/api/v3/courses_list?has_batches=true',
-                    {
-                        headers: {
-                            'Authorization': `Bearer ${process.env.NEXT_PUBLIC_EDUPORT}`
-                        }
-                    }
-                );
+                    `${process.env.NEXT_PUBLIC_EDUPORT_API}api/v3/courses_list?has_batches=true&open_for_reg=true`,);
 
                 if (!response.ok) {
                     throw new Error('Failed to fetch Eduport batches');
                 }
 
                 const data: EduportResponse = await response.json();
-                
+
                 // Find batches for the current course
                 const courseBatches: EduportBatch[] = [];
                 data.classes.forEach(classItem => {
@@ -166,8 +163,23 @@ export function BatchesSection({ courseId }: BatchesSectionProps) {
                         courseBatches.push(...course.batches);
                     }
                 });
-
-                setEduportBatches(courseBatches);
+                
+                // Create a Set of already used Eduport batch IDs for O(1) lookup
+                const usedEduportBatchIds = new Set<number>();
+                batches.forEach(batch => {
+                    if (batch.eduport_batch_id !== null && 
+                        // Allow the current batch being edited to use its own Eduport batch ID
+                        (!editingBatch || batch.id !== editingBatch.id)) {
+                        usedEduportBatchIds.add(batch.eduport_batch_id);
+                    }
+                });
+                
+                // Filter out already used Eduport batches in a single pass
+                const availableBatches = courseBatches.filter(eduportBatch => 
+                    !usedEduportBatchIds.has(eduportBatch.id)
+                );
+                
+                setEduportBatches(availableBatches);
             } catch (error) {
                 console.error('Error fetching Eduport batches:', error);
                 toast({
@@ -182,7 +194,7 @@ export function BatchesSection({ courseId }: BatchesSectionProps) {
         };
 
         fetchEduportBatches();
-    }, [eduportCourseId, toast]);
+    }, [eduportCourseId, batches, editingBatch, toast]);
 
     const fetchBatches = useCallback(async () => {
         setIsLoading(true);
@@ -333,155 +345,157 @@ export function BatchesSection({ courseId }: BatchesSectionProps) {
                             <DialogHeader>
                                 <DialogTitle>{editingBatch ? 'Edit Batch' : 'Add New Batch'}</DialogTitle>
                             </DialogHeader>
-                            <Form {...form}>
-                                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                                    <FormField
-                                        control={form.control}
-                                        name="name"
-                                        render={({ field }) => (
-                                            <FormItem>
-                                                <FormLabel>Name</FormLabel>
-                                                <FormControl>
-                                                    <Input placeholder="e.g., Weekend Batch A" {...field} />
-                                                </FormControl>
-                                                <FormMessage />
-                                            </FormItem>
-                                        )}
-                                    />
-                                    <FormField
-                                        control={form.control}
-                                        name="type"
-                                        render={({ field }) => (
-                                            <FormItem>
-                                                <FormLabel>Type</FormLabel>
-                                                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                            <div className=" overflow-y-auto pl-1 pr-5" style={{ maxHeight: 'calc(80vh)' }}>
+                                <Form {...form}>
+                                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                                        <FormField
+                                            control={form.control}
+                                            name="name"
+                                            render={({ field }) => (
+                                                <FormItem>
+                                                    <FormLabel>Name</FormLabel>
                                                     <FormControl>
-                                                        <SelectTrigger>
-                                                            <SelectValue placeholder="Select type" />
-                                                        </SelectTrigger>
+                                                        <Input placeholder="e.g., Weekend Batch A" {...field} />
                                                     </FormControl>
-                                                    <SelectContent>
-                                                        <SelectItem value="online">Online</SelectItem>
-                                                        <SelectItem value="offline">Offline</SelectItem>
-                                                    </SelectContent>
-                                                </Select>
-                                                <FormMessage />
-                                            </FormItem>
-                                        )}
-                                    />
-                                    <FormField
-                                        control={form.control}
-                                        name="amount"
-                                        render={({ field }) => (
-                                            <FormItem>
-                                                <FormLabel>Amount</FormLabel>
-                                                <FormControl>
-                                                    <Input type="number" step="0.01" placeholder="e.g., 5000.00" {...field} />
-                                                </FormControl>
-                                                <FormMessage />
-                                            </FormItem>
-                                        )}
-                                    />
-                                    <FormField
-                                        control={form.control}
-                                        name="discount"
-                                        render={({ field }) => (
-                                            <FormItem>
-                                                <FormLabel>Discount (%)</FormLabel>
-                                                <FormControl>
-                                                    <Input 
-                                                        type="number" 
-                                                        min="0" 
-                                                        max="100" 
-                                                        step="0.01" 
-                                                        placeholder="e.g., 10.00" 
-                                                        {...field} 
-                                                    />
-                                                </FormControl>
-                                                <FormMessage />
-                                            </FormItem>
-                                        )}
-                                    />
-                                    <FormField
-                                        control={form.control}
-                                        name="duration"
-                                        render={({ field }) => (
-                                            <FormItem>
-                                                <FormLabel>Duration</FormLabel>
-                                                <FormControl>
-                                                    <Input 
-                                                        type="number" 
-                                                        min="1" 
-                                                        step="1" 
-                                                        placeholder="e.g., 24" 
-                                                        {...field} 
-                                                    />
-                                                </FormControl>
-                                                <p className="text-sm text-muted-foreground mt-1">Duration in months (e.g., 12 for 1 year, 24 for 2 years)</p>
-                                                <FormMessage />
-                                            </FormItem>
-                                        )}
-                                    />
-                                    <FormField
-                                        control={form.control}
-                                        name="eduport_batch_id"
-                                        render={({ field }) => (
-                                            <FormItem>
-                                                <FormLabel>Eduport Batch</FormLabel>
-                                                <FormControl>
-                                                    {!eduportCourseId ? (
-                                                        <div className="text-sm text-red-500">
-                                                            Please select an Eduport course in the General Details tab first
-                                                        </div>
-                                                    ) : isLoadingEduportBatches ? (
-                                                        <div className="w-full h-10 bg-muted animate-pulse rounded-md" />
-                                                    ) : eduportBatches.length === 0 ? (
-                                                        <div className="text-sm text-muted-foreground">
-                                                            No batches available for this course
-                                                        </div>
-                                                    ) : (
-                                                        <Select
-                                                            value={field.value?.toString()}
-                                                            onValueChange={(value) => {
-                                                                field.onChange(value ? parseInt(value, 10) : null);
-                                                            }}
-                                                        >
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
+                                        />
+                                        <FormField
+                                            control={form.control}
+                                            name="type"
+                                            render={({ field }) => (
+                                                <FormItem>
+                                                    <FormLabel>Type</FormLabel>
+                                                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                                        <FormControl>
                                                             <SelectTrigger>
-                                                                <SelectValue placeholder="Select a batch" />
+                                                                <SelectValue placeholder="Select type" />
                                                             </SelectTrigger>
-                                                            <SelectContent>
-                                                                {eduportBatches.map(batch => (
-                                                                    <SelectItem 
-                                                                        key={batch.id} 
-                                                                        value={batch.id.toString()}
-                                                                    >
-                                                                        {batch.title}
-                                                                    </SelectItem>
-                                                                ))}
-                                                            </SelectContent>
-                                                        </Select>
-                                                    )}
-                                                </FormControl>
-                                                <FormMessage />
-                                            </FormItem>
-                                        )}
-                                    />
+                                                        </FormControl>
+                                                        <SelectContent>
+                                                            <SelectItem value="online">Online</SelectItem>
+                                                            <SelectItem value="offline">Offline</SelectItem>
+                                                        </SelectContent>
+                                                    </Select>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
+                                        />
+                                        <FormField
+                                            control={form.control}
+                                            name="amount"
+                                            render={({ field }) => (
+                                                <FormItem>
+                                                    <FormLabel>Amount</FormLabel>
+                                                    <FormControl>
+                                                        <Input type="number" step="0.01" placeholder="e.g., 5000.00" {...field} />
+                                                    </FormControl>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
+                                        />
+                                        <FormField
+                                            control={form.control}
+                                            name="discount"
+                                            render={({ field }) => (
+                                                <FormItem>
+                                                    <FormLabel>Discount (%)</FormLabel>
+                                                    <FormControl>
+                                                        <Input
+                                                            type="number"
+                                                            min="0"
+                                                            max="100"
+                                                            step="0.01"
+                                                            placeholder="e.g., 10.00"
+                                                            {...field}
+                                                        />
+                                                    </FormControl>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
+                                        />
+                                        <FormField
+                                            control={form.control}
+                                            name="duration"
+                                            render={({ field }) => (
+                                                <FormItem>
+                                                    <FormLabel>Duration</FormLabel>
+                                                    <FormControl>
+                                                        <Input
+                                                            type="number"
+                                                            min="1"
+                                                            step="1"
+                                                            placeholder="e.g., 24"
+                                                            {...field}
+                                                        />
+                                                    </FormControl>
+                                                    <p className="text-sm text-muted-foreground mt-1">Duration in months (e.g., 12 for 1 year, 24 for 2 years)</p>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
+                                        />
+                                        <FormField
+                                            control={form.control}
+                                            name="eduport_batch_id"
+                                            render={({ field }) => (
+                                                <FormItem>
+                                                    <FormLabel>Eduport Batch</FormLabel>
+                                                    <FormControl>
+                                                        {!eduportCourseId ? (
+                                                            <div className="text-sm text-red-500">
+                                                                Please select an Eduport course in the General Details tab first
+                                                            </div>
+                                                        ) : isLoadingEduportBatches ? (
+                                                            <div className="w-full h-10 bg-muted animate-pulse rounded-md" />
+                                                        ) : eduportBatches.length === 0 ? (
+                                                            <div className="text-sm text-muted-foreground">
+                                                                No batches available for this course
+                                                            </div>
+                                                        ) : (
+                                                            <Select
+                                                                value={field.value?.toString()}
+                                                                onValueChange={(value) => {
+                                                                    field.onChange(value ? parseInt(value, 10) : null);
+                                                                }}
+                                                            >
+                                                                <SelectTrigger>
+                                                                    <SelectValue placeholder="Select a batch" />
+                                                                </SelectTrigger>
+                                                                <SelectContent>
+                                                                    {eduportBatches.map(batch => (
+                                                                        <SelectItem
+                                                                            key={batch.id}
+                                                                            value={batch.id.toString()}
+                                                                        >
+                                                                            {batch.title}
+                                                                        </SelectItem>
+                                                                    ))}
+                                                                </SelectContent>
+                                                            </Select>
+                                                        )}
+                                                    </FormControl>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
+                                        />
 
-                                    <div className="flex justify-end space-x-2">
-                                        <Button 
-                                            type="button" 
-                                            variant="outline" 
-                                            onClick={() => {
-                                                form.reset();
-                                                setIsModalOpen(false);
-                                            }}
-                                        >
-                                            Cancel
-                                        </Button>
-                                        <Button type="submit">Submit</Button>
-                                    </div>
-                                </form>
-                            </Form>
+                                        <div className="flex justify-end space-x-2">
+                                            <Button
+                                                type="button"
+                                                variant="outline"
+                                                onClick={() => {
+                                                    form.reset();
+                                                    setIsModalOpen(false);
+                                                }}
+                                            >
+                                                Cancel
+                                            </Button>
+                                            <Button type="submit">Submit</Button>
+                                        </div>
+                                    </form>
+                                </Form>
+                            </div>
                         </DialogContent>
                     </Dialog>
                 </div>
@@ -489,7 +503,7 @@ export function BatchesSection({ courseId }: BatchesSectionProps) {
                 {isLoading ? (
                     <p>Loading batches...</p>
                 ) : batches.length === 0 ? (
-                     <p className="text-muted-foreground text-center">No batches added yet.</p>
+                    <p className="text-muted-foreground text-center">No batches added yet.</p>
                 ) : (
                     <Table>
                         <TableHeader>

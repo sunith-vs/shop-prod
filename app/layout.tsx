@@ -5,6 +5,7 @@ import { Inter } from "next/font/google";
 import localFont from 'next/font/local'
 
 import { RazorpayProvider } from "@/components/user/purchase/razorpay-provider";
+import { EduportHeader } from "@/components/header";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -29,6 +30,9 @@ const monaSans = localFont({
 export const metadata: Metadata = {
   title: "Course Management",
   description: "Manage your courses efficiently",
+  icons: {
+    icon: '/favicon.ico',
+  },
 };
 
 export default function RootLayout({
@@ -39,6 +43,7 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${inter.variable} ${monaSans.variable}`}>
       <body className={inter.className}>
+        {/*<EduportHeader/>*/}
         <RazorpayProvider>
           {children}
           <Toaster />
