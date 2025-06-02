@@ -1,7 +1,7 @@
 "use client";
 
 // CourseBottomSheet.tsx
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { validateEmail, validateName, validatePhone } from '@/utils/validation';
 
 interface Batch {
@@ -44,8 +44,11 @@ const CourseBottomSheet: React.FC<CourseBottomSheetProps> = ({ isOpen, onClose, 
         phone: false
     });
 
+    // Use a ref to track if we've added a history entry
+    const historyEntryAddedRef = useRef(false);
+
     // Function to reset form fields
-    const resetForm = () => {
+    const resetForm = useCallback(() => {
         setName('');
         setEmail('');
         setPhone('');
@@ -60,13 +63,17 @@ const CourseBottomSheet: React.FC<CourseBottomSheetProps> = ({ isOpen, onClose, 
             email: false,
             phone: false
         });
-    };
+    }, []);
 
     // Create a wrapper for onClose that resets the form
-    const handleClose = () => {
+    const handleClose = useCallback(() => {
         resetForm();
         onClose();
-    };
+        // If we added a history entry, we need to make sure we don't trigger another popstate
+        if (historyEntryAddedRef.current && typeof window !== 'undefined') {
+            historyEntryAddedRef.current = false;
+        }
+    }, [onClose, resetForm]);
     console.log(batches)
 
     // Convert batches to the format needed for display
@@ -103,6 +110,36 @@ const CourseBottomSheet: React.FC<CourseBottomSheetProps> = ({ isOpen, onClose, 
             setErrors(prev => ({ ...prev, phone: !validatePhone(phone) }));
         }
     }, [phone, touched.phone]);
+
+    // Handle browser history integration
+    useEffect(() => {
+        // When the bottom sheet opens, push a new history state
+        if (isOpen && !historyEntryAddedRef.current && typeof window !== 'undefined') {
+            const currentUrl = window.location.href;
+            window.history.pushState({ bottomSheetOpen: true }, '', currentUrl);
+            historyEntryAddedRef.current = true;
+        }
+
+        // Create a handler for popstate (browser back button)
+        const handlePopState = () => {
+            if (isOpen && historyEntryAddedRef.current) {
+                handleClose();
+                historyEntryAddedRef.current = false;
+            }
+        };
+
+        // Add the event listener
+        if (typeof window !== 'undefined') {
+            window.addEventListener('popstate', handlePopState);
+        }
+
+        // Clean up on unmount
+        return () => {
+            if (typeof window !== 'undefined') {
+                window.removeEventListener('popstate', handlePopState);
+            }
+        };
+    }, [isOpen, handleClose]);
 
     const handleSubmitPurchase = (e: React.FormEvent) => {
         e.preventDefault();
