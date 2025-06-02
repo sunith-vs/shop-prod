@@ -24,6 +24,12 @@ const PurchaseModal = ({ isOpen, onClose, courseId, courseAmount, courseName, ba
     email: false,
     phone: false
   });
+  
+  const [touched, setTouched] = useState({
+    name: false,
+    email: false,
+    phone: false
+  });
 
   // Close modal when escape key is pressed
   useEffect(() => {
@@ -51,9 +57,42 @@ const PurchaseModal = ({ isOpen, onClose, courseId, courseAmount, courseName, ba
     };
   }, [isOpen]);
 
+  // Validate fields as user types
+  useEffect(() => {
+    if (touched.name) {
+      setErrors(prev => ({ ...prev, name: !validateName(name) }));
+    }
+  }, [name, touched.name]);
+
+  useEffect(() => {
+    if (touched.email) {
+      setErrors(prev => ({ ...prev, email: !validateEmail(email) }));
+    }
+  }, [email, touched.email]);
+
+  useEffect(() => {
+    if (touched.phone) {
+      setErrors(prev => ({ ...prev, phone: !validatePhone(phone) }));
+    }
+  }, [phone, touched.phone]);
+
   // Handle close button click
   const handleClose = () => {
     setShowFooter(true);
+    // Reset form data
+    setName('');
+    setEmail('');
+    setPhone('');
+    setErrors({
+      name: false,
+      email: false,
+      phone: false
+    });
+    setTouched({
+      name: false,
+      email: false,
+      phone: false
+    });
     // Make the CourseListFooter visible again
     const footerContainer = document.getElementById('course-list-footer-container');
     if (footerContainer) {
@@ -65,34 +104,24 @@ const PurchaseModal = ({ isOpen, onClose, courseId, courseAmount, courseName, ba
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Reset errors
-    const newErrors = {
-      name: false,
-      email: false,
-      phone: false
-    };
+    // Mark all fields as touched
+    setTouched({
+      name: true,
+      email: true,
+      phone: true
+    });
 
     // Validate inputs
-    let isValid = true;
-
-    if (!validateName(name)) {
-      newErrors.name = true;
-      isValid = false;
-    }
-
-    if (!validateEmail(email)) {
-      newErrors.email = true;
-      isValid = false;
-    }
-
-    if (!validatePhone(phone)) {
-      newErrors.phone = true;
-      isValid = false;
-    }
-
+    const newErrors = {
+      name: !validateName(name),
+      email: !validateEmail(email),
+      phone: !validatePhone(phone)
+    };
+    
     setErrors(newErrors);
 
-    if (!isValid) return;
+    // Check if there are any errors
+    if (newErrors.name || newErrors.email || newErrors.phone) return;
 
     // Push checkout initiated event to dataLayer with user details
     if (typeof window !== 'undefined') {
@@ -195,10 +224,14 @@ const PurchaseModal = ({ isOpen, onClose, courseId, courseAmount, courseName, ba
               name="name"
               value={name}
               onChange={(e) => setName(e.target.value)}
+              onBlur={() => setTouched(prev => ({ ...prev, name: true }))}
               className={`w-full px-4 py-2 border ${errors.name ? 'border-red-500' : 'border-gray-300'} rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500`}
               placeholder="Enter your full name"
+              aria-invalid={errors.name ? "true" : "false"}
+              aria-describedby={errors.name ? "name-error" : undefined}
+              required
             />
-            {errors.name && <p id="name-error" className="text-red-500 text-sm mt-1">Please enter a valid name (letters, spaces, hyphens, and apostrophes only)</p>}
+            {errors.name && <p id="name-error" className="text-red-500 text-sm mt-1">Please enter a valid name</p>}
           </div>
           
           <div className="mb-4">
@@ -209,10 +242,14 @@ const PurchaseModal = ({ isOpen, onClose, courseId, courseAmount, courseName, ba
               name="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
+              onBlur={() => setTouched(prev => ({ ...prev, email: true }))}
               className={`w-full px-4 py-2 border ${errors.email ? 'border-red-500' : 'border-gray-300'} rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500`}
               placeholder="Enter your email address"
+              aria-invalid={errors.email ? "true" : "false"}
+              aria-describedby={errors.email ? "email-error" : undefined}
+              required
             />
-            {errors.email && <p id="email-error" className="text-red-500 text-sm mt-1">Please enter a valid email address</p>}
+            {errors.email && <p id="email-error" className="text-red-500 text-sm mt-1">Please enter a valid email address (e.g, example@domain.com)</p>}
           </div>
           
           <div className="mb-6">
@@ -222,9 +259,20 @@ const PurchaseModal = ({ isOpen, onClose, courseId, courseAmount, courseName, ba
               id="phone"
               name="phone"
               value={phone}
-              onChange={(e) => setPhone(e.target.value)}
+              onChange={(e) => {
+                // Only allow numeric input
+                const value = e.target.value.replace(/[^0-9]/g, '');
+                // Limit to 10 digits
+                setPhone(value.slice(0, 10));
+              }}
+              onBlur={() => setTouched(prev => ({ ...prev, phone: true }))}
               className={`w-full px-4 py-2 border ${errors.phone ? 'border-red-500' : 'border-gray-300'} rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500`}
-              placeholder="Enter your phone number"
+              placeholder="Enter your 10-digit phone number"
+              maxLength={10}
+              inputMode="numeric"
+              aria-invalid={errors.phone ? "true" : "false"}
+              aria-describedby={errors.phone ? "phone-error" : undefined}
+              required
             />
             {errors.phone && <p id="phone-error" className="text-red-500 text-sm mt-1">Please enter a valid 10-digit phone number</p>}
           </div>
@@ -234,7 +282,8 @@ const PurchaseModal = ({ isOpen, onClose, courseId, courseAmount, courseName, ba
           
           <button
             type="submit"
-            className="w-full bg-[#FB6514] text-white font-bold py-3 rounded-xl transition duration-200 hover:bg-orange-600"
+            className="w-full bg-[#FB6514] text-white font-bold py-3 rounded-xl transition duration-200 hover:bg-orange-600 disabled:opacity-70 disabled:cursor-not-allowed"
+            disabled={errors.name || errors.email || errors.phone}
           >
             Proceed to Payment
           </button>
