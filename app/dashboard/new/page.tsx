@@ -37,6 +37,7 @@ export default function NewCourse() {
   const [bannerUrl, setBannerUrl] = useState('');
   const [thumbnailUrl, setThumbnailUrl] = useState('');
   const [brochureUrl, setBrochureUrl] = useState('');
+  const [bannerDimensionError, setBannerDimensionError] = useState('');
   const { toast } = useToast();
 
   const bannerUpload = useSupabaseUpload({
@@ -44,7 +45,7 @@ export default function NewCourse() {
     path: 'banner',
     allowedMimeTypes: ['image/*'],
     maxFiles: 1,
-    recommendedSize: "2560 x 423",
+    recommendedSize: "1728 x 220",
   });
 
   const thumbnailUpload = useSupabaseUpload({
@@ -68,6 +69,27 @@ export default function NewCourse() {
       setBannerUrl(url);
     }
   }, [bannerUpload.isSuccess, bannerUpload.successes]);
+
+  // Validate banner image dimensions
+  useEffect(() => {
+    if (bannerUpload.files.length > 0) {
+      const file = bannerUpload.files[0];
+      const img = new Image();
+      img.onload = () => {
+        if (img.width !== 1728 || img.height !== 220) {
+          setBannerDimensionError(`Image must be exactly 1728 x 220 pixels. Current size: ${img.width} x ${img.height}`);
+        } else {
+          setBannerDimensionError('');
+        }
+      };
+      img.onerror = () => {
+        setBannerDimensionError('Error loading image. Please try again.');
+      };
+      img.src = file.preview || '';
+    } else {
+      setBannerDimensionError('');
+    }
+  }, [bannerUpload.files]);
 
   useEffect(() => {
     if (thumbnailUpload.isSuccess && thumbnailUpload.successes.length > 0) {
@@ -331,6 +353,7 @@ export default function NewCourse() {
 
             <div className="space-y-2">
               <label className="text-sm font-medium">Banner Image</label>
+              <div className="text-xs text-muted-foreground">Required size: 1728 x 220 pixels</div>
               <Dropzone {...bannerUpload}>
                 {bannerUpload.files.length === 0 ? (
                   <DropzoneEmptyState className="h-32" />
@@ -338,12 +361,19 @@ export default function NewCourse() {
                   <DropzoneContent className="h-32" />
                 )}
               </Dropzone>
+              {bannerDimensionError && (
+                <div className="text-sm text-destructive mt-1">{bannerDimensionError}</div>
+              )}
               <input type="hidden" name="bannerUrl" value={bannerUrl} />
-              {/* {bannerUpload.files.length > 0 && !bannerUpload.isSuccess && (
-                <Button type="button" onClick={bannerUpload.onUpload} disabled={bannerUpload.loading}>
+              {bannerUpload.files.length > 0 && !bannerUpload.isSuccess && !bannerDimensionError && (
+                <Button 
+                  type="button" 
+                  onClick={() => bannerUpload.onUpload(bannerUpload.files)} 
+                  disabled={bannerUpload.loading || !!bannerDimensionError}
+                >
                   {bannerUpload.loading ? 'Uploading...' : 'Upload Banner'}
                 </Button>
-              )} */}
+              )}
             </div>
 
             <div className="space-y-2">
