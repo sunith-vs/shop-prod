@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { createClient } from '@/lib/supabase/client';
 import { CourseBenefitModal } from './course-benefit-modal';
 import { Loader2, Pencil, Trash } from 'lucide-react';
-import { toast } from 'sonner';
+import { useToast } from '@/components/ui/use-toast';
 
 interface Icon {
   id: string;
@@ -33,6 +33,7 @@ export function CourseBenefitsManager({ courseId }: CourseBenefitsManagerProps) 
   const [selectedBenefit, setSelectedBenefit] = useState<CourseBenefit | undefined>();
   const [icons, setIcons] = useState<Record<string, Icon>>({});
   const [loading, setLoading] = useState(true);
+  const { toast } = useToast();
 
   const supabase = createClient();
 
@@ -42,12 +43,16 @@ export function CourseBenefitsManager({ courseId }: CourseBenefitsManagerProps) 
       .select('*')
       .eq('course_id', courseId)
       .order('order');
-    
+
     if (error) {
-      toast.error('Failed to load benefits');
+      toast({
+        title: "Error",
+        description: 'Failed to load benefits',
+        variant: "destructive"
+      });
       return;
     }
-    
+
     setBenefits(data || []);
   };
 
@@ -79,9 +84,12 @@ export function CourseBenefitsManager({ courseId }: CourseBenefitsManagerProps) 
             icon_id: benefit.icon_id
           })
           .eq('id', benefit.id);
-        
+
         if (error) throw error;
-        toast.success('Benefit updated successfully');
+        toast({
+          title: "Success",
+          description: 'Benefit updated successfully'
+        });
       } else {
         // Create
         const { error } = await supabase
@@ -90,14 +98,21 @@ export function CourseBenefitsManager({ courseId }: CourseBenefitsManagerProps) 
             ...benefit,
             order: benefits.length
           });
-        
+
         if (error) throw error;
-        toast.success('Benefit added successfully');
+        toast({
+          title: "Success",
+          description: 'Benefit added successfully'
+        });
       }
-      
+
       fetchBenefits();
     } catch (error) {
-      toast.error('Failed to save benefit');
+      toast({
+        title: "Error",
+        description: 'Failed to save benefit',
+        variant: "destructive"
+      });
     }
   };
 
@@ -107,13 +122,21 @@ export function CourseBenefitsManager({ courseId }: CourseBenefitsManagerProps) 
         .from('course_benefits')
         .delete()
         .eq('id', id);
-      
+
       if (error) throw error;
-      
-      toast.success('Benefit deleted successfully');
+
+      toast({
+        title: "Success",
+        description: 'Benefit deleted successfully'
+      });
+      console.log('Benefit deleted successfully');
       fetchBenefits();
     } catch (error) {
-      toast.error('Failed to delete benefit');
+      toast({
+        title: "Error",
+        description: 'Failed to delete benefit',
+        variant: "destructive"
+      });
     }
   };
 
