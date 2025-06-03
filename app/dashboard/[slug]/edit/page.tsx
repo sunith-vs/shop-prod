@@ -116,7 +116,7 @@ export default function EditCourse({ params }: { params: { slug: string } }) {
     const fetchCourse = async () => {
       try {
         setIsLoading(true);
-        
+
         // Fetch course data
         const { data: courseData, error: courseError } = await supabase
           .from('courses')
@@ -200,7 +200,7 @@ export default function EditCourse({ params }: { params: { slug: string } }) {
 
   const handleStatusChange = async () => {
     if (!course) return;
-    
+
     try {
       setIsSubmitting(true);
       const newStatus = course.status === 'active' ? 'draft' : 'active';
@@ -255,7 +255,7 @@ export default function EditCourse({ params }: { params: { slug: string } }) {
       if (!course.thumbnail || course.thumbnail.trim() === '') {
         validationErrors.push("Thumbnail image must be set");
       }
-      
+
 
       // 4. Check if at least one carousel item is present
       const { data: carouselItems, error: carouselError } = await supabase
@@ -379,7 +379,7 @@ export default function EditCourse({ params }: { params: { slug: string } }) {
         description: "Course updated successfully!",
         variant: "default",
       });
-      
+
       // Redirect if slug changed
       if (formattedSlug !== params.slug) {
         router.push(`/dashboard/${formattedSlug}/edit`);
@@ -404,7 +404,7 @@ export default function EditCourse({ params }: { params: { slug: string } }) {
     brochure_url: string;
   }>) => {
     if (!course) return;
-    
+
     try {
       setIsSubmitting(true);
       const supabase = createClient();
@@ -560,15 +560,15 @@ export default function EditCourse({ params }: { params: { slug: string } }) {
                     </PopoverTrigger>
                     <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
                       <Command>
-                        <CommandInput 
-                          placeholder="Search or enter new type..." 
+                        <CommandInput
+                          placeholder="Search or enter new type..."
                           value={courseTypeInput}
                           onValueChange={setCourseTypeInput}
                         />
                         {courseTypeInput && !courseTypes.includes(courseTypeInput) && (
                           <CommandEmpty className="py-2 px-4 text-sm">
-                            <Button 
-                              variant="ghost" 
+                            <Button
+                              variant="ghost"
                               className="w-full justify-start text-left font-normal"
                               onClick={() => {
                                 setCourseTypeValue(courseTypeInput);
@@ -581,7 +581,7 @@ export default function EditCourse({ params }: { params: { slug: string } }) {
                         )}
                         <CommandGroup>
                           {courseTypes
-                            .filter(type => 
+                            .filter(type =>
                               type.toLowerCase().includes(courseTypeInput.toLowerCase())
                             )
                             .map((type) => (
@@ -607,10 +607,10 @@ export default function EditCourse({ params }: { params: { slug: string } }) {
                       </Command>
                     </PopoverContent>
                   </Popover>
-                  <input 
-                    type="hidden" 
-                    name="courseType" 
-                    value={courseTypeValue} 
+                  <input
+                    type="hidden"
+                    name="courseType"
+                    value={courseTypeValue}
                   />
                 </div>
 
@@ -621,10 +621,10 @@ export default function EditCourse({ params }: { params: { slug: string } }) {
                     onCheckedChange={setIsPopular}
                   />
                   <Label htmlFor="popular">Mark as Popular Course</Label>
-                  <input 
-                    type="hidden" 
-                    name="popular" 
-                    value={isPopular.toString()} 
+                  <input
+                    type="hidden"
+                    name="popular"
+                    value={isPopular.toString()}
                   />
                 </div>
 
@@ -746,7 +746,7 @@ export default function EditCourse({ params }: { params: { slug: string } }) {
                 initialItems={course.carousel_items || []}
                 onSave={async (items) => {
                   if (!course) return;
-                  
+
                   // Update the course state
                   setCourse({
                     ...course,
@@ -754,13 +754,13 @@ export default function EditCourse({ params }: { params: { slug: string } }) {
 
                   // Save to database
                   const supabase = createClient();
-                  
+
                   // Delete existing items
                   await supabase
                     .from('carousel')
                     .delete()
                     .eq('course_id', course.id);
-                  
+
                   // Insert new items
                   if (items.length > 0) {
                     await supabase
@@ -853,14 +853,14 @@ export default function EditCourse({ params }: { params: { slug: string } }) {
               </Button>
             </div>
             <div className="flex gap-2 sm:gap-3 flex-[2] sm:flex-none order-0 sm:order-none">
-              <Button 
-                variant="outline" 
+              <Button
+                variant="outline"
                 onClick={() => router.push('/dashboard')}
                 className="flex-1 sm:flex-none"
               >
                 Cancel
               </Button>
-              <Button 
+              <Button
                 onClick={() => router.push(`/${params.slug}`)}
                 className="flex-1 sm:flex-none"
               >
@@ -872,10 +872,12 @@ export default function EditCourse({ params }: { params: { slug: string } }) {
       </header>
 
       <div className="flex flex-col sm:flex-row">
-        <div className="hidden sm:block w-64 border-r">
-          <SideTabs tabs={tabs} activeTab={activeTab} onTabChange={setActiveTab} />
+        <div className="hidden sm:block w-64 border-r sticky top-[93px] h-[calc(100vh-93px)] overflow-hidden">
+          <div className="h-full">
+            <SideTabs tabs={tabs} activeTab={activeTab} onTabChange={setActiveTab} />
+          </div>
         </div>
-        <div className="flex-1 p-4 sm:p-6">
+        <div className="flex-1 p-4 sm:p-6 overflow-y-auto">
           {renderTabContent()}
         </div>
       </div>
