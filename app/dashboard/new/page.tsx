@@ -38,7 +38,14 @@ export default function NewCourse() {
   const [thumbnailUrl, setThumbnailUrl] = useState('');
   const [brochureUrl, setBrochureUrl] = useState('');
   const [bannerDimensionError, setBannerDimensionError] = useState('');
+  // Add state for image dimensions
+  const [imgWidth, setImgWidth] = useState(0);
+  const [imgHeight, setImgHeight] = useState(0);
+  const [imgLoaded, setImgLoaded] = useState(false);
   const { toast } = useToast();
+
+  // Global Image object for banner validation
+  const img = new Image();
 
   const bannerUpload = useSupabaseUpload({
     bucketName: 'courses',
@@ -74,8 +81,13 @@ export default function NewCourse() {
   useEffect(() => {
     if (bannerUpload.files.length > 0) {
       const file = bannerUpload.files[0];
-      const img = new Image();
+      // Using the global img variable
       img.onload = () => {
+        // Set the image dimensions when the image loads
+        setImgWidth(img.width);
+        setImgHeight(img.height);
+        setImgLoaded(true);
+
         if (img.width !== 1728 || img.height !== 220) {
           setBannerDimensionError(`Image must be exactly 1728 x 220 pixels. Current size: ${img.width} x ${img.height}`);
         } else {
@@ -84,10 +96,12 @@ export default function NewCourse() {
       };
       img.onerror = () => {
         setBannerDimensionError('Error loading image. Please try again.');
+        setImgLoaded(false);
       };
       img.src = file.preview || '';
     } else {
       setBannerDimensionError('');
+      setImgLoaded(false);
     }
   }, [bannerUpload.files]);
 
@@ -358,22 +372,22 @@ export default function NewCourse() {
                 {bannerUpload.files.length === 0 ? (
                   <DropzoneEmptyState className="h-32" />
                 ) : (
-                  <DropzoneContent className="h-32" />
+                  <DropzoneContent className="h-32" maxWidth={1728} maxHeight={220} imageWidth={imgLoaded ? imgWidth : 0} imageHeight={imgLoaded ? imgHeight : 0} />
                 )}
               </Dropzone>
-              {bannerDimensionError && (
+              {/* {bannerDimensionError && (
                 <div className="text-sm text-destructive mt-1">{bannerDimensionError}</div>
-              )}
+              )} */}
               <input type="hidden" name="bannerUrl" value={bannerUrl} />
-              {bannerUpload.files.length > 0 && !bannerUpload.isSuccess && !bannerDimensionError && (
-                <Button 
-                  type="button" 
-                  onClick={() => bannerUpload.onUpload(bannerUpload.files)} 
+              {/* {bannerUpload.files.length > 0 && !bannerUpload.isSuccess && !bannerDimensionError && (
+                <Button
+                  type="button"
+                  onClick={() => bannerUpload.onUpload(bannerUpload.files)}
                   disabled={bannerUpload.loading || !!bannerDimensionError}
                 >
                   {bannerUpload.loading ? 'Uploading...' : 'Upload Banner'}
                 </Button>
-              )}
+              )} */}
             </div>
 
             <div className="space-y-2">

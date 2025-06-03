@@ -61,7 +61,7 @@ const Dropzone = ({
     </DropzoneContext.Provider>
   )
 }
-const DropzoneContent = ({ className }: { className?: string }) => {
+const DropzoneContent = ({ className, maxWidth, maxHeight, imageWidth, imageHeight }: { className?: string, maxWidth?: number, maxHeight?: number, imageWidth?: number, imageHeight?: number }) => {
   const {
     files,
     setFiles,
@@ -75,6 +75,11 @@ const DropzoneContent = ({ className }: { className?: string }) => {
   } = useDropzoneContext()
 
   const exceedMaxFiles = files.length > maxFiles
+  const isDimensionRequired = maxWidth && maxHeight
+  const exceedMaxResolution = (imageWidth && maxWidth && imageWidth >= maxWidth) || (imageHeight && maxHeight && imageHeight >= maxHeight)
+  console.log("Image dimensions - Width:", imageWidth, "Height:", imageHeight, "Max Width:", maxWidth, "Max Height:", maxHeight);
+
+
 
   const handleRemoveFile = useCallback(
     (fileName: string) => {
@@ -159,7 +164,12 @@ const DropzoneContent = ({ className }: { className?: string }) => {
           {files.length - maxFiles > 1 ? 's' : ''}.
         </p>
       )}
-      {files.length > 0 && !exceedMaxFiles && (
+      {isDimensionRequired && !exceedMaxResolution && (
+        <p className="text-sm text-left mt-2 text-destructive">
+          Image must be at least {maxWidth}x{maxHeight} pixels. Current size: {imageWidth}x{imageHeight}
+        </p>
+      )}
+      {files.length > 0 && !exceedMaxFiles && (exceedMaxResolution || !isDimensionRequired) && (
         <div className="mt-2">
           <Button
             variant="outline"
