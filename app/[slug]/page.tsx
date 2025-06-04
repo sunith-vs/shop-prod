@@ -7,6 +7,7 @@ import React from 'react'
 import CourseListFooter from '@/components/user/course-list/cource-list-footer'
 import { createClient } from '@/lib/supabase/server';
 import CoursesOfferBanner from '@/components/user/course-list/courses-offer-banner'
+import { notFound } from 'next/navigation'
 
 // Define types based on the data structure
 type Course = {
@@ -47,9 +48,10 @@ const CourseList = async ({ params }: { params: { slug: string } }) => {
     .eq('slug', params.slug)
     .single();
 
-  if (courseError) {
+  // If the course doesn't exist or there's an error, show the not-found page
+  if (courseError || !course) {
     console.error('Error fetching course:', courseError);
-    throw new Error('Failed to fetch course');
+    return notFound();
   }
 
   // Fetch course and batch details using the new function
@@ -58,7 +60,7 @@ const CourseList = async ({ params }: { params: { slug: string } }) => {
 
   if (detailsError) {
     console.error('Error fetching course details:', detailsError);
-    throw new Error('Failed to fetch course details');
+    return notFound();
   }
 
   // Extract batches from the response
@@ -74,7 +76,7 @@ const CourseList = async ({ params }: { params: { slug: string } }) => {
 
   if (benefitsError) {
     console.error('Error fetching course benefits:', benefitsError);
-    throw new Error('Failed to fetch course benefits');
+    return notFound();
   }
 
   return (
