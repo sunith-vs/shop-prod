@@ -45,7 +45,7 @@ export default function NewCourse() {
   const { toast } = useToast();
 
   // Global Image object for banner validation
-  const img = new Image();
+  const img = typeof window !== 'undefined' ? new Image() : null;
 
   const bannerUpload = useSupabaseUpload({
     bucketName: 'courses',
@@ -82,23 +82,25 @@ export default function NewCourse() {
     if (bannerUpload.files.length > 0) {
       const file = bannerUpload.files[0];
       // Using the global img variable
-      img.onload = () => {
-        // Set the image dimensions when the image loads
-        setImgWidth(img.width);
-        setImgHeight(img.height);
-        setImgLoaded(true);
+      if (img) {
+        img.onload = () => {
+          // Set the image dimensions when the image loads
+          setImgWidth(img.width);
+          setImgHeight(img.height);
+          setImgLoaded(true);
 
-        if (img.width !== 1728 || img.height !== 220) {
-          setBannerDimensionError(`Image must be exactly 1728 x 220 pixels. Current size: ${img.width} x ${img.height}`);
-        } else {
-          setBannerDimensionError('');
-        }
-      };
-      img.onerror = () => {
-        setBannerDimensionError('Error loading image. Please try again.');
-        setImgLoaded(false);
-      };
-      img.src = file.preview || '';
+          if (img.width !== 1728 || img.height !== 220) {
+            setBannerDimensionError(`Image must be exactly 1728 x 220 pixels. Current size: ${img.width} x ${img.height}`);
+          } else {
+            setBannerDimensionError('');
+          }
+        };
+        img.onerror = () => {
+          setBannerDimensionError('Error loading image. Please try again.');
+          setImgLoaded(false);
+        };
+        img.src = file.preview || '';
+      }
     } else {
       setBannerDimensionError('');
       setImgLoaded(false);
