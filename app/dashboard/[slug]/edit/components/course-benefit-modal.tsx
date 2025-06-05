@@ -46,15 +46,21 @@ export function CourseBenefitModal({
   const [iconId, setIconId] = useState(benefit?.icon_id || '');
   const [loading, setLoading] = useState(false);
 
-  // Update state when benefit prop changes
+  // Update state when benefit prop changes or modal opens
   useEffect(() => {
     if (benefit) {
       setTitle(benefit.title || '');
       setDescription(benefit.description || '');
       setColor(benefit.color || '#FF7B34');
       setIconId(benefit.icon_id || '');
+    } else {
+      // Reset form when opening modal for a new benefit
+      setTitle('');
+      setDescription('');
+      setColor('#FF7B34');
+      setIconId('');
     }
-  }, [benefit]);
+  }, [benefit, isOpen]);
 
   const handleSubmit = async () => {
     setLoading(true);

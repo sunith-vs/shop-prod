@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 // CourseBottomSheet.tsx
 import React, { useState } from 'react';
@@ -19,9 +19,9 @@ interface Batch {
 }
 
 interface CourseBottomSheetProps {
-    isOpen: boolean;
-    onClose: () => void;
-    batches?: Batch[];
+  isOpen: boolean;
+  onClose: () => void;
+  batches?: Batch[];
 }
 
 const CourseBottomSheet: React.FC<CourseBottomSheetProps> = ({ isOpen, onClose, batches = [] }) => {
@@ -74,41 +74,43 @@ const CourseBottomSheet: React.FC<CourseBottomSheetProps> = ({ isOpen, onClose, 
         setShowPurchaseForm(true);
     };
 
-    const handleSubmitPurchase = (e: React.FormEvent) => {
-        e.preventDefault();
+  const handleSubmitPurchase = (e: React.FormEvent) => {
+    e.preventDefault();
 
-        // Reset errors
-        const newErrors = {
-            name: false,
-            email: false,
-            phone: false
-        };
+    // Reset errors
+    const newErrors = {
+      name: false,
+      email: false,
+      phone: false,
+    };
 
-        // Validate inputs
-        let isValid = true;
+    // Validate inputs
+    let isValid = true;
 
         if (!validateName(name)) {
             newErrors.name = true;
             isValid = false;
         }
 
-        if (!validateEmail(email)) {
-            newErrors.email = true;
-            isValid = false;
-        }
+    if (!validateEmail(email)) {
+      newErrors.email = true;
+      isValid = false;
+    }
 
-        if (!validatePhone(phone)) {
-            newErrors.phone = true;
-            isValid = false;
-        }
+    if (!validatePhone(phone)) {
+      newErrors.phone = true;
+      isValid = false;
+    }
 
-        setErrors(newErrors);
+    setErrors(newErrors);
 
-        if (!isValid) return;
+    if (!isValid) return;
 
-        // Get selected course
-        const selectedCourseData = courses.find(course => course.id === selectedCourse);
-        if (!selectedCourseData) return;
+    // Get selected course
+    const selectedCourseData = courses.find(
+      (course) => course.id === selectedCourse
+    );
+    if (!selectedCourseData) return;
 
         // Push checkout initiated event to dataLayer with user details
         if (typeof window !== 'undefined') {
@@ -190,17 +192,39 @@ const CourseBottomSheet: React.FC<CourseBottomSheetProps> = ({ isOpen, onClose, 
                 style={{ opacity: isOpen ? '1' : '0' }}
             ></div>
 
-            {/* Bottom sheet */}
-            <div
-                className="absolute bottom-0 left-0 right-0 bg-white rounded-t-3xl shadow-lg transition-all duration-300 ease-in-out transform w-full"
-                style={{
-                    transform: isOpen ? 'translateY(0)' : 'translateY(100%)',
-                    opacity: isOpen ? '1' : '0',
-                    boxShadow: '0 -4px 20px rgba(0, 0, 0, 0.15)'
-                }}
-            >
-                <div className="max-w-4xl mx-auto px-4 py-6 lg:w-[720px]">
-                    <h2 className="text-[#1d2939] text-lg md:text-2xl font-bold mb-[14px]">{showPurchaseForm ? 'Complete Your Purchase' : 'Choose Course'}</h2>
+      {/* Bottom sheet */}
+      <div
+        className="absolute bottom-0 left-0 right-0 bg-white rounded-t-3xl shadow-lg transition-all duration-300 ease-in-out transform w-full"
+        style={{
+          transform: isOpen ? "translateY(0)" : "translateY(100%)",
+          opacity: isOpen ? "1" : "0",
+          boxShadow: "0 -4px 20px rgba(0, 0, 0, 0.15)",
+        }}
+      >
+        <button
+          onClick={onClose}
+          className="absolute top-4 right-4 p-2 hover:bg-gray-100 rounded-full transition-colors z-10"
+          aria-label="Close"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="h-6 w-6 text-gray-500"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M6 18L18 6M6 6l12 12"
+            />
+          </svg>
+        </button>
+        <div className="max-w-4xl mx-auto px-4 py-6 lg:w-[720px]">
+          <h2 className="text-[#1d2939] text-lg md:text-2xl font-bold mb-[14px]">
+            {showPurchaseForm ? "Complete Your Purchase" : "Choose Course"}
+          </h2>
 
                     {!showPurchaseForm ? (
                         <>
@@ -280,33 +304,55 @@ const CourseBottomSheet: React.FC<CourseBottomSheetProps> = ({ isOpen, onClose, 
                                     {errors.name && <p className="text-red-500 text-sm mt-1">Please enter your name</p>}
                                 </div>
 
-                                <div>
-                                    <label htmlFor="bs-email" className="block text-gray-700 font-medium mb-1">Email Address</label>
-                                    <input
-                                        type="email"
-                                        id="bs-email"
-                                        name="email"
-                                        value={email}
-                                        onChange={(e) => setEmail(e.target.value)}
-                                        className={`w-full px-4 py-2 border ${errors.email ? 'border-red-500' : 'border-gray-300'} rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500`}
-                                        placeholder="Enter your email address"
-                                    />
-                                    {errors.email && <p className="text-red-500 text-sm mt-1">Please enter a valid email address</p>}
-                                </div>
+                <div>
+                  <label
+                    htmlFor="bs-email"
+                    className="block text-gray-700 font-medium mb-1"
+                  >
+                    Email Address
+                  </label>
+                  <input
+                    type="email"
+                    id="bs-email"
+                    name="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className={`w-full px-4 py-2 border ${
+                      errors.email ? "border-red-500" : "border-gray-300"
+                    } rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500`}
+                    placeholder="Enter your email address"
+                  />
+                  {errors.email && (
+                    <p className="text-red-500 text-sm mt-1">
+                      Please enter a valid email address
+                    </p>
+                  )}
+                </div>
 
-                                <div>
-                                    <label htmlFor="bs-phone" className="block text-gray-700 font-medium mb-1">Phone Number</label>
-                                    <input
-                                        type="tel"
-                                        id="bs-phone"
-                                        name="phone"
-                                        value={phone}
-                                        onChange={(e) => setPhone(e.target.value)}
-                                        className={`w-full px-4 py-2 border ${errors.phone ? 'border-red-500' : 'border-gray-300'} rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500`}
-                                        placeholder="Enter your phone number"
-                                    />
-                                    {errors.phone && <p className="text-red-500 text-sm mt-1">Please enter a valid 10-digit phone number</p>}
-                                </div>
+                <div>
+                  <label
+                    htmlFor="bs-phone"
+                    className="block text-gray-700 font-medium mb-1"
+                  >
+                    Phone Number
+                  </label>
+                  <input
+                    type="tel"
+                    id="bs-phone"
+                    name="phone"
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    className={`w-full px-4 py-2 border ${
+                      errors.phone ? "border-red-500" : "border-gray-300"
+                    } rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500`}
+                    placeholder="Enter your phone number"
+                  />
+                  {errors.phone && (
+                    <p className="text-red-500 text-sm mt-1">
+                      Please enter a valid 10-digit phone number
+                    </p>
+                  )}
+                </div>
 
                                 <div className="mt-8 grid grid-cols-2 gap-4">
                                     <button
