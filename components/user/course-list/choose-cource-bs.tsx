@@ -1,7 +1,7 @@
 "use client";
 
 // CourseBottomSheet.tsx
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { validateEmail, validateName, validatePhone } from '@/utils/validation';
 
 interface Batch {
@@ -19,9 +19,9 @@ interface Batch {
 }
 
 interface CourseBottomSheetProps {
-  isOpen: boolean;
-  onClose: () => void;
-  batches?: Batch[];
+    isOpen: boolean;
+    onClose: () => void;
+    batches?: Batch[];
 }
 
 const CourseBottomSheet: React.FC<CourseBottomSheetProps> = ({ isOpen, onClose, batches = [] }) => {
@@ -38,8 +38,17 @@ const CourseBottomSheet: React.FC<CourseBottomSheetProps> = ({ isOpen, onClose, 
         phone: false
     });
 
+    const [touched, setTouched] = useState({
+        name: false,
+        email: false,
+        phone: false
+    });
+
+    // Use a ref to track if we've added a history entry
+    const historyEntryAddedRef = useRef(false);
+
     // Function to reset form fields
-    const resetForm = () => {
+    const resetForm = useCallback(() => {
         setName('');
         setEmail('');
         setPhone('');
@@ -49,13 +58,22 @@ const CourseBottomSheet: React.FC<CourseBottomSheetProps> = ({ isOpen, onClose, 
             email: false,
             phone: false
         });
-    };
+        setTouched({
+            name: false,
+            email: false,
+            phone: false
+        });
+    }, []);
 
     // Create a wrapper for onClose that resets the form
-    const handleClose = () => {
+    const handleClose = useCallback(() => {
         resetForm();
         onClose();
-    };
+        // If we added a history entry, we need to make sure we don't trigger another popstate
+        if (historyEntryAddedRef.current && typeof window !== 'undefined') {
+            historyEntryAddedRef.current = false;
+        }
+    }, [onClose, resetForm]);
     console.log(batches)
 
     // Convert batches to the format needed for display
@@ -74,43 +92,82 @@ const CourseBottomSheet: React.FC<CourseBottomSheetProps> = ({ isOpen, onClose, 
         setShowPurchaseForm(true);
     };
 
-  const handleSubmitPurchase = (e: React.FormEvent) => {
-    e.preventDefault();
+    // Validate fields as user types
+    useEffect(() => {
+        if (touched.name) {
+            setErrors(prev => ({ ...prev, name: !validateName(name) }));
+        }
+    }, [name, touched.name]);
 
-    // Reset errors
-    const newErrors = {
-      name: false,
-      email: false,
-      phone: false,
-    };
+    useEffect(() => {
+        if (touched.email) {
+            setErrors(prev => ({ ...prev, email: !validateEmail(email) }));
+        }
+    }, [email, touched.email]);
 
-    // Validate inputs
-    let isValid = true;
+    useEffect(() => {
+        if (touched.phone) {
+            setErrors(prev => ({ ...prev, phone: !validatePhone(phone) }));
+        }
+    }, [phone, touched.phone]);
 
-        if (!validateName(name)) {
-            newErrors.name = true;
-            isValid = false;
+    // Handle browser history integration
+    useEffect(() => {
+        // When the bottom sheet opens, push a new history state
+        if (isOpen && !historyEntryAddedRef.current && typeof window !== 'undefined') {
+            const currentUrl = window.location.href;
+            window.history.pushState({ bottomSheetOpen: true }, '', currentUrl);
+            historyEntryAddedRef.current = true;
         }
 
-    if (!validateEmail(email)) {
-      newErrors.email = true;
-      isValid = false;
-    }
+        // Create a handler for popstate (browser back button)
+        const handlePopState = () => {
+            if (isOpen && historyEntryAddedRef.current) {
+                handleClose();
+                historyEntryAddedRef.current = false;
+            }
+        };
 
-    if (!validatePhone(phone)) {
-      newErrors.phone = true;
-      isValid = false;
-    }
+        // Add the event listener
+        if (typeof window !== 'undefined') {
+            window.addEventListener('popstate', handlePopState);
+        }
 
-    setErrors(newErrors);
+        // Clean up on unmount
+        return () => {
+            if (typeof window !== 'undefined') {
+                window.removeEventListener('popstate', handlePopState);
+            }
+        };
+    }, [isOpen, handleClose]);
 
-    if (!isValid) return;
+    const handleSubmitPurchase = (e: React.FormEvent) => {
+        e.preventDefault();
 
-    // Get selected course
-    const selectedCourseData = courses.find(
-      (course) => course.id === selectedCourse
-    );
-    if (!selectedCourseData) return;
+        // Mark all fields as touched
+        setTouched({
+            name: true,
+            email: true,
+            phone: true
+        });
+
+        // Validate inputs
+        const newErrors = {
+            name: !validateName(name),
+            email: !validateEmail(email),
+            phone: !validatePhone(phone)
+        };
+
+        setErrors(newErrors);
+
+        // Check if there are any errors
+        if (newErrors.name || newErrors.email || newErrors.phone) return;
+
+        // Get selected course
+        const selectedCourseData = courses.find(
+            (course) => course.id === selectedCourse
+        );
+        if (!selectedCourseData) return;
 
         // Push checkout initiated event to dataLayer with user details
         if (typeof window !== 'undefined') {
@@ -192,39 +249,39 @@ const CourseBottomSheet: React.FC<CourseBottomSheetProps> = ({ isOpen, onClose, 
                 style={{ opacity: isOpen ? '1' : '0' }}
             ></div>
 
-      {/* Bottom sheet */}
-      <div
-        className="absolute bottom-0 left-0 right-0 bg-white rounded-t-3xl shadow-lg transition-all duration-300 ease-in-out transform w-full"
-        style={{
-          transform: isOpen ? "translateY(0)" : "translateY(100%)",
-          opacity: isOpen ? "1" : "0",
-          boxShadow: "0 -4px 20px rgba(0, 0, 0, 0.15)",
-        }}
-      >
-        <button
-          onClick={onClose}
-          className="absolute top-4 right-4 p-2 hover:bg-gray-100 rounded-full transition-colors z-10"
-          aria-label="Close"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="h-6 w-6 text-gray-500"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M6 18L18 6M6 6l12 12"
-            />
-          </svg>
-        </button>
-        <div className="max-w-4xl mx-auto px-4 py-6 lg:w-[720px]">
-          <h2 className="text-[#1d2939] text-lg md:text-2xl font-bold mb-[14px]">
-            {showPurchaseForm ? "Complete Your Purchase" : "Choose Course"}
-          </h2>
+            {/* Bottom sheet */}
+            <div
+                className="absolute bottom-0 left-0 right-0 bg-white rounded-t-3xl shadow-lg transition-all duration-300 ease-in-out transform w-full"
+                style={{
+                    transform: isOpen ? "translateY(0)" : "translateY(100%)",
+                    opacity: isOpen ? "1" : "0",
+                    boxShadow: "0 -4px 20px rgba(0, 0, 0, 0.15)",
+                }}
+            >
+                <button
+                    onClick={onClose}
+                    className="absolute top-4 right-4 p-2 hover:bg-gray-100 rounded-full transition-colors z-10"
+                    aria-label="Close"
+                >
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-6 w-6 text-gray-500"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                    >
+                        <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M6 18L18 6M6 6l12 12"
+                        />
+                    </svg>
+                </button>
+                <div className="max-w-4xl mx-auto px-4 py-6 lg:w-[720px]">
+                    <h2 className="text-[#1d2939] text-lg md:text-2xl font-bold mb-[14px]">
+                        {showPurchaseForm ? "Complete Your Purchase" : "Choose Course"}
+                    </h2>
 
                     {!showPurchaseForm ? (
                         <>
@@ -298,61 +355,75 @@ const CourseBottomSheet: React.FC<CourseBottomSheetProps> = ({ isOpen, onClose, 
                                         name="name"
                                         value={name}
                                         onChange={(e) => setName(e.target.value)}
+                                        onBlur={() => setTouched(prev => ({ ...prev, name: true }))}
                                         className={`w-full px-4 py-2 border ${errors.name ? 'border-red-500' : 'border-gray-300'} rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500`}
                                         placeholder="Enter your full name"
+                                        aria-invalid={errors.name ? "true" : "false"}
+                                        aria-describedby={errors.name ? "bs-name-error" : undefined}
                                     />
-                                    {errors.name && <p className="text-red-500 text-sm mt-1">Please enter your name</p>}
+                                    {errors.name && <p id="bs-name-error" className="text-red-500 text-sm mt-1">Please enter a valid name</p>}
                                 </div>
 
-                <div>
-                  <label
-                    htmlFor="bs-email"
-                    className="block text-gray-700 font-medium mb-1"
-                  >
-                    Email Address
-                  </label>
-                  <input
-                    type="email"
-                    id="bs-email"
-                    name="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className={`w-full px-4 py-2 border ${
-                      errors.email ? "border-red-500" : "border-gray-300"
-                    } rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500`}
-                    placeholder="Enter your email address"
-                  />
-                  {errors.email && (
-                    <p className="text-red-500 text-sm mt-1">
-                      Please enter a valid email address
-                    </p>
-                  )}
-                </div>
+                                <div>
+                                    <label
+                                        htmlFor="bs-email"
+                                        className="block text-gray-700 font-medium mb-1"
+                                    >
+                                        Email Address
+                                    </label>
+                                    <input
+                                        type="email"
+                                        id="bs-email"
+                                        name="email"
+                                        value={email}
+                                        onChange={(e) => setEmail(e.target.value)}
+                                        onBlur={() => setTouched(prev => ({ ...prev, email: true }))}
+                                        className={`w-full px-4 py-2 border ${errors.email ? "border-red-500" : "border-gray-300"
+                                            } rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500`}
+                                        placeholder="Enter your email address"
+                                        aria-invalid={errors.email ? "true" : "false"}
+                                        aria-describedby={errors.email ? "bs-email-error" : undefined}
+                                    />
+                                    {errors.email && (
+                                        <p id="bs-email-error" className="text-red-500 text-sm mt-1">
+                                            Please enter a valid email address (e.g, example@domain.com)
+                                        </p>
+                                    )}
+                                </div>
 
-                <div>
-                  <label
-                    htmlFor="bs-phone"
-                    className="block text-gray-700 font-medium mb-1"
-                  >
-                    Phone Number
-                  </label>
-                  <input
-                    type="tel"
-                    id="bs-phone"
-                    name="phone"
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                    className={`w-full px-4 py-2 border ${
-                      errors.phone ? "border-red-500" : "border-gray-300"
-                    } rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500`}
-                    placeholder="Enter your phone number"
-                  />
-                  {errors.phone && (
-                    <p className="text-red-500 text-sm mt-1">
-                      Please enter a valid 10-digit phone number
-                    </p>
-                  )}
-                </div>
+                                <div>
+                                    <label
+                                        htmlFor="bs-phone"
+                                        className="block text-gray-700 font-medium mb-1"
+                                    >
+                                        Phone Number
+                                    </label>
+                                    <input
+                                        type="tel"
+                                        id="bs-phone"
+                                        name="phone"
+                                        value={phone}
+                                        onChange={(e) => {
+                                            // Only allow numeric input
+                                            const value = e.target.value.replace(/[^0-9]/g, '');
+                                            // Limit to 10 digits
+                                            setPhone(value.slice(0, 10));
+                                        }}
+                                        onBlur={() => setTouched(prev => ({ ...prev, phone: true }))}
+                                        className={`w-full px-4 py-2 border ${errors.phone ? "border-red-500" : "border-gray-300"
+                                            } rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500`}
+                                        placeholder="Enter your 10-digit phone number"
+                                        maxLength={10}
+                                        inputMode="numeric"
+                                        aria-invalid={errors.phone ? "true" : "false"}
+                                        aria-describedby={errors.phone ? "bs-phone-error" : undefined}
+                                    />
+                                    {errors.phone && (
+                                        <p id="bs-phone-error" className="text-red-500 text-sm mt-1">
+                                            Please enter a valid 10-digit phone number
+                                        </p>
+                                    )}
+                                </div>
 
                                 <div className="mt-8 grid grid-cols-2 gap-4">
                                     <button
@@ -367,7 +438,8 @@ const CourseBottomSheet: React.FC<CourseBottomSheetProps> = ({ isOpen, onClose, 
                                     </button>
                                     <button
                                         type="submit"
-                                        className="py-3 px-6 bg-orange-500 text-white text-sm md:text-xl font-bold rounded-lg hover:bg-orange-600 transition-colors"
+                                        className="py-3 px-6 bg-orange-500 text-white text-sm md:text-xl font-bold rounded-lg hover:bg-orange-600 transition-colors disabled:opacity-70 disabled:cursor-not-allowed"
+                                        disabled={errors.name || errors.email || errors.phone}
                                     >
                                         Proceed to Payment
                                     </button>

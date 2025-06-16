@@ -40,27 +40,33 @@ export function CourseBenefitModal({
   courseId,
   benefit
 }: CourseBenefitModalProps) {
-  const [title, setTitle] = useState(benefit?.title || '');
-  const [description, setDescription] = useState(benefit?.description || '');
-  const [color, setColor] = useState(benefit?.color || '#FF7B34');
-  const [iconId, setIconId] = useState(benefit?.icon_id || '');
+  const [title, setTitle] = useState('');
+  const [description, setDescription] = useState('');
+  const [color, setColor] = useState('#FF7B34');
+  const [iconId, setIconId] = useState('');
   const [loading, setLoading] = useState(false);
 
-  // Update state when benefit prop changes or modal opens
-  useEffect(() => {
+  // Reset form fields to default or populate with benefit data
+  const resetForm = () => {
     if (benefit) {
       setTitle(benefit.title || '');
       setDescription(benefit.description || '');
       setColor(benefit.color || '#FF7B34');
       setIconId(benefit.icon_id || '');
     } else {
-      // Reset form when opening modal for a new benefit
       setTitle('');
       setDescription('');
       setColor('#FF7B34');
       setIconId('');
     }
-  }, [benefit, isOpen]);
+  };
+
+  // Initialize form when opened
+  useEffect(() => {
+    if (isOpen) {
+      resetForm();
+    }
+  }, [isOpen, benefit]);
 
   const handleSubmit = async () => {
     setLoading(true);
@@ -82,14 +88,24 @@ export function CourseBenefitModal({
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
+    <Dialog
+      open={isOpen}
+      onOpenChange={(open) => {
+        if (!open) {
+          // Reset form when closing
+          setLoading(false);
+          setTimeout(resetForm, 300); // Wait for dialog animation to complete
+          onClose();
+        }
+      }}
+    >
       <DialogContent>
         <DialogHeader >
           <DialogTitle className="ml-0.25">{benefit ? 'Edit Benefit' : 'Add New Benefit'}</DialogTitle>
         </DialogHeader>
         <div className="space-y-4 overflow-y-auto pl-1 pr-5" style={{ maxHeight: 'calc(80vh)' }}>
           <div>
-            <Label>Title</Label>
+            <Label>Title <span className="text-red-500">*</span></Label>
             <Input
               className="mt-1"
               value={title}
@@ -123,7 +139,7 @@ export function CourseBenefitModal({
             </div>
           </div>
           <div>
-            <Label>Icon</Label>
+            <Label>Icon <span className="text-red-500">*</span></Label>
             <IconSelector
               className="mt-1"
               selectedIconId={iconId}
@@ -134,7 +150,7 @@ export function CourseBenefitModal({
             <Button variant="outline" onClick={onClose}>
               Cancel
             </Button>
-            <Button onClick={handleSubmit} disabled={!title || loading}>
+            <Button onClick={handleSubmit} disabled={!title || !iconId || loading}>
               {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Save
             </Button>

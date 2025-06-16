@@ -37,7 +37,7 @@ export function MediaSection({ courseId, initialData, onUpdate }: MediaSectionPr
     path: 'banner',
     allowedMimeTypes: ['image/*'],
     maxFiles: 1,
-    recommendedSize: "2560 x 423",
+    recommendedSize: "1728 x 220",
   });
 
   const thumbnailUpload = useSupabaseUpload({
