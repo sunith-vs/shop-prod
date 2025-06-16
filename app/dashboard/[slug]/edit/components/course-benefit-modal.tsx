@@ -65,7 +65,7 @@ export function CourseBenefitModal({
       setIsTemplate(false);
     }
   };
-  
+
   // Initialize form when opened
   useEffect(() => {
     if (isOpen) {
@@ -94,8 +94,8 @@ export function CourseBenefitModal({
   };
 
   return (
-    <Dialog 
-      open={isOpen} 
+    <Dialog
+      open={isOpen}
       onOpenChange={(open) => {
         if (!open) {
           // Reset form when closing
