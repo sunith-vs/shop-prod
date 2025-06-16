@@ -21,6 +21,7 @@ interface CourseBenefit {
   course_id?: string;
   order?: number;
   color: string;
+  is_template?: boolean;
 }
 
 interface CourseBenefitsManagerProps {
@@ -29,31 +30,52 @@ interface CourseBenefitsManagerProps {
 
 export function CourseBenefitsManager({ courseId }: CourseBenefitsManagerProps) {
   const [benefits, setBenefits] = useState<CourseBenefit[]>([]);
+  const [templateBenefits, setTemplateBenefits] = useState<CourseBenefit[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedBenefit, setSelectedBenefit] = useState<CourseBenefit | undefined>();
   const [icons, setIcons] = useState<Record<string, Icon>>({});
   const [loading, setLoading] = useState(true);
+  const [showingTemplates, setShowingTemplates] = useState(false);
   const { toast } = useToast();
 
   const supabase = createClient();
 
   const fetchBenefits = async () => {
-    const { data, error } = await supabase
-      .from('course_benefits')
-      .select('*')
-      .eq('course_id', courseId)
-      .order('order');
+    try {
+      // Fetch course-specific benefits
+      const { data: courseBenefits, error: courseBenefitsError } = await supabase
+        .from('course_benefits')
+        .select('*')
+        .eq('course_id', courseId)
+        .eq('is_template', false)
+        .order('order');
 
-    if (error) {
+      if (courseBenefitsError) {
+        throw courseBenefitsError;
+      }
+
+      setBenefits(courseBenefits || []);
+      
+      // Fetch template benefits
+      const { data: templates, error: templatesError } = await supabase
+        .from('course_benefits')
+        .select('*')
+        .eq('is_template', true)
+        .order('order');
+        
+      if (templatesError) {
+        throw templatesError;
+      }
+      
+      setTemplateBenefits(templates || []);
+    } catch (error) {
+      console.error('Error fetching benefits:', error);
       toast({
         title: "Error",
         description: 'Failed to load benefits',
         variant: "destructive"
       });
-      return;
     }
-
-    setBenefits(data || []);
   };
 
   const fetchIcons = async () => {
@@ -74,14 +96,15 @@ export function CourseBenefitsManager({ courseId }: CourseBenefitsManagerProps) 
   const handleSave = async (benefit: CourseBenefit) => {
     try {
       if (benefit.id) {
-        // Update
+        // Update existing benefit
         const { error } = await supabase
           .from('course_benefits')
           .update({
             title: benefit.title,
             description: benefit.description,
             color: benefit.color,
-            icon_id: benefit.icon_id
+            icon_id: benefit.icon_id,
+            is_template: benefit.is_template || false
           })
           .eq('id', benefit.id);
 
@@ -91,23 +114,65 @@ export function CourseBenefitsManager({ courseId }: CourseBenefitsManagerProps) 
           description: 'Benefit updated successfully'
         });
       } else {
-        // Create
-        const { error } = await supabase
-          .from('course_benefits')
-          .insert({
-            ...benefit,
-            order: benefits.length
-          });
+        // Create new benefit
+        if (benefit.is_template) {
+          // If template is checked, save two copies: one as template and one for the current course
+          
+          // 1. Save as a template (without course_id)
+          const { error: templateError } = await supabase
+            .from('course_benefits')
+            .insert({
+              title: benefit.title,
+              description: benefit.description,
+              color: benefit.color,
+              icon_id: benefit.icon_id,
+              is_template: true,
+              order: 0 // Templates don't need specific order
+            });
 
-        if (error) throw error;
-        toast({
-          title: "Success",
-          description: 'Benefit added successfully'
-        });
+          if (templateError) throw templateError;
+          
+          // 2. Save as a course-specific benefit
+          const { error: courseError } = await supabase
+            .from('course_benefits')
+            .insert({
+              title: benefit.title,
+              description: benefit.description,
+              color: benefit.color,
+              icon_id: benefit.icon_id,
+              course_id: courseId,
+              is_template: false,
+              order: benefits.length
+            });
+
+          if (courseError) throw courseError;
+          
+          toast({
+            title: "Success",
+            description: 'Benefit added to both template and course'
+          });
+        } else {
+          // Regular course-specific benefit
+          const { error } = await supabase
+            .from('course_benefits')
+            .insert({
+              ...benefit,
+              course_id: courseId,
+              order: benefits.length,
+              is_template: false
+            });
+
+          if (error) throw error;
+          toast({
+            title: "Success",
+            description: 'Benefit added successfully'
+          });
+        }
       }
 
       fetchBenefits();
     } catch (error) {
+      console.error('Error saving benefit:', error);
       toast({
         title: "Error",
         description: 'Failed to save benefit',
@@ -145,6 +210,41 @@ export function CourseBenefitsManager({ courseId }: CourseBenefitsManagerProps) 
     setIsModalOpen(true);
   };
 
+  // Function to add a template benefit to the course
+  const addPresetBenefit = async (preset: CourseBenefit) => {
+    try {
+      // Add the template benefit to the course
+      const { error } = await supabase
+        .from('course_benefits')
+        .insert({
+          title: preset.title,
+          description: preset.description,
+          color: preset.color,
+          icon_id: preset.icon_id,
+          course_id: courseId,
+          order: benefits.length,
+          is_template: false
+        });
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: `"${preset.title}" added to your course`
+      });
+
+      // Refresh benefits list
+      await fetchBenefits();
+    } catch (error) {
+      console.error('Error adding template benefit:', error);
+      toast({
+        title: "Error",
+        description: 'Failed to add benefit',
+        variant: "destructive"
+      });
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center p-4">
@@ -155,7 +255,15 @@ export function CourseBenefitsManager({ courseId }: CourseBenefitsManagerProps) 
 
   return (
     <div>
-      <div className="flex justify-end mb-4">
+      <div className="flex justify-end mb-4 gap-2">
+        {templateBenefits.length > 0 && (
+          <Button
+            onClick={() => setShowingTemplates(!showingTemplates)}
+            variant={showingTemplates ? "outline" : "secondary"}
+          >
+            {showingTemplates ? 'Hide Templates' : 'Show Template Benefits'}
+          </Button>
+        )}
         <Button
           onClick={() => {
             setSelectedBenefit(undefined);
@@ -165,6 +273,51 @@ export function CourseBenefitsManager({ courseId }: CourseBenefitsManagerProps) 
           Add Benefit
         </Button>
       </div>
+
+
+      
+      {showingTemplates && templateBenefits.length > 0 && (
+        <>
+          <h2 className="text-lg font-semibold mb-2">Template Benefits (Click to add)</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+            {templateBenefits.map((template) => (
+              <div
+                key={template.id}
+                className="p-4 rounded-lg border-2 border-blue-300 hover:shadow-md transition-shadow cursor-pointer"
+                style={{ backgroundColor: `${template.color || '#e6f7ff'}25` }}
+                onClick={() => addPresetBenefit({
+                  ...template,
+                  course_id: courseId,
+                  is_template: false,
+                  id: undefined
+                })}
+              >
+                <div className="flex items-start justify-between">
+                  <div className="flex items-center gap-2">
+                    {template.icon_id && icons[template.icon_id] && (
+                      <img
+                        src={icons[template.icon_id].url}
+                        alt={icons[template.icon_id].name}
+                        className="w-8 h-8 object-contain"
+                      />
+                    )}
+                    <div>
+                      <div className="flex items-center">
+                        <h3 className="font-semibold">{template.title}</h3>
+                        <span className="ml-2 px-2 py-0.5 bg-blue-100 text-blue-800 text-xs rounded-full">Template</span>
+                      </div>
+                      {template.description && (
+                        <p className="text-sm text-gray-600">{template.description}</p>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+          {benefits.length > 0 && <h2 className="text-lg font-semibold mb-2">Your Course Benefits</h2>}
+        </>
+      )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {benefits.map((benefit) => (

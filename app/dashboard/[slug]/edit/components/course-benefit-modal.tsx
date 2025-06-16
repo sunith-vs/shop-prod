@@ -7,6 +7,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { useState, useEffect } from 'react';
 import { Loader2 } from 'lucide-react';
 import { Label } from '@/components/ui/label';
+import { Checkbox } from '@/components/ui/checkbox';
 import { IconSelector } from './icon-selector';
 
 interface Icon {
@@ -23,6 +24,7 @@ interface CourseBenefit {
   course_id?: string;
   order?: number;
   color: string;
+  is_template?: boolean;
 }
 
 interface CourseBenefitModalProps {
@@ -44,6 +46,7 @@ export function CourseBenefitModal({
   const [description, setDescription] = useState('');
   const [color, setColor] = useState('#FF7B34');
   const [iconId, setIconId] = useState('');
+  const [isTemplate, setIsTemplate] = useState(false);
   const [loading, setLoading] = useState(false);
 
   // Reset form fields to default or populate with benefit data
@@ -53,11 +56,13 @@ export function CourseBenefitModal({
       setDescription(benefit.description || '');
       setColor(benefit.color || '#FF7B34');
       setIconId(benefit.icon_id || '');
+      setIsTemplate(benefit.is_template || false);
     } else {
       setTitle('');
       setDescription('');
       setColor('#FF7B34');
       setIconId('');
+      setIsTemplate(false);
     }
   };
 
@@ -78,7 +83,8 @@ export function CourseBenefitModal({
         color,
         icon_id: iconId,
         course_id: courseId,
-        order: benefit?.order
+        order: benefit?.order,
+        is_template: isTemplate
       };
       await onSave(newBenefit);
       onClose();
@@ -145,6 +151,16 @@ export function CourseBenefitModal({
               selectedIconId={iconId}
               onSelect={(icon) => setIconId(icon.id)}
             />
+          </div>
+          <div className="flex items-center space-x-2">
+            <Checkbox 
+              id="is-template" 
+              checked={isTemplate} 
+              onCheckedChange={(checked: boolean | 'indeterminate') => setIsTemplate(checked === true)}
+            />
+            <Label htmlFor="is-template" className="cursor-pointer">
+              Save as template benefit (available for all courses)
+            </Label>
           </div>
           <div className="flex justify-end gap-2 pb-2">
             <Button variant="outline" onClick={onClose}>
