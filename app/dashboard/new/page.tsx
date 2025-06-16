@@ -49,7 +49,7 @@ export default function NewCourse() {
   const { toast } = useToast();
 
   // Global Image object for banner validation
-  const img = typeof window !== 'undefined' ? new Image() : null;
+  const img = new Image();
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const bannerUpload = useSupabaseUpload({
