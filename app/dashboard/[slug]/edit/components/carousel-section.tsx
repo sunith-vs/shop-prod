@@ -10,6 +10,7 @@ import { Plus, X, ArrowUp, ArrowDown, Youtube, Save } from 'lucide-react';
 import { FileUploadModal } from './file-upload-modal';
 import { createClient } from '@/lib/supabase/client';
 import Image from 'next/image';
+import { FallbackImage } from '@/components/ui/fallback-image';
 
 interface CarouselItem {
   id: string;
@@ -342,21 +343,21 @@ export function CarouselSection({ courseId, initialItems = [], onSave }: Carouse
               <CardContent className="flex items-center gap-4 p-4">
                 {! item.url.includes("youtube.com") ? (
                   <div className="relative h-24 w-24 overflow-hidden rounded">
-                    <img
+                    <FallbackImage
                       src={item.url}
                       alt={`Image ${index + 1}`}
                       className="object-cover"
-                      onError={(e) => { e.currentTarget.style.display = 'none'; /* Hide broken image */ }}
+                      hideBroken={true}
                     />
                   </div>
                 ) : (
                   <div className="flex items-center gap-4">
                     <div className="relative h-24 w-24 overflow-hidden rounded">
-                      <img
+                      <FallbackImage
                         src={`https://img.youtube.com/vi/${getYoutubeVideoId(item.url)}/hqdefault.jpg`}
                         alt={`Video ${index + 1}`}
                         className="object-cover"
-                        onError={(e) => { e.currentTarget.src = '/placeholder-video.png'; /* Fallback placeholder */ }}
+                        fallbackSrc="/placeholder-video.png"
                       />
                       <div className="absolute inset-0 flex items-center justify-center bg-black/30">
                         <Youtube className="h-8 w-8 text-white" />

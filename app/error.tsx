@@ -4,6 +4,7 @@ import { useEffect } from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { FallbackImage } from '@/components/ui/fallback-image';
 
 export default function ErrorPage({
   error,
@@ -31,14 +32,11 @@ export default function ErrorPage({
             The page you are looking for doesn&apos;t exist or has been moved.
           </p>
           <div className="w-full flex justify-center">
-            <img 
+            <FallbackImage 
               src="/images/404-illustration.svg" 
               alt="404 Illustration" 
               className="h-48 w-auto opacity-80"
-              onError={(e) => {
-                // Fallback if the image doesn't exist
-                e.currentTarget.style.display = 'none';
-              }}
+              hideBroken={true}
             />
           </div>
         </CardContent>
