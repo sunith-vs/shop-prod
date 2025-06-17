@@ -1,6 +1,7 @@
 "use client"
 // EnquiryBottomSheet.tsx
 import React, { useState } from 'react';
+import { FallbackImage } from '@/components/ui/fallback-image';
 
 interface EnquiryBottomSheetProps {
   isOpen: boolean;
@@ -179,27 +180,12 @@ const EnquiryBottomSheet: React.FC<EnquiryBottomSheetProps> = ({
                   <div className="flex items-center border border-gray-300 border-r-0 rounded-l-lg px-3 py-3 bg-white">
                     <div className="flex items-center">
                       <div className="w-8 h-6 overflow-hidden mr-2 rounded-sm">
-                        <img
+                        <FallbackImage
                           src="/images/india-flag.svg"
                           alt="India flag"
                           className="w-full h-full object-cover"
-                          onError={(e) => {
-                            const target = e.target as HTMLImageElement;
-                            target.onerror = null;
-                            target.style.display = 'none';
-                            const parent = target.parentElement;
-                            if (parent) {
-                              // Create a fallback flag using CSS
-                              const fallbackFlag = document.createElement('div');
-                              fallbackFlag.className = 'w-full h-full relative';
-                              fallbackFlag.innerHTML = `
-                                <div class="absolute top-0 w-full h-1/3 bg-orange-500"></div>
-                                <div class="absolute top-1/3 w-full h-1/3 bg-white"></div>
-                                <div class="absolute top-2/3 w-full h-1/3 bg-green-600"></div>
-                              `;
-                              parent.appendChild(fallbackFlag);
-                            }
-                          }}
+                          fallbackSrc="/images/india-flag-fallback.svg"
+                          hideBroken={true}
                         />
                       </div>
                       <span className="text-gray-700 font-medium">+91</span>

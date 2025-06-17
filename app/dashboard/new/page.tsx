@@ -48,8 +48,8 @@ export default function NewCourse() {
   const [imgLoaded, setImgLoaded] = useState(false);
   const { toast } = useToast();
 
-  // Global Image object for banner validation
-  const img = new Image();
+  // Reference to store the Image object
+  const imgRef = useRef<HTMLImageElement | null>(null);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const bannerUpload = useSupabaseUpload({
@@ -84,27 +84,35 @@ export default function NewCourse() {
 
   // Validate banner image dimensions
   useEffect(() => {
-    if (bannerUpload.files.length > 0) {
+    // Only run in browser environment
+    if (typeof window !== 'undefined' && bannerUpload.files.length > 0) {
       const file = bannerUpload.files[0];
-      // Using the global img variable
-      if (img) {
-        img.onload = () => {
+      
+      // Create a new Image object only in the browser
+      imgRef.current = new Image();
+      
+      if (imgRef.current) {
+        imgRef.current.onload = () => {
           // Set the image dimensions when the image loads
-          setImgWidth(img.width);
-          setImgHeight(img.height);
-          setImgLoaded(true);
+          if (imgRef.current) {
+            setImgWidth(imgRef.current.width);
+            setImgHeight(imgRef.current.height);
+            setImgLoaded(true);
 
-          if (img.width !== 1728 || img.height !== 220) {
-            setBannerDimensionError(`Image must be exactly 1728 x 220 pixels. Current size: ${img.width} x ${img.height}`);
-          } else {
-            setBannerDimensionError('');
+            if (imgRef.current.width !== 1728 || imgRef.current.height !== 220) {
+              setBannerDimensionError(`Image must be exactly 1728 x 220 pixels. Current size: ${imgRef.current.width} x ${imgRef.current.height}`);
+            } else {
+              setBannerDimensionError('');
+            }
           }
         };
-        img.onerror = () => {
+        
+        imgRef.current.onerror = () => {
           setBannerDimensionError('Error loading image. Please try again.');
           setImgLoaded(false);
         };
-        img.src = file.preview || '';
+        
+        imgRef.current.src = file.preview || '';
       }
     } else {
       setBannerDimensionError('');
