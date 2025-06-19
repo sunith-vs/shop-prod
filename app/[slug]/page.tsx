@@ -85,7 +85,7 @@ const CourseList = async ({ params }: { params: { slug: string } }) => {
         <CoursesOfferBanner bannerUrl={course.banner_url} bannerMobile={course.banner_mobile} />
       )}
       <div className='max-w-[1380px] mx-auto px-[16px] md:px-[24px]'>
-        <div className="lg:flex mt-5 lg:mt-12">
+        <div className="lg:flex lg:items-center mt-5 lg:mt-12">
           <CarouselList courseId={course.id} courseTitle={course.title} />
           <CourseOffering batches={batches} course={course} />
         </div>
